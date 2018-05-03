@@ -23,8 +23,8 @@ package io.github.novacrypto;
 
 import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip32.networks.Bitcoin;
-import io.github.novacrypto.bip39.JavaxPBKDF2WithHmacSHA512;
-import io.github.novacrypto.bip39.SeedCalculator;
+import com.nrlwallet.bip39.JavaxPBKDF2WithHmacSHA512;
+import com.nrlwallet.bip39.SeedCalculator;
 import io.github.novacrypto.testjson.EnglishJson;
 import io.github.novacrypto.testjson.TestVector;
 import io.github.novacrypto.testjson.TestVectorJson;

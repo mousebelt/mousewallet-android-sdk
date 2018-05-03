@@ -19,5 +19,16 @@
  *  You can contact the authors via github issues.
  */
 
-rootProject.name = 'NRLWalletSDK'
+package com.nrlwallet.bip39;
 
+import java.text.Normalizer;
+
+final class Normalization {
+    static String normalizeNFKD(final String string) {
+        return Normalizer.normalize(string, Normalizer.Form.NFKD);
+    }
+
+    static char normalizeNFKD(final char c) {
+        return normalizeNFKD("" + c).charAt(0);
+    }
+}

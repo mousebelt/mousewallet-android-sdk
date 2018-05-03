@@ -19,33 +19,29 @@
  *  You can contact the authors via github issues.
  */
 
-package io.github.novacrypto.wordlists;
+package com.nrlwallet.bip39;
 
-import com.nrlwallet.bip39.WordList;
+import com.nrlwallet.bip39.wordlists.English;
 import com.nrlwallet.bip39.wordlists.French;
+import com.nrlwallet.bip39.wordlists.Japanese;
 import org.junit.Test;
 
-import static io.github.novacrypto.wordlists.WordListHashing.WORD_COUNT;
-import static org.junit.Assert.assertEquals;
+public final class EnumValueValueOfCodeCoverageTests {
 
-public final class FrenchListContentTests {
-    private final WordList wordList = French.INSTANCE;
-
-    @Test
-    public void hashCheck() {
-        assertEquals("9e515b24c9bb0119eaf18acf85a8303c4b8fec82dac53ad688e20f379de1286c",
-                WordListHashing.hashWordList(wordList));
+    private static void superficialEnumCodeCoverage(Class<? extends Enum<?>> enumClass) throws Exception {
+        for (Object o : (Object[]) enumClass.getMethod("values").invoke(null)) {
+            enumClass.getMethod("valueOf", String.class).invoke(null, o.toString());
+        }
     }
 
     @Test
-    public void normalizedHashCheck() {
-        assertEquals("922939bd934c6128a897ad299de471bd7aafe578d28a37370e881dc998903d51",
-                WordListHashing.hashWordListNormalized(wordList));
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test(expected = ArrayIndexOutOfBoundsException.class)
-    public void correctNumberOfWords() {
-        wordList.getWord(WORD_COUNT + 1);
+    public void forCodeCoverageOnly_allEnums() throws Exception {
+        superficialEnumCodeCoverage(English.class);
+        superficialEnumCodeCoverage(Japanese.class);
+        superficialEnumCodeCoverage(French.class);
+        superficialEnumCodeCoverage(CharSequenceComparators.class);
+        superficialEnumCodeCoverage(SpongyCastlePBKDF2WithHmacSHA512.class);
+        superficialEnumCodeCoverage(JavaxPBKDF2WithHmacSHA512.class);
+        superficialEnumCodeCoverage(Words.class);
     }
 }

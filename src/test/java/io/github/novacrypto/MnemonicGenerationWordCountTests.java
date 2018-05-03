@@ -21,10 +21,10 @@
 
 package io.github.novacrypto;
 
-import io.github.novacrypto.bip39.Words;
-import io.github.novacrypto.bip39.MnemonicGenerator;
-import io.github.novacrypto.bip39.WordList;
-import io.github.novacrypto.bip39.wordlists.English;
+import com.nrlwallet.bip39.Words;
+import com.nrlwallet.bip39.MnemonicGenerator;
+import com.nrlwallet.bip39.WordList;
+import com.nrlwallet.bip39.wordlists.English;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

@@ -21,16 +21,16 @@
 
 package io.github.novacrypto;
 
-import io.github.novacrypto.bip39.MnemonicValidator;
-import io.github.novacrypto.bip39.Validation.InvalidChecksumException;
-import io.github.novacrypto.bip39.Validation.InvalidWordCountException;
-import io.github.novacrypto.bip39.Validation.UnexpectedWhiteSpaceException;
-import io.github.novacrypto.bip39.Validation.WordNotFoundException;
-import io.github.novacrypto.bip39.WordList;
-import io.github.novacrypto.bip39.wordlists.English;
-import io.github.novacrypto.bip39.wordlists.French;
-import io.github.novacrypto.bip39.wordlists.Japanese;
-import io.github.novacrypto.bip39.wordlists.Spanish;
+import com.nrlwallet.bip39.MnemonicValidator;
+import com.nrlwallet.bip39.Validation.InvalidChecksumException;
+import com.nrlwallet.bip39.Validation.InvalidWordCountException;
+import com.nrlwallet.bip39.Validation.UnexpectedWhiteSpaceException;
+import com.nrlwallet.bip39.Validation.WordNotFoundException;
+import com.nrlwallet.bip39.WordList;
+import com.nrlwallet.bip39.wordlists.English;
+import com.nrlwallet.bip39.wordlists.French;
+import com.nrlwallet.bip39.wordlists.Japanese;
+import com.nrlwallet.bip39.wordlists.Spanish;
 import io.github.novacrypto.testjson.EnglishJson;
 import io.github.novacrypto.testjson.TestVector;
 import io.github.novacrypto.testjson.TestVectorJson;

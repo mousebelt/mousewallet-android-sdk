@@ -19,30 +19,33 @@
  *  You can contact the authors via github issues.
  */
 
-package io.github.novacrypto;
+package com.nrlwallet.bip39;
 
-import com.nrlwallet.bip39.Validation.InvalidChecksumException;
-import com.nrlwallet.bip39.Validation.InvalidWordCountException;
-import com.nrlwallet.bip39.Validation.UnexpectedWhiteSpaceException;
-import org.junit.Test;
+import java.util.LinkedList;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+final class CharSequenceSplitter {
 
-public final class ValidationExceptionMessagesTests {
+    private final char separator1;
+    private final char separator2;
 
-    @Test
-    public void InvalidWordCountException_message() throws Exception {
-        assertEquals("Not a correct number of words", new InvalidWordCountException().getMessage());
+    CharSequenceSplitter(final char separator1, final char separator2) {
+        this.separator1 = separator1;
+        this.separator2 = separator2;
     }
 
-    @Test
-    public void InvalidChecksumException_message() throws Exception {
-        assertEquals("Invalid checksum", new InvalidChecksumException().getMessage());
+    List<CharSequence> split(final CharSequence charSequence) {
+        final LinkedList<CharSequence> list = new LinkedList<>();
+        int start = 0;
+        final int length = charSequence.length();
+        for (int i = 0; i < length; i++) {
+            final char c = charSequence.charAt(i);
+            if (c == separator1 || c == separator2) {
+                list.add(charSequence.subSequence(start, i));
+                start = i + 1;
+            }
+        }
+        list.add(charSequence.subSequence(start, length));
+        return list;
     }
-
-    @Test
-    public void UnexpectedWhiteSpaceException_message() throws Exception {
-        assertEquals("Unexpected whitespace", new UnexpectedWhiteSpaceException().getMessage());
-    }
-
 }

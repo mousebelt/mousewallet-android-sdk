@@ -21,15 +21,15 @@
 
 package io.github.novacrypto;
 
-import io.github.novacrypto.bip39.MnemonicGenerator;
-import io.github.novacrypto.bip39.WordList;
-import io.github.novacrypto.bip39.wordlists.Spanish;
+import com.nrlwallet.bip39.MnemonicGenerator;
+import com.nrlwallet.bip39.WordList;
+import com.nrlwallet.bip39.wordlists.Spanish;
 import io.github.novacrypto.testjson.EnglishJson;
 import io.github.novacrypto.testjson.TestVector;
 import io.github.novacrypto.testjson.TestVectorJson;
-import io.github.novacrypto.bip39.wordlists.English;
-import io.github.novacrypto.bip39.wordlists.French;
-import io.github.novacrypto.bip39.wordlists.Japanese;
+import com.nrlwallet.bip39.wordlists.English;
+import com.nrlwallet.bip39.wordlists.French;
+import com.nrlwallet.bip39.wordlists.Japanese;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

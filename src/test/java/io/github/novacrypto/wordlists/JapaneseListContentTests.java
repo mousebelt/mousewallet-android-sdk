@@ -21,8 +21,8 @@
 
 package io.github.novacrypto.wordlists;
 
-import io.github.novacrypto.bip39.WordList;
-import io.github.novacrypto.bip39.wordlists.Japanese;
+import com.nrlwallet.bip39.WordList;
+import com.nrlwallet.bip39.wordlists.Japanese;
 import org.junit.Test;
 
 import static io.github.novacrypto.wordlists.WordListHashing.WORD_COUNT;

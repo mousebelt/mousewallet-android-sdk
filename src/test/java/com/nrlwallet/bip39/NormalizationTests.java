@@ -19,5 +19,14 @@
  *  You can contact the authors via github issues.
  */
 
-rootProject.name = 'NRLWalletSDK'
+package com.nrlwallet.bip39;
 
+import org.junit.Test;
+
+public final class NormalizationTests {
+
+    @Test
+    public void forCodeCoverageOnly_create() {
+        new Normalization();
+    }
+}

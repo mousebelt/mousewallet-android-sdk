@@ -19,5 +19,10 @@
  *  You can contact the authors via github issues.
  */
 
-rootProject.name = 'NRLWalletSDK'
+package com.nrlwallet.bip39.Validation;
 
+public final class InvalidWordCountException extends Exception {
+    public InvalidWordCountException() {
+        super("Not a correct number of words");
+    }
+}

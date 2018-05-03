@@ -19,5 +19,9 @@
  *  You can contact the authors via github issues.
  */
 
-rootProject.name = 'NRLWalletSDK'
+package com.nrlwallet.bip39;
 
+public interface PBKDF2WithHmacSHA512 {
+
+    byte[] hash(final char[] chars, final byte[] salt);
+}

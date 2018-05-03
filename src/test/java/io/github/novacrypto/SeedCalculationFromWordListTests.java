@@ -21,14 +21,14 @@
 
 package io.github.novacrypto;
 
-import io.github.novacrypto.bip39.JavaxPBKDF2WithHmacSHA512;
-import io.github.novacrypto.bip39.SeedCalculator;
-import io.github.novacrypto.bip39.SeedCalculatorByWordListLookUp;
-import io.github.novacrypto.bip39.WordList;
-import io.github.novacrypto.bip39.wordlists.English;
-import io.github.novacrypto.bip39.wordlists.French;
-import io.github.novacrypto.bip39.wordlists.Japanese;
-import io.github.novacrypto.bip39.wordlists.Spanish;
+import com.nrlwallet.bip39.JavaxPBKDF2WithHmacSHA512;
+import com.nrlwallet.bip39.SeedCalculator;
+import com.nrlwallet.bip39.SeedCalculatorByWordListLookUp;
+import com.nrlwallet.bip39.WordList;
+import com.nrlwallet.bip39.wordlists.English;
+import com.nrlwallet.bip39.wordlists.French;
+import com.nrlwallet.bip39.wordlists.Japanese;
+import com.nrlwallet.bip39.wordlists.Spanish;
 import io.github.novacrypto.testjson.EnglishJson;
 import io.github.novacrypto.testjson.TestVector;
 import io.github.novacrypto.testjson.TestVectorJson;

@@ -21,7 +21,7 @@
 
 package io.github.novacrypto.wordlists;
 
-import io.github.novacrypto.bip39.WordList;
+import com.nrlwallet.bip39.WordList;
 
 import java.security.MessageDigest;
 import java.text.Normalizer;
