@@ -1,0 +1,104 @@
+/*
+ *  BIP39 library, a Java implementation of BIP39
+ *  Copyright (C) 2017 Alan Evans, NovaCrypto
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *  Original source: https://github.com/NovaCrypto/BIP39
+ *  You can contact the authors via github issues.
+ */
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
+    }
+}
+
+apply plugin: 'java'
+
+apply from: 'bintray.gradle'
+
+// Generate a dependency version update report for release
+// ./gradlew dependencyUpdates -Drevision=release
+// https://github.com/ben-manes/gradle-versions-plugin
+apply plugin: 'com.github.ben-manes.versions'
+
+group 'io.github.novacrypto'
+version '0.1.9'
+
+// To upload a new version
+// ./gradlew clean build bintrayUpload -Puser=user -Pkey=APIKEY
+bintray {
+    user = project.ext.properties.user
+    key = project.ext.properties.key
+    publications = ['MyPublication']
+    pkg {
+        repo = 'BIP'
+        name = 'BIP39'
+        userOrg = 'novacrypto'
+        licenses = ['GPL-3.0']
+        vcsUrl = "https://github.com/NovaCrypto/BIP32.git"
+        version {
+            name = project.version
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    maven {
+        url 'https://dl.bintray.com/novacrypto/General/'
+    }
+    maven {
+        url 'https://dl.bintray.com/novacrypto/Hashing/'
+    }
+    maven {
+        url 'https://dl.bintray.com/novacrypto/BIP/'
+    }
+}
+
+compileJava {
+    sourceCompatibility = '1.7'
+    targetCompatibility = '1.7'
+}
+
+dependencies {
+    compile 'com.madgag.spongycastle:core:1.58.0.0@jar'
+    compile 'io.github.novacrypto:SHA256:0.0.1@jar'
+    compile 'io.github.novacrypto:ToRuntime:0.9.0@jar'
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.google.code.gson:gson:2.8.2'
+    testCompile 'org.assertj:assertj-core:3.9.0'
+    testCompile 'io.github.novacrypto:BIP32:0.0.9'
+}
+
+dependencyUpdates {
+    outputFormatter = { result ->
+        if (!result.outdated.dependencies.isEmpty()) {
+            throw new GradleException('Abort, there are dependencies to update.')
+        }
+    }
+}
+
+bintrayUpload.dependsOn(dependencyUpdates)
+
+task('installSharedIdea', type: Copy) {
+    description = "Copy the shared intellij files into local .idea/"
+    from 'ideaShared/'
+    into '.idea/'
+}
