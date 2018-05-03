@@ -48,11 +48,11 @@ bintray {
     key = project.ext.properties.key
     publications = ['MyPublication']
     pkg {
-        repo = 'BIP'
-        name = 'BIP39'
-        userOrg = 'novacrypto'
+        repo = 'nrlwallet-android-sdk'
+        name = 'nrlwallet-android-sdk'
+        userOrg = 'gedanziger'
         licenses = ['GPL-3.0']
-        vcsUrl = "https://github.com/NovaCrypto/BIP32.git"
+        vcsUrl = "https://github.com/gedanziger/nrlwallet-android-sdk.git"
         version {
             name = project.version
         }
