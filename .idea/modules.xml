@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/NRLWalletSDK.iml" filepath="$PROJECT_DIR$/.idea/modules/NRLWalletSDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myapplication/myapplication.iml" filepath="$PROJECT_DIR$/.idea/modules/myapplication/myapplication.iml" />
     </modules>
   </component>
 </project>
