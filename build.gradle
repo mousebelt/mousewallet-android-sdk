@@ -23,6 +23,9 @@ allprojects {
         maven {
             url "https://dl.bintray.com/ethereum/maven/"
         }
+        flatDir() {
+            dirs project(':NRLWalletSDK').file('libs')
+        }
     }
 }
 

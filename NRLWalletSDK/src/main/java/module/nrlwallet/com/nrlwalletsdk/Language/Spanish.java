@@ -1,7 +1,7 @@
 package module.nrlwallet.com.nrlwalletsdk.Language;
 
 
-import module.nrlwallet.com.nrlwalletsdk.WordList;
+import module.nrlwallet.com.nrlwalletsdk.Utils.WordList;
 /**
  * Source: https://github.com/bitcoin/bips/blob/master/bip-0039/spanish.txt
  */
