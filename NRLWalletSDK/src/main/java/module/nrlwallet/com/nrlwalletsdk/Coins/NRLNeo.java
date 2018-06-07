@@ -3,6 +3,7 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -23,7 +24,6 @@ public class NRLNeo extends NRLCoin {
     String seedKey = "Nist256p1 seed";
     String curve = "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551";
     byte[] bseed;
-    final String HMAC_SHA512 = "HmacSHA512";
     String privateKey;
     String walletAddress;
     String Wif;
@@ -43,12 +43,14 @@ public class NRLNeo extends NRLCoin {
         final byte[] b_seedkey = seedKey.getBytes();
         final byte[] b_path = path.getBytes();
 
+        byte[] buf = path.getBytes(Charset.defaultCharset());
+
         try {
             sha512_HMAC = Mac.getInstance(HMAC_SHA512);
 
             SecretKeySpec keySpec = new SecretKeySpec(bseed, HMAC_SHA512);
             sha512_HMAC.init(keySpec);
-            byte [] mac_data = sha512_HMAC.doFinal(bseed);
+            byte [] mac_data = sha512_HMAC.doFinal(buf);
             byte[] slice = Arrays.copyOfRange(mac_data, 0, 32);
             this.privateKey = Neoutils.bytesToHex(slice);
 

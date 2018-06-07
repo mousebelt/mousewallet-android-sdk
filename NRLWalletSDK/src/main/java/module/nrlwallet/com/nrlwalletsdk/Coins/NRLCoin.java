@@ -1,5 +1,7 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
+import java.util.List;
+
 import io.github.novacrypto.bip32.Network;
 
 /*
@@ -12,7 +14,7 @@ import io.github.novacrypto.bip32.Network;
 
 public class NRLCoin {
     private byte[] Seed;
-    private Network network;
+    public Network network;
     private int coinType;
     private String SeedKey;
     private String Curve;
@@ -22,6 +24,7 @@ public class NRLCoin {
 
     private String address;
     private String wif;
+    final String HMAC_SHA512 = "HmacSHA512";
 
     public NRLCoin(byte[] seed, Network network, int coinType, String seedKey, String curve) {
         this.Seed = seed;
@@ -30,6 +33,10 @@ public class NRLCoin {
         this.SeedKey = seedKey;
         this.Curve = curve;
     }
+
+//    public NRLCoin(List<Integer> expected, String path) {
+//
+//    }
 
     public String getPublicKey() {
         return this.masterPrivateKey;

@@ -33,7 +33,7 @@ public class HexStringConverter
         return new String(txtInByte);
     }
 
-    private String asHex(byte[] buf)
+    public String asHex(byte[] buf)
     {
         char[] chars = new char[2 * buf.length];
         for (int i = 0; i < buf.length; ++i)

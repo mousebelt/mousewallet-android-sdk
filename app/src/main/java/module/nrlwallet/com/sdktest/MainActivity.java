@@ -1,29 +1,32 @@
 package module.nrlwallet.com.sdktest;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
 import android.os.Bundle;
 
+import module.nrlwallet.com.nrlwalletsdk.Coins.NRLBitcoin;
 import module.nrlwallet.com.nrlwalletsdk.Coins.NRLEthereum;
+import module.nrlwallet.com.nrlwalletsdk.Coins.NRLLite;
 import module.nrlwallet.com.nrlwalletsdk.Coins.NRLNeo;
 import module.nrlwallet.com.nrlwalletsdk.Utils.GenerateMnemonic;
 import module.nrlwallet.com.nrlwalletsdk.Language.English;
 import module.nrlwallet.com.nrlwalletsdk.Utils.MnemonicToSeed;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
-    @Override
+//    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.getEthereumWallet();
-        this.getNeoWallet();
+        this.getLitecoinWallet();
+        this.getBitcoinWallet();
     }
 
     private void getEthereumWallet() {
         StringBuilder sb = new StringBuilder();
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
         String strMnemonic = sb.toString();
-
+//
         byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
@@ -54,5 +57,28 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("************----------- Seed : " + seed);
         System.out.println("************----------- NEO Private Key : " + neoPrivateKey);
         System.out.println("************----------- NEO address     : " + neoAddress);
+    }
+
+    private void getBitcoinWallet() {
+        StringBuilder sb = new StringBuilder();
+        new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
+        String strMnemonic = sb.toString();
+
+        byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
+        String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
+
+        NRLBitcoin nrlBitcoin = new NRLBitcoin(bseed);
+
+    }
+    private void getLitecoinWallet() {
+        StringBuilder sb = new StringBuilder();
+        new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
+        String strMnemonic = sb.toString();
+
+        byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
+        String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
+
+        NRLLite nrlLite = new NRLLite(bseed);
+
     }
 }

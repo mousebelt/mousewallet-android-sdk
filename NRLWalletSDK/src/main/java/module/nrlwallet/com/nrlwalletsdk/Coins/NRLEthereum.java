@@ -3,6 +3,7 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
+import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
 import module.nrlwallet.com.nrlwalletsdk.Network.CoinType;
@@ -28,16 +29,23 @@ public class NRLEthereum extends NRLCoin {
     }
 
     private void init() {
+        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, network);
         addressIndex = BIP44.m()
                 .purpose44()
                 .coinType(coinType)
                 .account(0)
                 .external()
                 .address(0);
+
+
+        String address1 = root.derive(addressIndex, AddressIndex.DERIVATION)
+                .neuter().p2shAddress();
+        String address2 = root.derive(addressIndex, AddressIndex.DERIVATION)
+                .neuter().p2pkhAddress();
         this.rootKey = new ExtendedPrivateKeyBIP32().getRootKey(bSeed, CoinType.ETHEREUM);
         ExtendedPrivateKey privateKey;
         privateKey = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
-        ExtendedPrivateKey child = privateKey.derive(addressIndex.toString());
+        ExtendedPrivateKey child = privateKey.derive(addressIndex, AddressIndex.DERIVATION);
         ExtendedPublicKey childPub = child.neuter();
         extendedPrivateKey = child.extendedBase58();   //Extended Private Key
         extendedPublicKey = childPub.extendedBase58();    //Extended Public Key
