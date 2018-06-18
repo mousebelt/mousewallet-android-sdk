@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/NRLWalletSDK.iml" filepath="$PROJECT_DIR$/.idea/modules/NRLWalletSDK.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myapplication/myapplication.iml" filepath="$PROJECT_DIR$/.idea/modules/myapplication/myapplication.iml" />
+      <module fileurl="file://$PROJECT_DIR$/NRLWalletSDK/NRLWalletSDK.iml" filepath="$PROJECT_DIR$/NRLWalletSDK/NRLWalletSDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nrlwallet-android-sdk.iml" filepath="$PROJECT_DIR$/nrlwallet-android-sdk.iml" />
     </modules>
   </component>
 </project>

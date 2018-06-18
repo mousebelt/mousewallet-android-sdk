@@ -1,1 +1,1 @@
-include ':app', ':NRLWalletSDK', ':lib'
+include ':app', ':NRLWalletSDK'
