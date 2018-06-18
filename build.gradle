@@ -3,7 +3,9 @@
 buildscript {
     
     repositories {
-        google()
+        maven {
+            url 'https://maven.google.com'
+        }
         jcenter()
         maven {
 //            url "https://oss.jfrog.org/artifactory/oss-snapshot-local",
@@ -17,15 +19,19 @@ buildscript {
 
 allprojects {
     repositories {
-        mavenCentral()
         google()
+//        maven {
+//            url 'https://maven.google.com'
+//        }
+//        maven { url "https://jitpack.io" }
+        mavenCentral()
         jcenter()
         maven {
             url "https://dl.bintray.com/ethereum/maven/"
         }
-        flatDir() {
-            dirs project(':NRLWalletSDK').file('libs')
-        }
+////        flatDir() {
+//            dirs project(':NRLWalletSDK').file('libs')
+//        }
     }
 }
 

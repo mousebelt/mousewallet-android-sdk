@@ -1,5 +1,8 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.Web3jFactory;
+
 import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
@@ -26,6 +29,10 @@ public class NRLEthereum extends NRLCoin {
         super(seed, Ethereum.MAIN_NET, 60, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         this.init();
+    }
+
+    private void init1() {
+//        Web3j web3j = Web3jFactory.build()
     }
 
     private void init() {
