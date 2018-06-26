@@ -11,6 +11,8 @@ import module.nrlwallet.com.nrlwalletsdk.Coins.NRLStellar;
 import module.nrlwallet.com.nrlwalletsdk.Utils.GenerateMnemonic;
 import module.nrlwallet.com.nrlwalletsdk.Language.English;
 import module.nrlwallet.com.nrlwalletsdk.Utils.MnemonicToSeed;
+import module.nrlwallet.core.BRCoreKey;
+import module.nrlwallet.core.BRCoreMasterPubKey;
 
 public class MainActivity extends Activity {
 
@@ -23,11 +25,11 @@ public class MainActivity extends Activity {
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
         strMnemonic = sb.toString();
 
-//        this.getEthereumWallet(strMnemonic);
-//        this.getLitecoinWallet(strMnemonic);
-//        this.getBitcoinWallet(strMnemonic);
+        this.getEthereumWallet(strMnemonic);//ok
+        this.getLitecoinWallet(strMnemonic);//ok
+        this.getBitcoinWallet(strMnemonic);//ok
 //        this.getNeoWallet(strMnemonic);
-        this.getStellarWallet(strMnemonic);
+        this.getStellarWallet(strMnemonic);//ok
     }
 
     private void getEthereumWallet(String strMnemonic) {
@@ -66,8 +68,13 @@ public class MainActivity extends Activity {
         byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
-        NRLBitcoin nrlBitcoin = new NRLBitcoin(bseed);
-
+        NRLBitcoin nrlBitcoin = new NRLBitcoin(bseed, strMnemonic);
+        String btcPrivateKey = nrlBitcoin.getPrivateKey();
+        String btcAddress = nrlBitcoin.getAddress();
+        System.out.println("************----------- Mnemonic : " + strMnemonic);
+        System.out.println("************----------- Seed : " + seed);
+        System.out.println("************----------- BTC Private Key : " + btcPrivateKey);
+        System.out.println("************----------- BTC address     : " + btcAddress);
     }
     private void getLitecoinWallet(String strMnemonic) {
 
@@ -75,6 +82,12 @@ public class MainActivity extends Activity {
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
         NRLLite nrlLite = new NRLLite(bseed);
+        String stlPrivateKey = nrlLite.getPrivateKey();
+        String stlAddress = nrlLite.getAddress();
+        System.out.println("************----------- Mnemonic : " + strMnemonic);
+        System.out.println("************----------- Seed : " + seed);
+        System.out.println("************----------- Lite Private Key : " + stlPrivateKey);
+        System.out.println("************----------- Lite address     : " + stlAddress);
 
     }
 

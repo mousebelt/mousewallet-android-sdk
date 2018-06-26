@@ -9,6 +9,75 @@ android {
     }
     defaultConfig {
         multiDexEnabled true
+        // Similar to other properties in the defaultConfig block,
+        // you can configure the ndk block for each product flavor
+        // in your build configuration.
+        ndk {
+            // Specifies the ABI configurations of your native
+            // libraries Gradle should build and package with your APK.
+            abiFilters 'x86', 'x86_64'
+        }
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=gnustl_static'
+            }
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            // When you specify a version of CMake, as shown below,
+            // the Android plugin searches for its binary within your
+            // PATH environmental variable.
+            path "CMakeLists.txt"  //path can only be set outside (in android block)
+
+        }
+    }
+    lintOptions {
+        // set to true to turn off analysis progress reporting by lint
+        quiet false
+
+        explainIssues true
+        // if true, stop the gradle build if errors are found
+        abortOnError true
+        // if true, only report errors
+        ignoreWarnings false
+
+        checkReleaseBuilds false
+
+        disable 'MissingTranslation'
+    }
+    buildTypes {
+//        gitUpdateModules()
+//        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        release {
+            minifyEnabled = false
+            debuggable = false
+
+            ndk {
+                minifyEnabled = false
+                debuggable = false
+            }
+        }
+        debug {
+            debuggable = true
+            jniDebuggable = true
+            minifyEnabled = false
+
+            ndk {
+                minifyEnabled = false
+                debuggable = true
+                jniDebuggable = true
+            }
+        }
+
+    }
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java', 'src/main/jni/nrlwallet-core/Java/root', 'src/main/jni/nrlwallet-core/ethereum/Java/root']
+        }
+    }
+    dexOptions {
+        incremental true
     }
 }
 
@@ -26,7 +95,7 @@ allprojects {
 }
 
 dependencies {
-    compileOnly fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.google.guava:guava:25.0-android'
     implementation 'io.ethmobile:ethdroid:2.0.0-m2'
     implementation 'io.github.novacrypto:BIP44:0.0.3'
@@ -48,5 +117,5 @@ dependencies {
         exclude (module:'javax.inject')
     }
     implementation 'net.i2p.crypto:eddsa:0.3.0'
-    compile ('org.web3j:core:3.3.1-android')
+    implementation ('org.web3j:core:3.3.1-android')
 }
