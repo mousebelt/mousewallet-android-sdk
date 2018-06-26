@@ -25,8 +25,18 @@ public class NRLPrivateKey {
         this.childIndex = 0;
     }
 
-    public void extended() {
+    private void init(byte[] nrlPribateKey, byte[] chainCode, int depth, int fingerprint, int childIndex, NRLCoin coin) {
+        this.raw = nrlPribateKey;
+        this.chainCode = chainCode;
+        this.depth = depth;
+        this.fingerprint = fingerprint;
+        this.childIndex = childIndex;
+        this.coin = coin;
+    }
+
+    public String extended() {
         Object extendedPrivateKeyData = new Object();
 //        extendedPrivateKeyData += this.coin.network.
+        return "";
     }
 }

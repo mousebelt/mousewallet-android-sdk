@@ -23,6 +23,8 @@ import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedKey;
 import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HexStringConverter;
 import module.nrlwallet.com.nrlwalletsdk.Utils.WIF;
+import module.nrlwallet.core.BRCoreKey;
+import module.nrlwallet.core.BRCoreMasterPubKey;
 import neoutils.Wallet;
 
 public class NRLBitcoin extends NRLCoin {
@@ -38,17 +40,21 @@ public class NRLBitcoin extends NRLCoin {
     String extendedPublicKey;
     String walletAddress;
     String privateKey;
+    String Mnemonic;
 
 
     private List<Integer> expected;
     private String path;
     private int[] list;
 
-    public NRLBitcoin(byte[] seed) {
+    public NRLBitcoin(byte[] seed, String mnemonic) {
 
         super(seed, Bitcoin.MAIN_NET, 0, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
-        this.getData(seed);
+        Mnemonic = mnemonic;
+
+        this.init();
+//        this.getData(seed);
 
 //        this.generatePubkeyFromPrivatekey(seed);
     }
@@ -60,6 +66,15 @@ public class NRLBitcoin extends NRLCoin {
 //        this.path = path;
 //        list = copy(expected);
 //    }
+
+    private void init2() {
+
+//        byte[] authKey = BRCoreKey.getAuthPrivKeyForAPI(bSeed);
+        String[] words = this.Mnemonic.split(" ");
+        byte[] paperKeyBytes = BRCoreMasterPubKey.generatePaperKey(bSeed, words);
+        byte[] pubKey = new BRCoreMasterPubKey(paperKeyBytes, false).serialize();
+    }
+
 
     private int[] copy(List<Integer> expected) {
         final int length = expected.size();

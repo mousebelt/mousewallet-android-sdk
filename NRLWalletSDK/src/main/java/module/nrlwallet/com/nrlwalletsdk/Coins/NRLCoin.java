@@ -38,6 +38,16 @@ public class NRLCoin {
 //
 //    }
 
+    //should be overrided
+    void generateAddress() {
+
+    }
+
+    byte[] generatePublicKeyFromPrivateKey(byte[] privateKey) {
+        return privateKey;
+    }
+
+
     public String getPublicKey() {
         return this.masterPrivateKey;
     }
