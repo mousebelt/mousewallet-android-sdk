@@ -3,6 +3,10 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +28,7 @@ import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HexStringConverter;
 import module.nrlwallet.com.nrlwalletsdk.Utils.WIF;
+import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -41,7 +46,8 @@ public class NRLLite extends NRLCoin {
     String extendedPublicKey;
     String walletAddress;
     String privateKey;
-    String balance;
+    String balance = "0";
+    JSONArray transactions = new JSONArray();
 
 
     private List<Integer> expected;
@@ -54,17 +60,7 @@ public class NRLLite extends NRLCoin {
         bSeed = seed;
         this.getData(seed);
         this.init();
-
-//        this.generatePubkeyFromPrivatekey(seed);
     }
-
-
-//    public NRLBitcoin(List<Integer> expected, String path) {
-//        super(expected, path);
-//        expected = expected;
-//        this.path = path;
-//        list = copy(expected);
-//    }
 
     private int[] copy(List<Integer> expected) {
         final int length = expected.size();
@@ -81,7 +77,7 @@ public class NRLLite extends NRLCoin {
             ExtendedKey ka = module.nrlwallet.com.nrlwalletsdk.Utils.BIP44.getKeyType(m, coinType, 0, 0);
 
             // Print first 5 addresses of the first account.
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 1; i++) {
                 ExtendedKey ck = ka.getChild(i);
                 String addr = ck.getAddress();
                 String wif = WIF.getWif(ck.getMaster());
@@ -119,6 +115,7 @@ public class NRLLite extends NRLCoin {
         extendedPublicKey = childPub.extendedBase58();    //Extended Public Key
         walletAddress = childPub.p2pkhAddress();
         String str4 = childPub.p2shAddress();
+
     }
 
     public String getPrivateKey() {
@@ -127,8 +124,15 @@ public class NRLLite extends NRLCoin {
 
     @Override
     public String getAddress() {
-//        String address = this.neoWallet.getAddress();
         return walletAddress;
+    }
+
+    public void getBalance(NRLCallback callback) {
+        this.checkBalance(callback);
+    }
+
+    public void getTransactions(NRLCallback callback) {
+        this.checkTransactions(callback);
     }
 
     private void generatePubkeyFromPrivatekey(byte[] seed) {
@@ -144,18 +148,30 @@ public class NRLLite extends NRLCoin {
         integers[input.length] = index;
         return integers;
     }
-    public void getBalance() {
+    public void checkBalance(NRLCallback callback) {
         String url_getbalance = "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                callback.onFailure(e);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    String responseStr = response.body().string();
+                    String result =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(result);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            balance = data.getString("balance");
+                            callback.onResponse(balance);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     // Do what you want to do with the response.
                 } else {
                     // Request not successful
@@ -163,9 +179,39 @@ public class NRLLite extends NRLCoin {
             }
         });
     }
-    public void getTransactions() {
 
+    private void checkTransactions(NRLCallback callback) {
+        String url_getTransaction = "/address/txs/" + this.walletAddress;
+        new HTTPRequest().run(url_getTransaction, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String body =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(body);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            transactions = data.getJSONArray("result");
+                            callback.onResponseArray(transactions);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    // Do what you want to do with the response.
+                } else {
+                    // Request not successful
+                }
+            }
+        });
     }
+
     public void createTransaction(long amount, String address, String memo, long fee) {
 
     }

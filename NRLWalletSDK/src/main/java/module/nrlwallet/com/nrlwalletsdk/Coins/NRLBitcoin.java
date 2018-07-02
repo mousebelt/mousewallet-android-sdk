@@ -4,6 +4,10 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -184,8 +188,27 @@ public class NRLBitcoin extends NRLCoin {
         return arr_address;
     }
 
-    public long getBalance() {
-        return this.balance;
+    public JSONArray getTransctions() {
+        JSONArray jsonArray = new JSONArray();
+        BRCoreTransaction[] transactions = manager.getWallet().getTransactions();
+        for (BRCoreTransaction transaction : wallet.getTransactions()) {
+            JSONObject object = new JSONObject();
+            try {
+                object.put("tx", transaction.toString());
+                object.put("size", transaction.getSize());  //long
+                object.put("fee", transaction.getStandardFee());    //long
+                object.put("input_address", transaction.getInputAddresses());   //[string]
+                object.put("output_address", transaction.getOutputAddresses()); //[string]
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            jsonArray.put(object);
+        }
+        return jsonArray;
+    }
+
+    public String getBalance() {
+        return this.balance + "";
     }
 
     public void createTransaction(long amount, String address) {

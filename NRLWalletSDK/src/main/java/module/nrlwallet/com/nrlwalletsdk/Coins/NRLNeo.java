@@ -3,9 +3,12 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,6 +25,7 @@ import io.github.novacrypto.bip32.Network;
 import jnr.ffi.Struct;
 import module.nrlwallet.com.nrlwalletsdk.Network.Neo;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
+import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import neoutils.Neoutils;
 import neoutils.RawTransaction;
 import neoutils.Wallet;
@@ -41,7 +45,10 @@ public class NRLNeo extends NRLCoin {
     String walletAddress;
     String Wif;
     Wallet neoWallet;
-    String balance;
+    JSONArray trnasactions;
+    public String balance;
+
+    private NRLCallback callback;
 
     public NRLNeo(byte[] bseed) {
         super(bseed, Neo.MAIN_NET, 888, "Nist256p1 seed", "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551");
@@ -74,7 +81,6 @@ public class NRLNeo extends NRLCoin {
             neoWallet = Neoutils.generateFromPrivateKey(this.privateKey);
             walletAddress = neoWallet.getAddress();
             Boolean isValid = Neoutils.validateNEOAddress(walletAddress);
-
             SecretKeySpec keySpec1 = new SecretKeySpec(b_seedkey, HMAC_SHA512);
             sha512_HMAC.init(keySpec1);
             byte [] mac_data1 = sha512_HMAC.doFinal(b_path);
@@ -98,23 +104,45 @@ public class NRLNeo extends NRLCoin {
     public String getAddress() {
         return this.walletAddress;
     }
+    public void getBalance(NRLCallback callback) {
+        checkBalance(callback);
+    }
 
-    public void getBalance() {
+    public void getTransactions(NRLCallback callback) {
+        checkTransactions(callback);
+    }
+
+    private void checkBalance(NRLCallback callback) {
+        this.walletAddress = "AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf";
         String url_getbalance = "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                callback.onFailure(e);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    balance =   (response.body().string());
+                    String result =   (response.body().string());
 
                     try {
-                        JSONObject jsonObj = new JSONObject(balance);
-                        String sss = jsonObj.get("msg").toString();
+                        JSONObject jsonObj = new JSONObject(result);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            JSONArray balances = data.getJSONArray("balance");
+                            for(int i = 0; i < balances.length(); i++) {
+                                JSONObject obj = balances.getJSONObject(i);
+                                String ticker = obj.getString("ticker");
+                                if(ticker.equals("NEO")){
+                                    balance = obj.getString("value");
+                                    callback.onResponse(balance);
+                                    return;
+                                }
+                            }
+
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -127,22 +155,29 @@ public class NRLNeo extends NRLCoin {
     }
 
 
-    public void getTransactions() {
+    private void checkTransactions(NRLCallback callback) {
+        //AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf
+        this.walletAddress = "AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf";
         String url_getTransaction = "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                callback.onFailure(e);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    balance =   (response.body().string());
+                    String body =   (response.body().string());
 
                     try {
-                        JSONObject jsonObj = new JSONObject(balance);
-                        String sss = jsonObj.get("msg").toString();
+                        JSONObject jsonObj = new JSONObject(body);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            trnasactions = data.getJSONArray("result");
+                            callback.onResponseArray(trnasactions);
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
