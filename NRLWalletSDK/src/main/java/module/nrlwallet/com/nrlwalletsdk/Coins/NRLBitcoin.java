@@ -45,6 +45,7 @@ public class NRLBitcoin extends NRLCoin {
     String Mnemonic;
     BRCoreWalletManager manager;
     BRCoreWallet wallet;
+    BRCorePeerManager brCorePeerManager;
     long balance;
     private Executor listenerExecutor = Executors.newSingleThreadExecutor();
 
@@ -58,6 +59,7 @@ public class NRLBitcoin extends NRLCoin {
     private List<Integer> expected;
     private String path;
     private int[] list;
+    BRCoreKey brCoreKey;
 
     public NRLBitcoin(byte[] seed, String mnemonic) {
 
@@ -70,6 +72,7 @@ public class NRLBitcoin extends NRLCoin {
     private void createWallet1() {
         BRCoreMasterPubKey brCoreMasterPubKey = new BRCoreMasterPubKey(bSeed, true);
         BRCoreWallet.Listener walletListener = getWalletListener();
+        brCoreKey = brCoreMasterPubKey.getPubKeyAsCoreKey();
         wallet = createWallet(new BRCoreTransaction[]{}, brCoreMasterPubKey, walletListener);
         createListener();
         balance = wallet.getBalance();
@@ -141,7 +144,7 @@ public class NRLBitcoin extends NRLCoin {
 
             }
         };
-        BRCorePeerManager brCorePeerManager = new BRCorePeerManager(
+        brCorePeerManager = new BRCorePeerManager(
                 BRCoreChainParams.testnetChainParams,
                 wallet,
                 0,
@@ -214,6 +217,10 @@ public class NRLBitcoin extends NRLCoin {
     public void createTransaction(long amount, String address) {
         if(address == null) return;
         BRCoreTransaction transaction = manager.getWallet().createTransaction(amount, new BRCoreAddress(address));
+        if(!transaction.isSigned()) {
+            transaction.sign(brCoreKey, 0);
+        }
+        brCorePeerManager.publishTransaction(transaction);
     }
 
 

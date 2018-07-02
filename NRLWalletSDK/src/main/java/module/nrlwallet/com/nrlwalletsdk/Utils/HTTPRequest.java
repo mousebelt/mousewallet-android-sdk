@@ -1,12 +1,16 @@
 package module.nrlwallet.com.nrlwalletsdk.Utils;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class HTTPRequest {
@@ -19,6 +23,19 @@ public class HTTPRequest {
         Request request = new Request.Builder()
                 .url(url)
                 .get()
+                .build();
+
+        Call call = client.newCall(request);
+        call.enqueue(callback);
+        return call;
+    }
+
+    public Call run(String url_path, RequestBody formBody, Callback callback) {
+        String url = urlServer + url_path;
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
                 .build();
 
         Call call = client.newCall(request);

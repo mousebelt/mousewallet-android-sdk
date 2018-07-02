@@ -28,8 +28,8 @@ public class MainActivity extends Activity {
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
         strMnemonic = sb.toString();
 
-        this.getEthereumWallet(strMnemonic);//ok
-//        this.getLitecoinWallet(strMnemonic);//ok
+//        this.getEthereumWallet(strMnemonic);//ok
+        this.getLitecoinWallet(strMnemonic);//ok
 //        this.getBitcoinWallet(strMnemonic);//okkkk
 //        this.getNeoWallet(strMnemonic);//okkkk
 //        this.getStellarWallet(strMnemonic);//okk
@@ -150,7 +150,7 @@ public class MainActivity extends Activity {
         byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
-        NRLLite nrlLite = new NRLLite(bseed);
+        NRLLite nrlLite = new NRLLite(bseed, strMnemonic);
         String stlPrivateKey = nrlLite.getPrivateKey();
         String stlAddress = nrlLite.getAddress();
         System.out.println("************----------- Mnemonic : " + strMnemonic);
@@ -158,6 +158,7 @@ public class MainActivity extends Activity {
         System.out.println("************----------- Lite Private Key : " + stlPrivateKey);
         System.out.println("************----------- Lite address     : " + stlAddress);
 
+        nrlLite.createTransaction(1, "LZSTRc6imhZLuz9aDQs8GTrLw3cjBHSMzJ", "", (long) 0.01);
     }
 
     private void getStellarWallet(String strMnemonic) {
@@ -172,5 +173,36 @@ public class MainActivity extends Activity {
         System.out.println("************----------- Stellar Private Key : " + stlPrivateKey);
         System.out.println("************----------- Stellar address     : " + stlAddress);
 
+        nrlStellar.getBalance(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+            @Override
+            public void onResponse(String response) {
+                System.out.println("************----------- NEO Balance     : " + response);
+
+            }
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
+        nrlStellar.getTransactions(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
     }
 }

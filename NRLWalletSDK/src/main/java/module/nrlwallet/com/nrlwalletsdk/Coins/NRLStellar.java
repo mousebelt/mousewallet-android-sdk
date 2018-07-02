@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 
 import io.github.novacrypto.bip32.Network;
 import module.nrlwallet.com.nrlwalletsdk.Network.Neo;
