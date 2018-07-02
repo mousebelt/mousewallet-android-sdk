@@ -1,5 +1,8 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
+import org.json.JSONArray;
+
+import java.lang.reflect.Array;
 import java.util.List;
 
 import io.github.novacrypto.bip32.Network;
@@ -24,6 +27,8 @@ public class NRLCoin {
 
     private String address;
     private String wif;
+    private String balance;
+    private JSONArray transactions;
     final String HMAC_SHA512 = "HmacSHA512";
 
     public NRLCoin(byte[] seed, Network network, int coinType, String seedKey, String curve) {

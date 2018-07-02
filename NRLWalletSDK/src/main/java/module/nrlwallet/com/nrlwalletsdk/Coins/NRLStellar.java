@@ -3,6 +3,10 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
@@ -16,6 +20,7 @@ import module.nrlwallet.com.nrlwalletsdk.Stellar.Memo;
 import module.nrlwallet.com.nrlwalletsdk.Stellar.PaymentOperation;
 import module.nrlwallet.com.nrlwalletsdk.Stellar.Transaction;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
+import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import neoutils.Wallet;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -35,7 +40,8 @@ public class NRLStellar extends NRLCoin {
     Wallet neoWallet;
     KeyPair keyPair;
     Account account;
-    String balance;
+    String balance = "0";
+    JSONArray transactions = new JSONArray();
     OkHttpClient client = new OkHttpClient();
 
     public NRLStellar(byte[] bseed) {
@@ -62,18 +68,47 @@ public class NRLStellar extends NRLCoin {
         return walletAddress;
     }
 
-    public void getBalance() {
-        String url_getbalance = "/api/v1/balance/" + this.walletAddress;
+    public void getBalance(NRLCallback callback) {
+        this.checkBalance(callback);
+    }
+
+    public void getTransactions(NRLCallback callback) {
+        this.checkTransactions(callback);
+    }
+
+    private void checkBalance(NRLCallback callback) {
+        String url_getbalance = "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                callback.onFailure(e);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    String responseStr = response.body().string();
+                    String result =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(result);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            JSONArray balances = data.getJSONArray("balance");
+                            for(int i = 0; i < balances.length(); i++) {
+                                JSONObject obj = balances.getJSONObject(i);
+                                String ticker = obj.getString("asset_type");
+                                if(ticker.equals("native")){
+                                    balance = obj.getString("value");
+                                    callback.onResponse(balance);
+                                    return;
+                                }
+                            }
+
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     // Do what you want to do with the response.
                 } else {
                     // Request not successful
@@ -82,10 +117,36 @@ public class NRLStellar extends NRLCoin {
         });
     }
 
-    private void getTransactions() {
-    }
+    private void checkTransactions(NRLCallback callback) {
+        String url_getTransaction = "/address/txs/" + this.walletAddress;
+        new HTTPRequest().run(url_getTransaction, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
 
-    public void createWallet(Date date, boolean knew) {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String body =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(body);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            transactions = data.getJSONArray("result");
+                            callback.onResponseArray(transactions);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    // Do what you want to do with the response.
+                } else {
+                    // Request not successful
+                }
+            }
+        });
     }
 
     public void createTransaction(long amount, String destinationAddress) {
