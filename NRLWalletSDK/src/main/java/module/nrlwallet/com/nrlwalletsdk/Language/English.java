@@ -19,6 +19,11 @@ public enum English implements WordList {
         return ' ';
     }
 
+    @Override
+    public String[] getAllWords() {
+        return words;
+    }
+
     private final static String[] words = new String[]{
             "abandon",
             "ability",

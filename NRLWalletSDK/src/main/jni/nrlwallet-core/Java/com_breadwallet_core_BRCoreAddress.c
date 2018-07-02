@@ -32,7 +32,7 @@
  * Signature: (Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_BRCoreAddress_createCoreAddress
+Java_module_nrlwallet_core_BRCoreAddress_createCoreAddress
         (JNIEnv *env, jclass thisClass, jstring stringObject) {
     BRAddress *address = (BRAddress *) calloc (1, sizeof (BRAddress));
 
@@ -59,7 +59,7 @@ Java_com_breadwallet_core_BRCoreAddress_createCoreAddress
  * Method:    createCoreAddressFromScriptPubKey
  * Signature: ([B)J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddressFromScriptPubKey
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCoreAddress_createCoreAddressFromScriptPubKey
         (JNIEnv *env, jclass thisClass, jbyteArray scriptByteArray) {
     BRAddress *address = (BRAddress *) calloc (1, sizeof (BRAddress));
 
@@ -77,7 +77,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddres
  * Method:    createCoreAddressFromScriptSignature
  * Signature: ([B)J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddressFromScriptSignature
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCoreAddress_createCoreAddressFromScriptSignature
         (JNIEnv *env, jclass thisClass, jbyteArray scriptByteArray) {
     BRAddress *address = (BRAddress *) calloc(1, sizeof(BRAddress));
 
@@ -96,7 +96,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddres
  * Signature: ()Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_com_breadwallet_core_BRCoreAddress_stringify
+Java_module_nrlwallet_core_BRCoreAddress_stringify
         (JNIEnv *env, jobject thisObject) {
     BRAddress *address = (BRAddress *) getJNIReference (env, thisObject);
     return (*env)->NewStringUTF (env, address->s);
@@ -108,7 +108,7 @@ Java_com_breadwallet_core_BRCoreAddress_stringify
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL
-Java_com_breadwallet_core_BRCoreAddress_isValid
+Java_module_nrlwallet_core_BRCoreAddress_isValid
         (JNIEnv *env, jobject thisObject) {
     BRAddress *address = (BRAddress *) getJNIReference(env, thisObject);
     return (jboolean) (BRAddressIsValid(address->s)
@@ -122,7 +122,7 @@ Java_com_breadwallet_core_BRCoreAddress_isValid
  * Signature: ()[B
  */
 JNIEXPORT jbyteArray JNICALL
-Java_com_breadwallet_core_BRCoreAddress_getPubKeyScript
+Java_module_nrlwallet_core_BRCoreAddress_getPubKeyScript
         (JNIEnv *env, jobject thisObject) {
     BRAddress *address = (BRAddress *) getJNIReference(env, thisObject);
 
@@ -141,7 +141,7 @@ Java_com_breadwallet_core_BRCoreAddress_getPubKeyScript
  * Method:    bcashDecodeBitcoin
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCoreAddress_bcashDecodeBitcoin
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_BRCoreAddress_bcashDecodeBitcoin
         (JNIEnv *env, jclass thisClass, jstring bcashAddrString ) {
     const char *bcashAddr = (*env)->GetStringUTFChars (env, bcashAddrString, 0);
 
@@ -159,7 +159,7 @@ JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCoreAddress_bcashDecodeBit
  * Method:    bcashEncodeBitcoin
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCoreAddress_bcashEncodeBitcoin
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_BRCoreAddress_bcashEncodeBitcoin
         (JNIEnv *env, jclass thisClass, jstring bitcoinAddrString) {
     const char *bitcoinAddr = (*env)->GetStringUTFChars (env, bitcoinAddrString, 0);
 

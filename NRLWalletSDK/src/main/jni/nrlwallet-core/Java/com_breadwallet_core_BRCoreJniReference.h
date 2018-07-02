@@ -12,7 +12,7 @@ extern "C" {
  * Method:    disposeNative
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_breadwallet_core_BRCoreJniReference_disposeNative
+JNIEXPORT void JNICALL Java_module_nrlwallet_core_BRCoreJniReference_disposeNative
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

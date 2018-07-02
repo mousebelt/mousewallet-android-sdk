@@ -12,7 +12,7 @@ extern "C" {
  * Method:    getJniMagicNumber
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_com_breadwallet_core_BRCoreChainParams_getJniMagicNumber
+JNIEXPORT jint JNICALL Java_module_nrlwallet_core_BRCoreChainParams_getJniMagicNumber
   (JNIEnv *, jobject);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jint JNICALL Java_com_breadwallet_core_BRCoreChainParams_getJniMagicNu
  * Method:    createJniMainnetChainParams
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreChainParams_createJniMainnetChainParams
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCoreChainParams_createJniMainnetChainParams
   (JNIEnv *, jclass);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreChainParams_createJniMai
  * Method:    createJniTestnetChainParams
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreChainParams_createJniTestnetChainParams
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCoreChainParams_createJniTestnetChainParams
   (JNIEnv *, jclass);
 
 /*
@@ -36,7 +36,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreChainParams_createJniTes
  * Method:    createJniMainnetBcashChainParams
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreChainParams_createJniMainnetBcashChainParams
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCoreChainParams_createJniMainnetBcashChainParams
   (JNIEnv *, jclass);
 
 /*
@@ -44,7 +44,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreChainParams_createJniMai
  * Method:    createJniTestnetBcashChainParams
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreChainParams_createJniTestnetBcashChainParams
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCoreChainParams_createJniTestnetBcashChainParams
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

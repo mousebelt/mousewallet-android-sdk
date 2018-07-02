@@ -25,26 +25,26 @@ JNI_OBJS=$(JNI_SRCS:.c=.o)
 # JNI Header Files that we are interest in keeping (that are not empty)
 JNI_HDRS=$(JNI_SRCS:.c=.h)
 
-JAVA_SRCS=root/com/breadwallet/core/BRCoreAddress.java \
-	root/com/breadwallet/core/BRCoreChainParams.java \
-	root/com/breadwallet/core/BRCoreJniReference.java \
-	root/com/breadwallet/core/BRCoreKey.java \
-	root/com/breadwallet/core/BRCoreMasterPubKey.java \
-	root/com/breadwallet/core/BRCoreMerkleBlock.java \
-	root/com/breadwallet/core/BRCorePaymentProtocolEncryptedMessage.java \
-	root/com/breadwallet/core/BRCorePaymentProtocolInvoiceRequest.java \
-	root/com/breadwallet/core/BRCorePaymentProtocolMessage.java \
-	root/com/breadwallet/core/BRCorePaymentProtocolPayment.java \
-	root/com/breadwallet/core/BRCorePaymentProtocolACK.java \
-	root/com/breadwallet/core/BRCorePaymentProtocolRequest.java \
-	root/com/breadwallet/core/BRCorePeer.java \
-	root/com/breadwallet/core/BRCorePeerManager.java \
-	root/com/breadwallet/core/BRCoreTransaction.java \
-	root/com/breadwallet/core/BRCoreTransactionInput.java \
-	root/com/breadwallet/core/BRCoreTransactionOutput.java \
-	root/com/breadwallet/core/BRCoreWallet.java \
-	root/com/breadwallet/core/BRCoreWalletManager.java \
-	root/com/breadwallet/core/test/BRWalletManager.java
+JAVA_SRCS=root/module/nrlwallet/core/BRCoreAddress.java \
+	root/module/nrlwallet/core/BRCoreChainParams.java \
+	root/module/nrlwallet/core/BRCoreJniReference.java \
+	root/module/nrlwallet/core/BRCoreKey.java \
+	root/module/nrlwallet/core/BRCoreMasterPubKey.java \
+	root/module/nrlwallet/core/BRCoreMerkleBlock.java \
+	root/module/nrlwallet/core/BRCorePaymentProtocolEncryptedMessage.java \
+	root/module/nrlwallet/core/BRCorePaymentProtocolInvoiceRequest.java \
+	root/module/nrlwallet/core/BRCorePaymentProtocolMessage.java \
+	root/module/nrlwallet/core/BRCorePaymentProtocolPayment.java \
+	root/module/nrlwallet/core/BRCorePaymentProtocolACK.java \
+	root/module/nrlwallet/core/BRCorePaymentProtocolRequest.java \
+	root/module/nrlwallet/core/BRCorePeer.java \
+	root/module/nrlwallet/core/BRCorePeerManager.java \
+	root/module/nrlwallet/core/BRCoreTransaction.java \
+	root/module/nrlwallet/core/BRCoreTransactionInput.java \
+	root/module/nrlwallet/core/BRCoreTransactionOutput.java \
+	root/module/nrlwallet/core/BRCoreWallet.java \
+	root/module/nrlwallet/core/BRCoreWalletManager.java \
+	root/module/nrlwallet/core/test/BRWalletManager.java
 
 JAVA_OBJS=$(JAVA_SRCS:.java=.class)
 
@@ -95,7 +95,7 @@ java_comp:	FORCE
 	javac -d build $(JAVA_SRCS)
 
 jni_hdr: java_comp
-	@(cd build/com/breadwallet/core; \
+	@(cd build/module/nrlwallet/core; \
 	  for class in BRCore*.class; do \
 	      javah -jni -d $(DIR) -classpath $(DIR)/build com.breadwallet.core.$${class%%.class}; \
 	  done)
@@ -127,7 +127,7 @@ FORCE:
 # 	java -Djava.library.path=/Users/ebg Foo
 #
 
-# (cd ${APP}/app/build/intermediates/classes/debug/com/breadwallet/core; for class in BRCore*.class; do \
+# (cd ${APP}/app/build/intermediates/classes/debug/module/nrlwallet/core; for class in BRCore*.class; do \
 #     javah -jni -d ${APP}/app/src/main/cpp/breadwallet-core/Java/ \
 #	-classpath ${APP}/app/build/intermediates/classes/debug/ \
 #	com.breadwallet.core.${class%%.class}; \

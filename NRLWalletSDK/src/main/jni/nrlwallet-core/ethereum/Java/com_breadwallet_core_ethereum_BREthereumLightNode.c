@@ -117,7 +117,7 @@ static jmethodID transactionFinder;
  * Signature: (Lcom/breadwallet/core/ethereum/BREthereumLightNode/Listener;)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAddListener
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniAddListener
         (JNIEnv *env, jobject thisObject, jobject listenerObject) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
 
@@ -136,7 +136,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAddListener
  * Signature: (Lcom/breadwallet/core/ethereum/BREthereumLightNode/Client;JLjava/lang/String;[Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeLES
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeLES
         (JNIEnv *env, jclass thisClass,
          jobject clientObject,
          jlong network,
@@ -171,7 +171,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeLES
  * Signature: (Lcom/breadwallet/core/ethereum/BREthereumLightNode/Client;J[B)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeLES_1PublicKey
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeLES_1PublicKey
         (JNIEnv *env, jclass thisClass, jobject clientObject, jlong network, jbyteArray publicKey) {
 
     assert (65 == (*env)->GetArrayLength(env, publicKey));
@@ -196,7 +196,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeLES_1Pu
  * Signature: (Lcom/breadwallet/core/ethereum/BREthereumLightNode/Client;JLjava/lang/String;[Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeJSON_1RPC
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeJSON_1RPC
         (JNIEnv *env, jclass thisClass,
          jobject clientObject,
          jlong network,
@@ -242,7 +242,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeJSON_1R
  * Signature: (Lcom/breadwallet/core/ethereum/BREthereumLightNode/Client;J[B)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeJSON_1RPC_1PublicKey
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeJSON_1RPC_1PublicKey
     (JNIEnv *env, jclass thisClass, jobject clientObject, jlong network, jbyteArray publicKey) {
 
     assert (65 == (*env)->GetArrayLength(env, publicKey));
@@ -277,7 +277,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateLightNodeJSON_1R
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeGetAccount
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniLightNodeGetAccount
     (JNIEnv *env, jobject thisObject) {
   BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jlong) lightNodeGetAccount(node);
@@ -289,7 +289,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeGetAccount
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeGetWallet
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniLightNodeGetWallet
         (JNIEnv *env, jobject thisObject) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jlong) lightNodeGetWallet(node);
@@ -301,7 +301,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeGetWallet
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeGetWalletToken
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniLightNodeGetWalletToken
         (JNIEnv *env, jobject thisObject, jlong tokenId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     // TODO: Implement
@@ -315,7 +315,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeGetWalletToke
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeCreateWalletToken
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniLightNodeCreateWalletToken
         (JNIEnv *env, jobject thisObject, jlong token) {
   BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
   return (jlong) lightNodeCreateWalletHoldingToken(node, (BREthereumToken) token);
@@ -327,7 +327,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeCreateWalletT
  * Signature: (J)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniGetAccountPrimaryAddress
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniGetAccountPrimaryAddress
         (JNIEnv *env, jobject thisObject, jlong account) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
 
@@ -344,7 +344,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniGetAccountPrimaryAddre
  * Signature: (J)[B
  */
 JNIEXPORT jbyteArray JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniGetAccountPrimaryAddressPublicKey
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniGetAccountPrimaryAddressPublicKey
         (JNIEnv *env, jobject thisObject, jlong account) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
 
@@ -361,7 +361,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniGetAccountPrimaryAddre
  * Signature: (JJ)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniGetWalletBalance
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniGetWalletBalance
         (JNIEnv *env, jobject thisObject, jlong wid, jlong unit) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     BREthereumAmount balance = lightNodeWalletGetBalance(node, wid);
@@ -381,7 +381,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniGetWalletBalance
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniEstimateWalletGasPrice
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniEstimateWalletGasPrice
         (JNIEnv *env, jobject thisObject, jlong wid) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
 
@@ -397,7 +397,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniEstimateWalletGasPrice
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniForceWalletBalanceUpdate
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniForceWalletBalanceUpdate
         (JNIEnv *env, jobject thisObject, jlong wid) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     lightNodeUpdateWalletBalance
@@ -411,7 +411,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniForceWalletBalanceUpda
  * Signature: ()V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniForceTransactionUpdate
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniForceTransactionUpdate
         (JNIEnv *env, jobject thisObject) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     lightNodeUpdateTransactions(node);
@@ -423,7 +423,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniForceTransactionUpdate
  * Signature: (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceTransaction
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniAnnounceTransaction
         (JNIEnv *env, jobject thisObject,
          jint id,
          jstring hashObject,
@@ -468,7 +468,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceTransaction
  * Signature: (ILjava/lang/String;I)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceBalance
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniAnnounceBalance
         (JNIEnv *env, jobject thisObject,
          jint wid,
          jstring balance,
@@ -486,7 +486,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceBalance
  * Signature: (ILjava/lang/String;I)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceGasPrice
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniAnnounceGasPrice
         (JNIEnv *env, jobject thisObject,
          jint wid,
          jstring gasPrice,
@@ -504,7 +504,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceGasPrice
  * Signature: (IILjava/lang/String;I)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceGasEstimate
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniAnnounceGasEstimate
         (JNIEnv *env, jobject thisObject,
 	 jint wid,
          jint tid,
@@ -524,7 +524,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceGasEstimate
  * Signature: (ILjava/lang/String;I)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceSubmitTransaction
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniAnnounceSubmitTransaction
         (JNIEnv *env, jobject thisObject,
          jint wid,
          jint tid,
@@ -541,7 +541,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniAnnounceSubmitTransact
  * Signature: (JLjava/lang/String;Ljava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateTransaction
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniCreateTransaction
         (JNIEnv *env, jobject thisObject,
          jlong wid,
          jstring toObject,
@@ -569,7 +569,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniCreateTransaction
  * Signature: (JJLjava/lang/String;)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniSignTransaction
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniSignTransaction
         (JNIEnv *env, jobject thisObject,
          jlong walletId,
          jlong transactionId,
@@ -587,7 +587,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniSignTransaction
  * Signature: (JJ)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniSubmitTransaction
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniSubmitTransaction
         (JNIEnv *env, jobject thisObject,
          jlong walletId,
          jlong transactionId) {
@@ -604,7 +604,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniSubmitTransaction
  * Signature: (J)[J
  */
 JNIEXPORT jlongArray JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniGetTransactions
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniGetTransactions
         (JNIEnv *env, jobject thisObject,
          jlong wid) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
@@ -631,7 +631,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniGetTransactions
  * Signature: (JJ)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetAmount
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionGetAmount
         (JNIEnv *env, jobject thisObject,
          jlong tid,
          jlong unit) {
@@ -651,7 +651,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetAmount
  * Signature: (JJ)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetFee
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionGetFee
         (JNIEnv *env, jobject thisObject,
          jlong tid,
          jlong unit) {
@@ -680,7 +680,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetFee
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionHasToken
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionHasToken
         (JNIEnv *env, jobject thisObject,
          jlong tid) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
@@ -695,7 +695,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionHasToken
  * Signature: (JJ)V
  */
 JNIEXPORT void JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionEstimateGas
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionEstimateGas
         (JNIEnv *env, jobject thisObject,
          jlong walletId,
          jlong transactionId) {
@@ -713,7 +713,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionEstimateGas
  * Signature: (JLjava/lang/String;JJ)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionEstimateFee
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionEstimateFee
         (JNIEnv *env, jobject thisObject,
          jlong wid,
          jstring amountString,
@@ -760,7 +760,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionEstimateFee
  * Signature: (J)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionSourceAddress
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionSourceAddress
         (JNIEnv *env, jobject thisObject, jlong transactionId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return asJniString(env, lightNodeTransactionGetSendAddress
@@ -774,7 +774,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionSourceAddre
  * Signature: (J)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionTargetAddress
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionTargetAddress
         (JNIEnv *env, jobject thisObject, jlong transactionId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return asJniString(env, lightNodeTransactionGetRecvAddress
@@ -787,7 +787,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionTargetAddre
  * Method:    jniTransactionGetHash
  * Signature: (J)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetHash
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionGetHash
         (JNIEnv *env, jobject thisObject, jlong transactionId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return asJniString(env, lightNodeTransactionGetHash
@@ -801,7 +801,7 @@ JNIEXPORT jstring JNICALL Java_com_breadwallet_core_ethereum_BREthereumLightNode
  * Signature: (JJ)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetGasPrice
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionGetGasPrice
         (JNIEnv *env, jobject thisObject, jlong transactionId, jlong unit) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return asJniString(env, lightNodeTransactionGetGasPrice
@@ -816,7 +816,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetGasPrice
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetGasLimit
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionGetGasLimit
         (JNIEnv *env, jobject thisObject, jlong transactionId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jlong) lightNodeTransactionGetGasLimit
@@ -830,7 +830,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetGasLimit
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetGasUsed
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionGetGasUsed
         (JNIEnv *env, jobject thisObject, jlong transactionId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jlong) lightNodeTransactionGetGasUsed
@@ -845,7 +845,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetGasUsed
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetNonce
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionGetNonce
         (JNIEnv *env, jobject thisObject, jlong transactionId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jlong) lightNodeTransactionGetNonce
@@ -859,7 +859,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetNonce
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetBlockNumber
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionGetBlockNumber
         (JNIEnv *env, jobject thisObject, jlong transactionId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jlong) lightNodeTransactionGetBlockNumber
@@ -874,7 +874,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetBlockNum
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetBlockTimestamp
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionGetBlockTimestamp
         (JNIEnv *env, jobject thisObject, jlong transactionId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jlong) lightNodeTransactionGetBlockTimestamp
@@ -888,7 +888,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionGetBlockTim
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionIsConfirmed
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionIsConfirmed
         (JNIEnv *env, jobject thisObject, jlong transactionId) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jboolean) (ETHEREUM_BOOLEAN_TRUE ==
@@ -905,7 +905,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionIsConfirmed
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionIsSubmitted
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniTransactionIsSubmitted
     (JNIEnv *env, jobject thisObject, jlong transactionId) {
         BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
         return (jboolean) (ETHEREUM_BOOLEAN_TRUE ==
@@ -924,7 +924,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniTransactionIsSubmitted
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeConnect
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniLightNodeConnect
         (JNIEnv *env, jobject thisObject) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jboolean) (ETHEREUM_BOOLEAN_TRUE == lightNodeConnect(node) ? JNI_TRUE : JNI_FALSE);
@@ -935,7 +935,7 @@ Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeConnect
  * Method:    jniLightNodeDisconnect
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_com_breadwallet_core_ethereum_BREthereumLightNode_jniLightNodeDisconnect
+JNIEXPORT jboolean JNICALL Java_module_nrlwallet_core_ethereum_BREthereumLightNode_jniLightNodeDisconnect
         (JNIEnv *env, jobject thisObject) {
     BREthereumLightNode node = (BREthereumLightNode) getJNIReference(env, thisObject);
     return (jboolean) (ETHEREUM_BOOLEAN_TRUE == lightNodeDisconnect(node) ? JNI_TRUE : JNI_FALSE);
@@ -948,7 +948,7 @@ JNIEXPORT jboolean JNICALL Java_com_breadwallet_core_ethereum_BREthereumLightNod
  * Signature: ()V
  */
 JNIEXPORT void JNICALL 
-Java_com_breadwallet_core_ethereum_BREthereumLightNode_initializeNative
+Java_module_nrlwallet_core_ethereum_BREthereumLightNode_initializeNative
   (JNIEnv *env, jclass thisClass) {
 
     // Wallet Finder

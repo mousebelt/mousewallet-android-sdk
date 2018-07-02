@@ -39,8 +39,7 @@ public class BREthereumLightNodeClientTest implements
         BREthereumLightNode.ClientJSON_RPC,
         BREthereumLightNode.Listener {
     static {
-        if (System.getProperties().containsKey("light.node.test"))
-            System.loadLibrary("Core");
+        System.loadLibrary("core");
     }
 
     private static final String RANDOM_TEST_PAPER_KEY =

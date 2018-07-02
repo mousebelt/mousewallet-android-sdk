@@ -12,7 +12,7 @@ extern "C" {
  * Method:    jniGetTokenBRD
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_ethereum_BREthereumToken_jniGetTokenBRD
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_ethereum_BREthereumToken_jniGetTokenBRD
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

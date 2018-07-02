@@ -53,8 +53,7 @@ import java.util.concurrent.Executors;
  */
 public class BRWalletManager extends BRCoreWalletManager {
     static {
-        if (System.getProperties().containsKey("wallet.test"))
-            System.loadLibrary("Core");
+        System.loadLibrary("core");
     }
 
     Executor listenerExecutor;

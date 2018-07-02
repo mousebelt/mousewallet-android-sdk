@@ -12,7 +12,7 @@ extern "C" {
  * Method:    jniGetMainnet
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_ethereum_BREthereumNetwork_jniGetMainnet
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_ethereum_BREthereumNetwork_jniGetMainnet
   (JNIEnv *, jclass);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_ethereum_BREthereumNetwork_jni
  * Method:    jniGetTestnet
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_ethereum_BREthereumNetwork_jniGetTestnet
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_ethereum_BREthereumNetwork_jniGetTestnet
   (JNIEnv *, jclass);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_ethereum_BREthereumNetwork_jni
  * Method:    jniGetRinkeby
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_ethereum_BREthereumNetwork_jniGetRinkeby
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_ethereum_BREthereumNetwork_jniGetRinkeby
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

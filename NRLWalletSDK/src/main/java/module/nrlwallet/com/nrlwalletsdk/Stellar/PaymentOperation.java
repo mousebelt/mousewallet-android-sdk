@@ -98,10 +98,10 @@ public class PaymentOperation extends Operation {
      * @param amount The amount to send in lumens.
      * @throws ArithmeticException when amount has more than 7 decimal places.
      */
-    public Builder(KeyPair destination, Asset asset, String amount) {
+    public Builder(KeyPair destination, Asset asset, long amount) {
       this.destination = destination;
       this.asset = asset;
-      this.amount = amount;
+      this.amount = String.valueOf(amount);
     }
 
     /**
