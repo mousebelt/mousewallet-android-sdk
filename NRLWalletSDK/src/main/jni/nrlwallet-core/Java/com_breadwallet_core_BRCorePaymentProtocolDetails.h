@@ -12,7 +12,7 @@ extern "C" {
  * Method:    createPaymentProtocolDetails
  * Signature: ([B)J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolDetails_createPaymentProtocolDetails
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolDetails_createPaymentProtocolDetails
   (JNIEnv *, jclass, jbyteArray);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolDetails_c
  * Method:    serialize
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolDetails_serialize
+JNIEXPORT jbyteArray JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolDetails_serialize
   (JNIEnv *, jobject);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolDeta
  * Method:    disposeNative
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolDetails_disposeNative
+JNIEXPORT void JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolDetails_disposeNative
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

@@ -12,7 +12,7 @@ extern "C" {
  * Method:    getNetwork
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getNetwork
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getNetwork
   (JNIEnv *, jobject);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest
  * Method:    getOutputs
  * Signature: ()[Lcom/breadwallet/core/BRCoreTransactionOutput;
  */
-JNIEXPORT jobjectArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getOutputs
+JNIEXPORT jobjectArray JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getOutputs
   (JNIEnv *, jobject);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRe
  * Method:    getTime
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getTime
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getTime
   (JNIEnv *, jobject);
 
 /*
@@ -36,7 +36,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_g
  * Method:    getExpires
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getExpires
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getExpires
   (JNIEnv *, jobject);
 
 /*
@@ -44,7 +44,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_g
  * Method:    getMemo
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getMemo
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getMemo
   (JNIEnv *, jobject);
 
 /*
@@ -52,7 +52,7 @@ JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest
  * Method:    getPaymentURL
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getPaymentURL
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getPaymentURL
   (JNIEnv *, jobject);
 
 /*
@@ -60,7 +60,7 @@ JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest
  * Method:    getMerchantData
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getMerchantData
+JNIEXPORT jbyteArray JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getMerchantData
   (JNIEnv *, jobject);
 
 /*
@@ -68,7 +68,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequ
  * Method:    getVersion
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getVersion
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getVersion
   (JNIEnv *, jobject);
 
 /*
@@ -76,7 +76,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_g
  * Method:    getPKIType
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getPKIType
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getPKIType
   (JNIEnv *, jobject);
 
 /*
@@ -84,7 +84,7 @@ JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest
  * Method:    getPKIData
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getPKIData
+JNIEXPORT jbyteArray JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getPKIData
   (JNIEnv *, jobject);
 
 /*
@@ -92,7 +92,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequ
  * Method:    getSignature
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getSignature
+JNIEXPORT jbyteArray JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getSignature
   (JNIEnv *, jobject);
 
 /*
@@ -100,7 +100,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequ
  * Method:    getDigest
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getDigest
+JNIEXPORT jbyteArray JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getDigest
   (JNIEnv *, jobject);
 
 /*
@@ -108,7 +108,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequ
  * Method:    getCerts
  * Signature: ()[[B
  */
-JNIEXPORT jobjectArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_getCerts
+JNIEXPORT jobjectArray JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_getCerts
   (JNIEnv *, jobject);
 
 /*
@@ -116,7 +116,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRe
  * Method:    createPaymentProtocolRequest
  * Signature: ([B)J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_createPaymentProtocolRequest
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_createPaymentProtocolRequest
   (JNIEnv *, jclass, jbyteArray);
 
 /*
@@ -124,7 +124,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_c
  * Method:    serialize
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_serialize
+JNIEXPORT jbyteArray JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_serialize
   (JNIEnv *, jobject);
 
 /*
@@ -132,7 +132,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequ
  * Method:    disposeNative
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_disposeNative
+JNIEXPORT void JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_disposeNative
   (JNIEnv *, jobject);
 
 /*
@@ -140,7 +140,7 @@ JNIEXPORT void JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_di
  * Method:    initializeNative
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_breadwallet_core_BRCorePaymentProtocolRequest_initializeNative
+JNIEXPORT void JNICALL Java_module_nrlwallet_core_BRCorePaymentProtocolRequest_initializeNative
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

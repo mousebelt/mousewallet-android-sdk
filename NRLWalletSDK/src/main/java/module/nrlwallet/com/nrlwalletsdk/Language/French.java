@@ -15,6 +15,11 @@ public enum French implements WordList {
     }
 
     @Override
+    public String[] getAllWords() {
+        return words;
+    }
+
+    @Override
     public char getSpace() {
         return ' ';
     }

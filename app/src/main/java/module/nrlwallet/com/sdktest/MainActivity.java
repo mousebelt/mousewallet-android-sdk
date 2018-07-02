@@ -25,11 +25,11 @@ public class MainActivity extends Activity {
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
         strMnemonic = sb.toString();
 
-        this.getEthereumWallet(strMnemonic);//ok
-        this.getLitecoinWallet(strMnemonic);//ok
-        this.getBitcoinWallet(strMnemonic);//ok
-//        this.getNeoWallet(strMnemonic);
-        this.getStellarWallet(strMnemonic);//ok
+//        this.getEthereumWallet(strMnemonic);//ok
+//        this.getLitecoinWallet(strMnemonic);//ok
+//        this.getBitcoinWallet(strMnemonic);//okkkk
+        this.getNeoWallet(strMnemonic);
+//        this.getStellarWallet(strMnemonic);//okk
     }
 
     private void getEthereumWallet(String strMnemonic) {
@@ -61,6 +61,8 @@ public class MainActivity extends Activity {
         System.out.println("************----------- Seed : " + seed);
         System.out.println("************----------- NEO Private Key : " + neoPrivateKey);
         System.out.println("************----------- NEO address     : " + neoAddress);
+        nrlNeo.getBalance();
+        nrlNeo.getTransactions();
     }
 
     private void getBitcoinWallet(String strMnemonic) {
@@ -75,6 +77,7 @@ public class MainActivity extends Activity {
         System.out.println("************----------- Seed : " + seed);
         System.out.println("************----------- BTC Private Key : " + btcPrivateKey);
         System.out.println("************----------- BTC address     : " + btcAddress);
+        System.out.println("************----------- BTC balance     : " + nrlBitcoin.getBalance());
     }
     private void getLitecoinWallet(String strMnemonic) {
 
@@ -102,7 +105,6 @@ public class MainActivity extends Activity {
         System.out.println("************----------- Seed : " + seed);
         System.out.println("************----------- Stellar Private Key : " + stlPrivateKey);
         System.out.println("************----------- Stellar address     : " + stlAddress);
-
 
     }
 }

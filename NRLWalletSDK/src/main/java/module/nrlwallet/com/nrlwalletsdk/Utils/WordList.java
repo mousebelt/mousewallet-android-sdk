@@ -16,4 +16,11 @@ public interface WordList {
      * @return a whitespace character.
      */
     char getSpace();
+
+    /**
+     * Get the space character for this language.
+     *
+     * @return all Words list.
+     */
+    String[] getAllWords();
 }

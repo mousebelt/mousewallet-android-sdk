@@ -2,30 +2,28 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-import io.github.novacrypto.bip32.ExtendedPrivateKey;
-import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
-import io.github.novacrypto.bip32.derivation.CkdFunctionDerive;
-import io.github.novacrypto.bip32.derivation.Derive;
 import io.github.novacrypto.bip32.networks.Bitcoin;
 import io.github.novacrypto.bip44.AddressIndex;
-import io.github.novacrypto.bip44.BIP44;
-import module.nrlwallet.com.nrlwalletsdk.Common.ValidationException;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Base58Encode;
-import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
-import module.nrlwallet.com.nrlwalletsdk.Network.CoinType;
-import module.nrlwallet.com.nrlwalletsdk.Network.Ethereum;
-import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedKey;
-import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
-import module.nrlwallet.com.nrlwalletsdk.Utils.HexStringConverter;
-import module.nrlwallet.com.nrlwalletsdk.Utils.WIF;
+import module.nrlwallet.core.BRCoreAddress;
+import module.nrlwallet.core.BRCoreChainParams;
 import module.nrlwallet.core.BRCoreKey;
 import module.nrlwallet.core.BRCoreMasterPubKey;
-import neoutils.Wallet;
+import module.nrlwallet.core.BRCoreMerkleBlock;
+import module.nrlwallet.core.BRCorePeer;
+import module.nrlwallet.core.BRCorePeerManager;
+import module.nrlwallet.core.BRCoreTransaction;
+import module.nrlwallet.core.BRCoreWallet;
+import module.nrlwallet.core.BRCoreWalletManager;
 
 public class NRLBitcoin extends NRLCoin {
 
@@ -41,8 +39,18 @@ public class NRLBitcoin extends NRLCoin {
     String walletAddress;
     String privateKey;
     String Mnemonic;
+    BRCoreWalletManager manager;
+    BRCoreWallet wallet;
+    long balance;
+    private Executor listenerExecutor = Executors.newSingleThreadExecutor();
 
-
+    static {
+        try {
+            System.loadLibrary("core");
+        } catch (UnsatisfiedLinkError e) {
+            e.printStackTrace();
+        }
+    }
     private List<Integer> expected;
     private String path;
     private int[] list;
@@ -53,78 +61,91 @@ public class NRLBitcoin extends NRLCoin {
         bSeed = seed;
         Mnemonic = mnemonic;
 
-        this.init();
-//        this.getData(seed);
-
-//        this.generatePubkeyFromPrivatekey(seed);
+        this.createWallet1();
+    }
+    private void createWallet1() {
+        BRCoreMasterPubKey brCoreMasterPubKey = new BRCoreMasterPubKey(bSeed, true);
+        BRCoreWallet.Listener walletListener = getWalletListener();
+        wallet = createWallet(new BRCoreTransaction[]{}, brCoreMasterPubKey, walletListener);
+        createListener();
+        balance = wallet.getBalance();
+        walletAddress = wallet.getReceiveAddress().stringify();
+        privateKey = brCoreMasterPubKey.getPubKeyAsCoreKey().getPrivKey();
     }
 
-
-//    public NRLBitcoin(List<Integer> expected, String path) {
-//        super(expected, path);
-//        expected = expected;
-//        this.path = path;
-//        list = copy(expected);
-//    }
-
-    private void init2() {
-
-//        byte[] authKey = BRCoreKey.getAuthPrivKeyForAPI(bSeed);
-        String[] words = this.Mnemonic.split(" ");
-        byte[] paperKeyBytes = BRCoreMasterPubKey.generatePaperKey(bSeed, words);
-        byte[] pubKey = new BRCoreMasterPubKey(paperKeyBytes, false).serialize();
-    }
-
-
-    private int[] copy(List<Integer> expected) {
-        final int length = expected.size();
-        final int[] list = new int[length];
-        for (int i = 0; i < length; i++)
-            list[i] = expected.get(i);
-        return list;
-    }
-
-    private void getData(byte[] bSeed) {
+    private static BRCoreWallet createWallet (BRCoreTransaction[] transactions,
+                                              BRCoreMasterPubKey masterPubKey,
+                                              BRCoreWallet.Listener listener) {
         try {
-            ExtendedKey m = ExtendedKey.create(bSeed);
-            // Derive account based on BIP44
-            ExtendedKey ka = module.nrlwallet.com.nrlwalletsdk.Utils.BIP44.getKeyType(m, coinType,0, 0);
-
-            ExtendedKey ck = ka.getChild(coinType);
-            walletAddress = ck.getAddress();
-            extendedPrivateKey = WIF.getWif(ck.getMaster());
-            System.out.println("acct 0 ,idx:" + 0 + " ,addr:" + walletAddress + " ,Private Key:" + extendedPrivateKey);
-        } catch (ValidationException e) {
-            e.printStackTrace();
+            return new BRCoreWallet(transactions, masterPubKey, listener);
         }
-
+        catch (BRCoreWallet.WalletExecption ex) {
+//            asserting (false);
+            return null;
+        }
     }
-    private void init() {
-        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, network);
-        addressIndex = BIP44.m()
-                .purpose44()
-                .coinType(coinType)
-                .account(0)
-                .external()
-                .address(0);
 
-        this.walletAddress = root.derive(addressIndex, AddressIndex.DERIVATION)
-                .neuter().p2pkhAddress();
+    private void createWallet() {
+        BRCoreMasterPubKey brCoreMasterPubKey = new BRCoreMasterPubKey(bSeed, true);
+        BRCoreChainParams chainParams = BRCoreChainParams.testnetChainParams;
+        double createTime = System.currentTimeMillis();
+        manager = new BRCoreWalletManager(brCoreMasterPubKey, chainParams, createTime);
+        createListener();
+//        manager.syncStarted();
+        BRCoreWallet wallet = manager.getWallet();
+        walletAddress = brCoreMasterPubKey.getPubKeyAsCoreKey().address();
+        byte[] pubKey = new BRCoreMasterPubKey(bSeed, true).serialize();
+        extendedPublicKey = Base58Encode.encode(pubKey);
+        balance = wallet.getBalance();
+    }
 
+    private void createListener() {
+        BRCoreMerkleBlock[] block = new BRCoreMerkleBlock[0];
+        BRCorePeerManager.Listener listener = new BRCorePeerManager.Listener() {
+            @Override
+            public void syncStarted() {
 
+            }
 
-        Derive<Integer[]> derive = new CkdFunctionDerive<>(NRLBitcoin::concat, new Integer[0]);
-        Integer[] actual = derive.derive(addressIndex, AddressIndex.DERIVATION);
+            @Override
+            public void syncStopped(String error) {
 
-        this.rootKey = new ExtendedPrivateKeyBIP32().getRootKey(bSeed, CoinType.ETHEREUM);
-        ExtendedPrivateKey privateKey;
-        privateKey = ExtendedPrivateKey.fromSeed(bSeed, Bitcoin.MAIN_NET);
-        ExtendedPrivateKey child = privateKey.derive("m/44'/0'/0'/0");
-        ExtendedPublicKey childPub = child.neuter();
-        extendedPrivateKey = child.extendedBase58();   //Extended Private Key
-        extendedPublicKey = childPub.extendedBase58();    //Extended Public Key
-        walletAddress = childPub.p2pkhAddress();
-        String str4 = childPub.p2shAddress();
+            }
+
+            @Override
+            public void txStatusUpdate() {
+
+            }
+
+            @Override
+            public void saveBlocks(boolean replace, BRCoreMerkleBlock[] blocks) {
+
+            }
+
+            @Override
+            public void savePeers(boolean replace, BRCorePeer[] peers) {
+
+            }
+
+            @Override
+            public boolean networkIsReachable() {
+                return false;
+            }
+
+            @Override
+            public void txPublished(String error) {
+
+            }
+        };
+        BRCorePeerManager brCorePeerManager = new BRCorePeerManager(
+                BRCoreChainParams.testnetChainParams,
+                wallet,
+                0,
+                block,
+                new BRCorePeer[0],
+                new WrappedExceptionPeerManagerListener(listener)
+        );
+        brCorePeerManager.connect();
     }
 
     public String getPrivateKey() {
@@ -133,15 +154,7 @@ public class NRLBitcoin extends NRLCoin {
 
     @Override
     public String getAddress() {
-//        String address = this.neoWallet.getAddress();
         return walletAddress;
-    }
-
-    private void generatePubkeyFromPrivatekey(byte[] seed) {
-        byte[] publickey = Secp256k1.getPublicKey(seed);
-        String bbb = HexStringConverter.getHexStringConverterInstance().asHex(publickey);
-        String aaa = Base58Encode.encode(publickey);
-        System.out.println("************----------- Bitcoin public key     : " + aaa);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
@@ -150,4 +163,134 @@ public class NRLBitcoin extends NRLCoin {
         integers[input.length] = index;
         return integers;
     }
+
+    public String[] getInputTransaction(int index) {
+        BRCoreTransaction[] transactions = manager.getWallet().getTransactions();
+        if(transactions.length == 0) return null;
+        return transactions[index].getInputAddresses();
+    }
+    public String[] getOutputTransaction(int index) {
+        BRCoreTransaction[] transactions = manager.getWallet().getTransactions();
+        if(transactions.length == 0) return null;
+        return transactions[index].getOutputAddresses();
+    }
+    public String[] getAddressOfWallet() {
+        BRCoreAddress[] addresses = manager.getWallet().getAllAddresses();
+        if(addresses.length == 0) return null;
+        String[] arr_address = new String[addresses.length];
+        for (int i = 0; i < addresses.length; i++) {
+            arr_address[i] = addresses[i].stringify();
+        }
+        return arr_address;
+    }
+
+    public long getBalance() {
+        return this.balance;
+    }
+
+    public void createTransaction(long amount, String address) {
+        if(address == null) return;
+        BRCoreTransaction transaction = manager.getWallet().createTransaction(amount, new BRCoreAddress(address));
+    }
+
+
+    static public class WrappedExceptionPeerManagerListener implements BRCorePeerManager.Listener {
+        private BRCorePeerManager.Listener listener;
+
+        public WrappedExceptionPeerManagerListener(BRCorePeerManager.Listener listener) {
+            this.listener = listener;
+        }
+
+        //        private <T> void safeHandler (Supplier<Void> supplier) {
+        //            try { supplier.get(); }
+        //            catch (Exception ex) {
+        //                ex.printStackTrace(System.err);
+        //            }
+        //        }
+
+        @Override
+        public void syncStarted() {
+            try { listener.syncStarted(); }
+            catch (Exception ex) {
+                ex.printStackTrace(System.err);
+            }
+        }
+
+        @Override
+        public void syncStopped(String error) {
+            try { listener.syncStopped(error); }
+            catch (Exception ex) {
+                ex.printStackTrace(System.err);
+            }
+        }
+
+        @Override
+        public void txStatusUpdate() {
+            try { listener.txStatusUpdate(); }
+            catch (Exception ex) {
+                ex.printStackTrace(System.err);
+            }
+        }
+
+        @Override
+        public void saveBlocks(boolean replace, BRCoreMerkleBlock[] blocks) {
+            try { listener.saveBlocks(replace, blocks); }
+            catch (Exception ex) {
+                ex.printStackTrace(System.err);
+            }
+        }
+
+        @Override
+        public void savePeers(boolean replace, BRCorePeer[] peers) {
+            try { listener.savePeers(replace, peers); }
+            catch (Exception ex) {
+                ex.printStackTrace(System.err);
+            }
+        }
+
+        @Override
+        public boolean networkIsReachable() {
+            try { return listener.networkIsReachable(); }
+            catch (Exception ex) {
+                ex.printStackTrace(System.err);
+                return false;
+            }
+        }
+
+        @Override
+        public void txPublished(String error) {
+            try { listener.txPublished(error); }
+            catch (Exception ex) {
+                ex.printStackTrace(System.err);
+            }
+        }
+    }
+
+    private static BRCoreWallet.Listener getWalletListener () {
+        return  new BRCoreWallet.Listener() {
+            @Override
+            public void balanceChanged(long balance) {
+                System.out.println(String.format("            balance   : %d", balance));
+            }
+
+            @Override
+            public void onTxAdded(BRCoreTransaction transaction) {
+                System.out.println(String.format("            tx added  : %s",
+                        BRCoreKey.encodeHex(transaction.getHash())));
+
+            }
+
+            @Override
+            public void onTxUpdated(String hash, int blockHeight, int timeStamp) {
+                System.out.println(String.format("            tx updated: %s", hash));
+            }
+
+            @Override
+            public void onTxDeleted(String hash, int notifyUser, int recommendRescan) {
+                System.out.println(String.format("            tx deleted: %s", hash));
+
+            }
+        };
+    }
+
 }

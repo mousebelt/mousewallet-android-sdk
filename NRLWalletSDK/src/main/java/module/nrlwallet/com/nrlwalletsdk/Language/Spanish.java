@@ -14,6 +14,11 @@ public enum Spanish implements WordList {
     }
 
     @Override
+    public String[] getAllWords() {
+        return words;
+    }
+
+    @Override
     public char getSpace() {
         return ' ';
     }

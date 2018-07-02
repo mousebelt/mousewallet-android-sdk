@@ -3,6 +3,7 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,8 +21,12 @@ import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
 import module.nrlwallet.com.nrlwalletsdk.Network.CoinType;
 import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedKey;
 import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
+import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HexStringConverter;
 import module.nrlwallet.com.nrlwalletsdk.Utils.WIF;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class NRLLite extends NRLCoin {
 
@@ -36,6 +41,7 @@ public class NRLLite extends NRLCoin {
     String extendedPublicKey;
     String walletAddress;
     String privateKey;
+    String balance;
 
 
     private List<Integer> expected;
@@ -138,4 +144,30 @@ public class NRLLite extends NRLCoin {
         integers[input.length] = index;
         return integers;
     }
+    public void getBalance() {
+        String url_getbalance = "/balance/" + this.walletAddress;
+        new HTTPRequest().run(url_getbalance, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String responseStr = response.body().string();
+                    // Do what you want to do with the response.
+                } else {
+                    // Request not successful
+                }
+            }
+        });
+    }
+    public void getTransactions() {
+
+    }
+    public void createTransaction(long amount, String address, String memo, long fee) {
+
+    }
+
 }

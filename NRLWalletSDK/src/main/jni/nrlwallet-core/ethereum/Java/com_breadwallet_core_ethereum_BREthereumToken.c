@@ -32,7 +32,7 @@
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumToken_jniGetTokenBRD
+Java_module_nrlwallet_core_ethereum_BREthereumToken_jniGetTokenBRD
         (JNIEnv *env, jclass thisClass) {
     return (jlong) tokenBRD;
 }

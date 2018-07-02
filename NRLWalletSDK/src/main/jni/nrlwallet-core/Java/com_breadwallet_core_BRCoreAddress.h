@@ -12,7 +12,7 @@ extern "C" {
  * Method:    createCoreAddress
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddress
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCoreAddress_createCoreAddress
   (JNIEnv *, jclass, jstring);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddres
  * Method:    createCoreAddressFromScriptPubKey
  * Signature: ([B)J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddressFromScriptPubKey
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCoreAddress_createCoreAddressFromScriptPubKey
   (JNIEnv *, jclass, jbyteArray);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddres
  * Method:    createCoreAddressFromScriptSignature
  * Signature: ([B)J
  */
-JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddressFromScriptSignature
+JNIEXPORT jlong JNICALL Java_module_nrlwallet_core_BRCoreAddress_createCoreAddressFromScriptSignature
   (JNIEnv *, jclass, jbyteArray);
 
 /*
@@ -36,7 +36,7 @@ JNIEXPORT jlong JNICALL Java_com_breadwallet_core_BRCoreAddress_createCoreAddres
  * Method:    stringify
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCoreAddress_stringify
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_BRCoreAddress_stringify
   (JNIEnv *, jobject);
 
 /*
@@ -44,7 +44,7 @@ JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCoreAddress_stringify
  * Method:    isValid
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_com_breadwallet_core_BRCoreAddress_isValid
+JNIEXPORT jboolean JNICALL Java_module_nrlwallet_core_BRCoreAddress_isValid
   (JNIEnv *, jobject);
 
 /*
@@ -52,7 +52,7 @@ JNIEXPORT jboolean JNICALL Java_com_breadwallet_core_BRCoreAddress_isValid
  * Method:    getPubKeyScript
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCoreAddress_getPubKeyScript
+JNIEXPORT jbyteArray JNICALL Java_module_nrlwallet_core_BRCoreAddress_getPubKeyScript
   (JNIEnv *, jobject);
 
 /*
@@ -60,7 +60,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_breadwallet_core_BRCoreAddress_getPubKeySc
  * Method:    bcashDecodeBitcoin
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCoreAddress_bcashDecodeBitcoin
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_BRCoreAddress_bcashDecodeBitcoin
   (JNIEnv *, jclass, jstring);
 
 /*
@@ -68,7 +68,7 @@ JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCoreAddress_bcashDecodeBit
  * Method:    bcashEncodeBitcoin
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_breadwallet_core_BRCoreAddress_bcashEncodeBitcoin
+JNIEXPORT jstring JNICALL Java_module_nrlwallet_core_BRCoreAddress_bcashEncodeBitcoin
   (JNIEnv *, jclass, jstring);
 
 #ifdef __cplusplus

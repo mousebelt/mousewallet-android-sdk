@@ -32,7 +32,7 @@
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumNetwork_jniGetMainnet
+Java_module_nrlwallet_core_ethereum_BREthereumNetwork_jniGetMainnet
         (JNIEnv *env, jclass thisClass) {
     return (jlong) ethereumMainnet;
 }
@@ -43,7 +43,7 @@ Java_com_breadwallet_core_ethereum_BREthereumNetwork_jniGetMainnet
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumNetwork_jniGetTestnet
+Java_module_nrlwallet_core_ethereum_BREthereumNetwork_jniGetTestnet
         (JNIEnv *env, jclass thisClass) {
     return (jlong) ethereumTestnet;
 }
@@ -54,7 +54,7 @@ Java_com_breadwallet_core_ethereum_BREthereumNetwork_jniGetTestnet
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_com_breadwallet_core_ethereum_BREthereumNetwork_jniGetRinkeby
+Java_module_nrlwallet_core_ethereum_BREthereumNetwork_jniGetRinkeby
         (JNIEnv *env, jclass thisClass) {
     return (jlong) ethereumRinkeby;
 }
