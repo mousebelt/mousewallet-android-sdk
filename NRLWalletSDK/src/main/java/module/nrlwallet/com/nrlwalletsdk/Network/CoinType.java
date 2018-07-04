@@ -10,6 +10,7 @@ public class CoinType {
     public static final int ZCASH           = 133;
     public static final int LISK            = 134;
     public static final int BITCOINCASH     = 145;
+    public static final int STELLAR         = 148;
     public static final int NEO             = 888;
 
     public final int coinType;

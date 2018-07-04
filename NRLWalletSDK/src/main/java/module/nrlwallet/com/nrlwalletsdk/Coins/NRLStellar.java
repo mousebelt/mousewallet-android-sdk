@@ -29,7 +29,7 @@ import okhttp3.Response;
 @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
 public class NRLStellar extends NRLCoin {
     Network network = Neo.MAIN_NET;
-    int coinType = 888;
+    int coinType = 148;
     String seedKey = "ed25519 seed";
     String curve = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
     byte[] bseed;
@@ -44,7 +44,7 @@ public class NRLStellar extends NRLCoin {
     OkHttpClient client = new OkHttpClient();
 
     public NRLStellar(byte[] bseed) {
-        super(bseed, Neo.MAIN_NET, 888, "ed25519 seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
+        super(bseed, Neo.MAIN_NET, 148, "ed25519 seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         this.bseed = bseed;
         this.init();
     }

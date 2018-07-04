@@ -4,20 +4,27 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 
 import org.bitcoinj.core.Address;
+import org.bitcoinj.core.BitcoinSerializer;
+import org.bitcoinj.core.Block;
 import org.bitcoinj.core.BlockChain;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.DumpedPrivateKey;
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.InsufficientMoneyException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.PeerGroup;
+import org.bitcoinj.core.StoredBlock;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.listeners.DownloadProgressTracker;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.net.discovery.DnsDiscovery;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
+import org.bitcoinj.store.BlockStore;
 import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.store.SPVBlockStore;
+import org.bitcoinj.utils.MonetaryFormat;
 import org.bitcoinj.wallet.DeterministicSeed;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.UnreadableWalletException;
@@ -39,6 +46,7 @@ import io.github.novacrypto.bip32.derivation.CkdFunctionDerive;
 import io.github.novacrypto.bip32.derivation.Derive;
 import io.github.novacrypto.bip32.networks.Bitcoin;
 import io.github.novacrypto.bip32.networks.Litecoin;
+import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
 import module.nrlwallet.com.nrlwalletsdk.Common.ValidationException;
@@ -85,9 +93,9 @@ public class NRLLite extends NRLCoin {
         super(seed, Litecoin.MAIN_NET, 2, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         str_seed = s_seed;
-//        createWallet();
+        createWallet();
 //        this.getData(seed);
-        this.init();
+//        this.init();
     }
 
     private void createWallet() {
@@ -97,7 +105,8 @@ public class NRLLite extends NRLCoin {
             DeterministicSeed seed = new DeterministicSeed(str_seed, null, "", creationtime);
             wallet = Wallet.fromSeed(params, seed);
             wallet.clearTransactions(0);
-            File chainFile = new File("lite");
+            File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
+
             if (chainFile.exists()) {
                 chainFile.delete();
             }
@@ -109,7 +118,6 @@ public class NRLLite extends NRLCoin {
             BlockChain chain = new BlockChain(params, chainStore);
             PeerGroup peerGroup = new PeerGroup(params, chain);
             peerGroup.addPeerDiscovery(new DnsDiscovery(params));
-
 
             // Now we need to hook the wallet up to the blockchain and the peers. This registers event listeners that notify our wallet about new transactions.
             chain.addWallet(wallet);
@@ -157,29 +165,26 @@ public class NRLLite extends NRLCoin {
     }
 
     private void init() {
-        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, network);
-        addressIndex = BIP44.m()
-                .purpose44()
-                .coinType(coinType)
-                .account(0)
-                .external()
-                .address(0);
-
-        this.walletAddress = root.derive(addressIndex, AddressIndex.DERIVATION)
+        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Litecoin.MAIN_NET);
+        walletAddress = root
+                .derive("m/44'/2'/0'/0/0")
                 .neuter().p2pkhAddress();
+        System.out.println(walletAddress);
 
-        Derive<Integer[]> derive = new CkdFunctionDerive<>(NRLLite::concat, new Integer[0]);
-        Integer[] actual = derive.derive(addressIndex, AddressIndex.DERIVATION);
+        Account account = BIP44.m().purpose44()
+                .coinType(2)
+                .account(0);
+        final ExtendedPublicKey accountKey = root.derive(account, Account.DERIVATION).neuter();
 
-        this.rootKey = new ExtendedPrivateKeyBIP32().getRootKey(bSeed, CoinType.LITECOIN);
-        ExtendedPrivateKey privateKey;
-        privateKey = ExtendedPrivateKey.fromSeed(bSeed, Litecoin.MAIN_NET);
-        ExtendedPrivateKey child = privateKey.derive("m/44'/2'/0'/0");
-        ExtendedPublicKey childPub = child.neuter();
-        extendedPrivateKey = child.extendedBase58();   //Extended Private Key
-        extendedPublicKey = childPub.extendedBase58();    //Extended Public Key
-        walletAddress = childPub.p2pkhAddress();
-        String str4 = childPub.p2shAddress();
+        final ExtendedPrivateKey privateKey = root.derive("m/44'/2'/0'");
+        extendedPrivateKey = privateKey.extendedBase58();
+
+        extendedPublicKey = accountKey.extendedBase58();
+        System.out.println(extendedPublicKey);
+
+//        Derive<Integer[]> derive = new CkdFunctionDerive<>(NRLLite::concat, new Integer[0]);
+//        Integer[] actual = derive.derive(addressIndex, AddressIndex.DERIVATION);
+
 //        this.getTransactionCount();
     }
 

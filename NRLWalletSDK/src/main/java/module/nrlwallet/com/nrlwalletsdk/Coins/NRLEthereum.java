@@ -1,15 +1,14 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
-import org.eclipse.jetty.util.security.Credential;
+import org.bitcoinj.core.ECKey;
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
-import org.web3j.crypto.WalletUtils;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.Web3jFactory;
+import org.web3j.crypto.WalletFile;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -19,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
+import io.github.novacrypto.bip32.networks.Bitcoin;
 import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
@@ -27,12 +27,8 @@ import module.nrlwallet.com.nrlwalletsdk.Network.Ethereum;
 import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
-import module.nrlwallet.core.BRCoreChainParams;
+import module.nrlwallet.core.BRCoreKey;
 import module.nrlwallet.core.BRCoreMasterPubKey;
-import module.nrlwallet.core.BRCoreWallet;
-import module.nrlwallet.core.BRCoreWalletManager;
-import module.nrlwallet.core.ethereum.BREthereumLightNode;
-import module.nrlwallet.core.ethereum.BREthereumWallet;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -54,12 +50,16 @@ public class NRLEthereum extends NRLCoin {
     int count = 0;
     ExtendedPrivateKey privateKey;
     JSONArray transactions = new JSONArray();
-    BREthereumLightNode.JSON_RPC node;
 
     public NRLEthereum(byte[] seed) {
         super(seed, Ethereum.MAIN_NET, 60, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         this.init();
+    }
+
+    private void test() {
+
+
     }
 
     private void init() {
@@ -148,10 +148,11 @@ public class NRLEthereum extends NRLCoin {
                         JSONObject jsonObj = new JSONObject(result);
                         String msg = jsonObj.get("msg").toString();
                         if(msg.equals("success")) {
-                            JSONArray balances = jsonObj.getJSONArray("data");
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            JSONArray balances = data.getJSONArray("balance");
                             for(int i = 0; i < balances.length(); i++) {
                                 JSONObject obj = balances.getJSONObject(i);
-                                String ticker = obj.getString("symbol");
+                                String ticker = obj.getString("ticker");
                                 if(ticker.equals("ETH")){
                                     balance = obj.getString("balance");
                                     callback.onResponse(balance);
