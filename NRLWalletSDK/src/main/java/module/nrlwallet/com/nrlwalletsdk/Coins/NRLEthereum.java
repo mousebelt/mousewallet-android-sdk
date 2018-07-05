@@ -48,6 +48,7 @@ public class NRLEthereum extends NRLCoin {
     Network network = Ethereum.MAIN_NET;
     int coinType = 60;
     String seedKey = "Bitcoin seed";
+    String Mnemonic = "";
     String curve = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
     byte[] bSeed;
     String rootKey;
@@ -60,9 +61,10 @@ public class NRLEthereum extends NRLCoin {
     ExtendedPrivateKey privateKey;
     JSONArray transactions = new JSONArray();
 
-    public NRLEthereum(byte[] seed) {
+    public NRLEthereum(byte[] seed, String strMnemonic) {
         super(seed, Ethereum.MAIN_NET, 60, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
+        Mnemonic = strMnemonic;
 //        this.init();
         this.createAddress();
     }
@@ -70,7 +72,7 @@ public class NRLEthereum extends NRLCoin {
     private void createAddress() {
         DeterministicSeed seed = null;
         try {
-            seed = new DeterministicSeed("tone absurd popular virus fatal possible skirt local head open siren damp", null, "", 1409478661L);
+            seed = new DeterministicSeed(Mnemonic, null, "", 1409478661L);
             DeterministicKeyChain chain = DeterministicKeyChain.builder().seed(seed).build();
             List<ChildNumber> keyPath = HDUtils.parsePath("M/44H/60H/0H/0/0");
             DeterministicKey key = chain.getKeyByPath(keyPath, true);
@@ -135,6 +137,9 @@ public class NRLEthereum extends NRLCoin {
         this.checkTransactions(callback);
     }
 
+    public void getGasPrice() {
+
+    }
     private void getTransactionCount() {
         this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
         String url_getbalance = url_server + "/address/gettransactioncount/" + this.walletAddress;
@@ -243,7 +248,14 @@ public class NRLEthereum extends NRLCoin {
     }
 
     public void createTransaction(String amount, String address, String memo, long fee) {
-
+//////// PLEASE MAKE GASEPRICE
+//        tx = try EthereumTransaction(
+//                nonce: EthereumQuantity(quantity: BigUInt(nonce)),
+//        gasPrice: EthereumQuantity(quantity: BigUInt(fee)),
+//        gas: EthereumQuantity(quantity: BigUInt(ethereumGasAmount)),
+//        to: EthereumAddress(hex: to, eip55: false),
+//        value: EthereumQuantity(quantity: BigUInt(value))
+//)
         BigInteger nonce = BigInteger.valueOf(this.count);
         BigInteger gas_price = BigInteger.valueOf(fee);
         //nonce, <gas price>, <gas limit>, <toAddress>, <value>

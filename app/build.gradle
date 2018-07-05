@@ -4,7 +4,7 @@ android {
     compileSdkVersion 25
     defaultConfig {
         applicationId "module.nrlwallet.com.sdktest"
-        minSdkVersion 25
+        minSdkVersion 22
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
@@ -13,13 +13,13 @@ android {
         ndk {
             // Specifies the ABI configurations of your native
             // libraries Gradle should build and package with your APK.
-            abiFilters 'x86', 'x86_64'
+            abiFilters 'x86', 'x86_64', 'armeabi-v7a'
         }
-        externalNativeBuild {
-            cmake {
-                arguments '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=gnustl_static'
-            }
-        }
+//        externalNativeBuild {
+//            cmake {
+//                arguments '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=gnustl_static'
+//            }
+//        }
     }
     buildTypes {
         release {

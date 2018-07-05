@@ -28,11 +28,11 @@ public class MainActivity extends Activity {
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
         strMnemonic = "tone absurd popular virus fatal possible skirt local head open siren damp";//sb.toString();
 
-        this.getEthereumWallet(strMnemonic);//okkkk
-        this.getLitecoinWallet(strMnemonic);//okkkk
+//        this.getEthereumWallet(strMnemonic);//okkkk
+//        this.getLitecoinWallet(strMnemonic);//okkkk
         this.getBitcoinWallet(strMnemonic);//okkkk
-        this.getNeoWallet(strMnemonic);//okkkkk
-        this.getStellarWallet(strMnemonic);//okkkk
+//        this.getNeoWallet(strMnemonic);//okkkkk
+//        this.getStellarWallet(strMnemonic);//okkkk
     }
 
     private void getEthereumWallet(String strMnemonic) {
@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
         byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
-        NRLEthereum nrlEthereum = new NRLEthereum(bseed);
+        NRLEthereum nrlEthereum = new NRLEthereum(bseed, strMnemonic);
         String ethRootKey = nrlEthereum.getRootKey();
         String ethPrivateKey = nrlEthereum.getPrivateKey();
         String ethAddress = nrlEthereum.getAddress();
@@ -237,6 +237,22 @@ public class MainActivity extends Activity {
             }
         });
         nrlStellar.getTransactions(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
+        nrlStellar.getOperation(new NRLCallback() {
             @Override
             public void onFailure(Throwable t) {
 
