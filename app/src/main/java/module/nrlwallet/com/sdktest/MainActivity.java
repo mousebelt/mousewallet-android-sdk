@@ -26,7 +26,9 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         StringBuilder sb = new StringBuilder();
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
-        strMnemonic = "tone absurd popular virus fatal possible skirt local head open siren damp";//sb.toString();
+//        strMnemonic = "tone absurd popular virus fatal possible skirt local head open siren damp";//sb.toString();
+        strMnemonic = "cost alpha light gravity result unique multiply stadium fitness catalog diesel beauty";//sb.toString();
+//        strMnemonic = "tape have dawn eagle ginger wagon couple sunset okay gentle curve put";//sb.toString();
 
 //        this.getEthereumWallet(strMnemonic);//okkkk
 //        this.getLitecoinWallet(strMnemonic);//okkkk
@@ -134,7 +136,7 @@ public class MainActivity extends Activity {
         byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
-        NRLBitcoin nrlBitcoin = new NRLBitcoin(bseed);
+        NRLBitcoin nrlBitcoin = new NRLBitcoin(bseed, strMnemonic);
         String btcPrivateKey = nrlBitcoin.getPrivateKey();
         String btcAddress = nrlBitcoin.getAddress();
         String btcBalance = nrlBitcoin.getBalance();

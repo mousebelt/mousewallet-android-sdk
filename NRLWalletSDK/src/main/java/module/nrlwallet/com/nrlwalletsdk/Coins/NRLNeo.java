@@ -74,19 +74,25 @@ public class NRLNeo extends NRLCoin {
             sha512_HMAC.init(keySpec);
             byte [] mac_data = sha512_HMAC.doFinal(buf);
             byte[] slice = Arrays.copyOfRange(mac_data, 0, 32);
-
-
-
             this.privateKey = Neoutils.bytesToHex(slice);
 
             neoWallet = Neoutils.generateFromPrivateKey(this.privateKey);
             walletAddress = neoWallet.getAddress();
             Boolean isValid = Neoutils.validateNEOAddress(walletAddress);
-            SecretKeySpec keySpec1 = new SecretKeySpec(b_seedkey, HMAC_SHA512);
-            sha512_HMAC.init(keySpec1);
-            byte [] mac_data1 = sha512_HMAC.doFinal(b_path);
-            byte[] slice1 = Arrays.copyOfRange(mac_data1, 0, 32);
-            String b1 = Neoutils.bytesToHex(slice1);
+
+
+//            SecretKeySpec keySpec1 = new SecretKeySpec(bseed, HMAC_SHA512);
+//            sha512_HMAC.init(keySpec1);
+//            byte [] mac_data1 = sha512_HMAC.doFinal(b_path);
+//            byte[] slice1 = Arrays.copyOfRange(mac_data1, 32, 64);
+//            String b1 = Neoutils.bytesToHex(slice1);
+//            neoWallet = Neoutils.generateFromPrivateKey(b1);
+//            walletAddress = neoWallet.getAddress();
+
+
+
+
+
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (InvalidKeyException e) {
@@ -114,7 +120,7 @@ public class NRLNeo extends NRLCoin {
     }
 
     private void checkBalance(NRLCallback callback) {
-        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
+//        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
         String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -158,7 +164,7 @@ public class NRLNeo extends NRLCoin {
 
     private void checkTransactions(NRLCallback callback) {
         //AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf
-        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
+//        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override

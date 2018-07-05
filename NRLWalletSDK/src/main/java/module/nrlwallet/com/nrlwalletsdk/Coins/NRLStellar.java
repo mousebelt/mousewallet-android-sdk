@@ -78,7 +78,7 @@ public class NRLStellar extends NRLCoin {
     }
 
     private void checkBalance(NRLCallback callback) {
-        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
+//        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
         String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -121,7 +121,7 @@ public class NRLStellar extends NRLCoin {
     }
 
     private void checkTransactions(NRLCallback callback) {
-        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
+//        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
@@ -154,7 +154,7 @@ public class NRLStellar extends NRLCoin {
     }
 
     public void getOperation(NRLCallback callback) {
-        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
+//        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
         String url_getTransaction = url_server + "/address/payments/" + this.walletAddress;
 
         new HTTPRequest().run(url_getTransaction, new Callback() {

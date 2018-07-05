@@ -41,6 +41,7 @@ public class NRLBitcoin extends NRLCoin {
     String seedKey = "Bitcoin seed";
     String curve = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
     byte[] bSeed;
+    String mNemonic;
     String rootKey;
     AddressIndex addressIndex;
     String extendedPrivateKey;
@@ -66,12 +67,12 @@ public class NRLBitcoin extends NRLCoin {
     private int[] list;
     BRCoreKey brCoreKey;
 
-    public NRLBitcoin(byte[] seed) {
+    public NRLBitcoin(byte[] seed, String mnemonic) {
 
         super(seed, Bitcoin.MAIN_NET, 0, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
 
         bSeed = seed;
-
+        mNemonic = mnemonic;
         this.createWallet();
     }
 
@@ -143,21 +144,24 @@ public class NRLBitcoin extends NRLCoin {
     }
 
     private void createWallet() {
-        String mnemonic = "tone absurd popular virus fatal possible skirt local head open siren damp";
-        BRCoreMasterPubKey pubKey = new BRCoreMasterPubKey("tone absurd popular virus fatal possible skirt local head open siren damp".getBytes(), true);
+        BRCoreMasterPubKey pubKey = new BRCoreMasterPubKey(mNemonic.getBytes(), true);
 
-        BRCoreChainParams chainParams = BRCoreChainParams.mainnetChainParams;
+        BRCoreChainParams chainParams = BRCoreChainParams.mainnetChainParams;//mainnetChainParams;
         double createTime = System.currentTimeMillis();
 
         manager = new BRCoreWalletManager(pubKey, chainParams, createTime);
         wallet = manager.getWallet();
         if(wallet.getReceiveAddress().isValid()) {
+//            BRCoreAddress[] addressed = wallet.getAllAddresses();
+//            for(int i = 0; i < addressed.length; i ++) {
+//                System.out.println("************----------- btc address -----   : " + addressed[i].stringify());
+//            }
             walletAddress = wallet.getReceiveAddress().stringify();
         } else {
         }
         manager.getPeerManager().connect();
         try {
-            Thread.sleep (1 * 1000);
+            Thread.sleep (10 * 1000);
             System.err.println ("Retry");
             manager.getPeerManager().disconnect();
             manager.getPeerManager().connect();
