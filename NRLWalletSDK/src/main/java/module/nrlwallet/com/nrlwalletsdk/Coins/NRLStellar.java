@@ -28,7 +28,7 @@ import okhttp3.Response;
 
 @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
 public class NRLStellar extends NRLCoin {
-    String url_server = "http://18.205.122.159:2000/api/v1";
+    String url_server = "http://18.205.122.159:80/api/v1";
     Network network = Neo.MAIN_NET;
     int coinType = 148;
     String seedKey = "ed25519 seed";
@@ -155,7 +155,7 @@ public class NRLStellar extends NRLCoin {
 
     public void getOperation(NRLCallback callback) {
         this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
-        String url_getTransaction = url_server + "/account/payments/" + this.walletAddress;
+        String url_getTransaction = url_server + "/address/payments/" + this.walletAddress;
 
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override

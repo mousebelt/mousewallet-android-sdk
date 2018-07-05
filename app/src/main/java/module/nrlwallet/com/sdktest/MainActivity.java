@@ -30,9 +30,9 @@ public class MainActivity extends Activity {
 
 //        this.getEthereumWallet(strMnemonic);//okkkk
 //        this.getLitecoinWallet(strMnemonic);//okkkk
-        this.getBitcoinWallet(strMnemonic);//okkkk
+//        this.getBitcoinWallet(strMnemonic);//okkkk
 //        this.getNeoWallet(strMnemonic);//okkkkk
-//        this.getStellarWallet(strMnemonic);//okkkk
+        this.getStellarWallet(strMnemonic);//okkkk
     }
 
     private void getEthereumWallet(String strMnemonic) {
