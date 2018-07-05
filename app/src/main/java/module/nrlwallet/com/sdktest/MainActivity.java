@@ -28,11 +28,11 @@ public class MainActivity extends Activity {
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
         strMnemonic = "tone absurd popular virus fatal possible skirt local head open siren damp";//sb.toString();
 
-//        this.getEthereumWallet(strMnemonic);//ok
-        this.getLitecoinWallet(strMnemonic);//ok
-//        this.getBitcoinWallet(strMnemonic);//okkkk
-//        this.getNeoWallet(strMnemonic);//okkkk
-//        this.getStellarWallet(strMnemonic);//okk
+        this.getEthereumWallet(strMnemonic);//okkkk
+        this.getLitecoinWallet(strMnemonic);//okkkk
+        this.getBitcoinWallet(strMnemonic);//okkkk
+        this.getNeoWallet(strMnemonic);//okkkkk
+        this.getStellarWallet(strMnemonic);//okkkk
     }
 
     private void getEthereumWallet(String strMnemonic) {
@@ -138,7 +138,22 @@ public class MainActivity extends Activity {
         String btcPrivateKey = nrlBitcoin.getPrivateKey();
         String btcAddress = nrlBitcoin.getAddress();
         String btcBalance = nrlBitcoin.getBalance();
-        JSONArray jsonArray = nrlBitcoin.getTransctions();
+        nrlBitcoin.getTransctions(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
         System.out.println("************----------- Mnemonic : " + strMnemonic);
         System.out.println("************----------- Seed : " + seed);
         System.out.println("************----------- BTC Private Key : " + btcPrivateKey);
@@ -157,6 +172,39 @@ public class MainActivity extends Activity {
         System.out.println("************----------- Seed : " + seed);
         System.out.println("************----------- Lite Private Key : " + stlPrivateKey);
         System.out.println("************----------- Lite address     : " + stlAddress);
+        nrlLite.getBalance(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
+
+        nrlLite.getTransactions(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
 
 //        nrlLite.createTransaction(1, "LZSTRc6imhZLuz9aDQs8GTrLw3cjBHSMzJ", "", (long) 0.01);
     }

@@ -64,7 +64,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class NRLLite extends NRLCoin {
-
+    String url_server = "http://34.239.180.150/api/v1";
     Network network = Bitcoin.MAIN_NET;
     int coinType = 2;
     String seedKey = "Bitcoin seed";
@@ -93,9 +93,9 @@ public class NRLLite extends NRLCoin {
         super(seed, Litecoin.MAIN_NET, 2, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         str_seed = s_seed;
+        this.init();
         createWallet();
 //        this.getData(seed);
-//        this.init();
     }
 
     private void createWallet() {
@@ -103,6 +103,8 @@ public class NRLLite extends NRLCoin {
         NetworkParameters params = MainNetParams.get();
         try {
             DeterministicSeed seed = new DeterministicSeed(str_seed, null, "", creationtime);
+
+
             wallet = Wallet.fromSeed(params, seed);
             wallet.clearTransactions(0);
             File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
@@ -145,25 +147,6 @@ public class NRLLite extends NRLCoin {
         }
     }
 
-    private void getData(byte[] bSeed) {
-        try {
-            ExtendedKey m = ExtendedKey.create(bSeed);
-            // Derive account based on BIP44
-            ExtendedKey ka = module.nrlwallet.com.nrlwalletsdk.Utils.BIP44.getKeyType(m, coinType, 0, 0);
-
-            // Print first 5 addresses of the first account.
-            for (int i = 0; i < 1; i++) {
-                ExtendedKey ck = ka.getChild(i);
-                String addr = ck.getAddress();
-                Wif = WIF.getWif(ck.getMaster());
-                System.out.println("acct 0 ,idx:" + i + " ,addr:" + addr + " ,wif:" + Wif);
-            }
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
-
-    }
-
     private void init() {
         ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Litecoin.MAIN_NET);
         walletAddress = root
@@ -198,7 +181,8 @@ public class NRLLite extends NRLCoin {
     }
 
     private void getTransactionCount() {
-        String url_getbalance = "/address/gettransactioncount/" + this.walletAddress;
+        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
+        String url_getbalance = url_server + "/address/gettransactioncount/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -247,7 +231,8 @@ public class NRLLite extends NRLCoin {
         return integers;
     }
     public void checkBalance(NRLCallback callback) {
-        String url_getbalance = "/balance/" + this.walletAddress;
+        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
+        String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -279,7 +264,8 @@ public class NRLLite extends NRLCoin {
     }
 
     private void checkTransactions(NRLCallback callback) {
-        String url_getTransaction = "/address/txs/" + this.walletAddress;
+        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
+        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

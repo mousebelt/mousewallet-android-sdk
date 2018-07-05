@@ -22,6 +22,7 @@ import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Base58Encode;
+import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import module.nrlwallet.core.BRCoreAddress;
 import module.nrlwallet.core.BRCoreChainParams;
 import module.nrlwallet.core.BRCoreKey;
@@ -71,8 +72,7 @@ public class NRLBitcoin extends NRLCoin {
 
         bSeed = seed;
 
-//        this.test();
-        this.createWallet1();
+        this.createWallet();
     }
 
     private void test() {
@@ -263,7 +263,7 @@ public class NRLBitcoin extends NRLCoin {
         return arr_address;
     }
 
-    public JSONArray getTransctions() {
+    public void getTransctions(NRLCallback callback) {
         JSONArray jsonArray = new JSONArray();
         BRCoreTransaction[] transactions = manager.getWallet().getTransactions();
         for (BRCoreTransaction transaction : wallet.getTransactions()) {
@@ -276,10 +276,11 @@ public class NRLBitcoin extends NRLCoin {
                 object.put("output_address", transaction.getOutputAddresses()); //[string]
             } catch (JSONException e) {
                 e.printStackTrace();
+                callback.onFailure(e);
             }
             jsonArray.put(object);
         }
-        return jsonArray;
+        callback.onResponseArray(jsonArray);
     }
 
     public String getBalance() {

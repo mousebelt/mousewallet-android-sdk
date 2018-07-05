@@ -15,11 +15,11 @@ import okhttp3.Response;
 
 public class HTTPRequest {
     OkHttpClient client = new OkHttpClient();
-    String urlServer = "http://54.152.5.218/api/v1";
+
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public Call run(String url_path, Callback callback) {
-        String url = urlServer + url_path;
+        String url = url_path;
         Request request = new Request.Builder()
                 .url(url)
                 .get()
@@ -31,7 +31,7 @@ public class HTTPRequest {
     }
 
     public Call run(String url_path, RequestBody formBody, Callback callback) {
-        String url = urlServer + url_path;
+        String url = url_path;
 
         Request request = new Request.Builder()
                 .url(url)
