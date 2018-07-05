@@ -11,13 +11,13 @@ public class NRLWallet {
     public NRLWallet(byte[] Seed, int coinType){
         switch (coinType){
             case CoinType.ETHEREUM:
-                this.coin = new NRLEthereum(Seed);
+//                this.coin = new NRLEthereum(Seed);
                 break;
             case CoinType.NEO:
-                this.coin = new NRLNeo(Seed);
+//                this.coin = new NRLNeo(Seed);
                 break;
             default:
-                this.coin = new NRLEthereum(Seed);
+//                this.coin = new NRLEthereum(Seed);
         }
     }
 

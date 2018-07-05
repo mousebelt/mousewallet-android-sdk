@@ -28,7 +28,7 @@ import okhttp3.Response;
 
 @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
 public class NRLStellar extends NRLCoin {
-    String url_server = " http://18.205.122.159:2000/api/v1";
+    String url_server = "http://18.205.122.159:2000/api/v1";
     Network network = Neo.MAIN_NET;
     int coinType = 148;
     String seedKey = "ed25519 seed";
@@ -42,6 +42,7 @@ public class NRLStellar extends NRLCoin {
     Account account;
     String balance = "0";
     JSONArray transactions = new JSONArray();
+    JSONArray operations = new JSONArray();
     OkHttpClient client = new OkHttpClient();
 
     public NRLStellar(byte[] bseed) {
@@ -140,6 +141,40 @@ public class NRLStellar extends NRLCoin {
                             JSONObject data = jsonObj.getJSONObject("data");
                             transactions = data.getJSONArray("result");
                             callback.onResponseArray(transactions);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    // Do what you want to do with the response.
+                } else {
+                    // Request not successful
+                }
+            }
+        });
+    }
+
+    public void getOperation(NRLCallback callback) {
+        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
+        String url_getTransaction = url_server + "/account/payments/" + this.walletAddress;
+
+        new HTTPRequest().run(url_getTransaction, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String body =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(body);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            operations = data.getJSONArray("result");
+                            callback.onResponseArray(operations);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
