@@ -26,13 +26,13 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         StringBuilder sb = new StringBuilder();
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
-        strMnemonic = sb.toString();
+        strMnemonic = "tone absurd popular virus fatal possible skirt local head open siren damp";//sb.toString();
 
-        this.getEthereumWallet(strMnemonic);//ok
-//        this.getLitecoinWallet(strMnemonic);//ok
-//        this.getBitcoinWallet(strMnemonic);//okkkk
-//        this.getNeoWallet(strMnemonic);//okkkk
-//        this.getStellarWallet(strMnemonic);//okk
+        this.getEthereumWallet(strMnemonic);//okkkk
+        this.getLitecoinWallet(strMnemonic);//okkkk
+        this.getBitcoinWallet(strMnemonic);//okkkk
+        this.getNeoWallet(strMnemonic);//okkkkk
+        this.getStellarWallet(strMnemonic);//okkkk
     }
 
     private void getEthereumWallet(String strMnemonic) {
@@ -134,30 +134,79 @@ public class MainActivity extends Activity {
         byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
-        NRLBitcoin nrlBitcoin = new NRLBitcoin(bseed, strMnemonic);
+        NRLBitcoin nrlBitcoin = new NRLBitcoin(bseed);
         String btcPrivateKey = nrlBitcoin.getPrivateKey();
         String btcAddress = nrlBitcoin.getAddress();
         String btcBalance = nrlBitcoin.getBalance();
-        JSONArray jsonArray = nrlBitcoin.getTransctions();
+        nrlBitcoin.getTransctions(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
         System.out.println("************----------- Mnemonic : " + strMnemonic);
         System.out.println("************----------- Seed : " + seed);
         System.out.println("************----------- BTC Private Key : " + btcPrivateKey);
         System.out.println("************----------- BTC address     : " + btcAddress);
-        System.out.println("************----------- BTC balance     : " + nrlBitcoin.getBalance());
+        System.out.println("************----------- BTC balance     : " + btcBalance);
     }
     private void getLitecoinWallet(String strMnemonic) {
 
         byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
-        NRLLite nrlLite = new NRLLite(bseed);
+        NRLLite nrlLite = new NRLLite(bseed, strMnemonic);
         String stlPrivateKey = nrlLite.getPrivateKey();
         String stlAddress = nrlLite.getAddress();
         System.out.println("************----------- Mnemonic : " + strMnemonic);
         System.out.println("************----------- Seed : " + seed);
         System.out.println("************----------- Lite Private Key : " + stlPrivateKey);
         System.out.println("************----------- Lite address     : " + stlAddress);
+        nrlLite.getBalance(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
 
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
+
+        nrlLite.getTransactions(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
+
+//        nrlLite.createTransaction(1, "LZSTRc6imhZLuz9aDQs8GTrLw3cjBHSMzJ", "", (long) 0.01);
     }
 
     private void getStellarWallet(String strMnemonic) {
@@ -172,5 +221,36 @@ public class MainActivity extends Activity {
         System.out.println("************----------- Stellar Private Key : " + stlPrivateKey);
         System.out.println("************----------- Stellar address     : " + stlAddress);
 
+        nrlStellar.getBalance(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+            @Override
+            public void onResponse(String response) {
+                System.out.println("************----------- NEO Balance     : " + response);
+
+            }
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
+        nrlStellar.getTransactions(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
     }
 }

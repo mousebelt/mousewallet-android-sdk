@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 
 import io.github.novacrypto.bip32.Network;
 import module.nrlwallet.com.nrlwalletsdk.Network.Neo;
@@ -29,8 +28,9 @@ import okhttp3.Response;
 
 @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
 public class NRLStellar extends NRLCoin {
+    String url_server = " http://18.205.122.159:2000/api/v1";
     Network network = Neo.MAIN_NET;
-    int coinType = 888;
+    int coinType = 148;
     String seedKey = "ed25519 seed";
     String curve = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
     byte[] bseed;
@@ -45,7 +45,7 @@ public class NRLStellar extends NRLCoin {
     OkHttpClient client = new OkHttpClient();
 
     public NRLStellar(byte[] bseed) {
-        super(bseed, Neo.MAIN_NET, 888, "ed25519 seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
+        super(bseed, Neo.MAIN_NET, 148, "ed25519 seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         this.bseed = bseed;
         this.init();
     }
@@ -77,7 +77,8 @@ public class NRLStellar extends NRLCoin {
     }
 
     private void checkBalance(NRLCallback callback) {
-        String url_getbalance = "/balance/" + this.walletAddress;
+        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
+        String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -93,21 +94,22 @@ public class NRLStellar extends NRLCoin {
                         JSONObject jsonObj = new JSONObject(result);
                         String msg = jsonObj.get("msg").toString();
                         if(msg.equals("success")) {
-                            JSONObject data = jsonObj.getJSONObject("data");
-                            JSONArray balances = data.getJSONArray("balance");
-                            for(int i = 0; i < balances.length(); i++) {
-                                JSONObject obj = balances.getJSONObject(i);
+                            JSONArray data = jsonObj.getJSONArray("data");
+                            for(int i = 0; i < data.length(); i++) {
+                                JSONObject obj = data.getJSONObject(i);
                                 String ticker = obj.getString("asset_type");
                                 if(ticker.equals("native")){
-                                    balance = obj.getString("value");
+                                    balance = obj.getString("balance");
                                     callback.onResponse(balance);
                                     return;
                                 }
                             }
-
+                        } else {
+                            callback.onResponse(msg);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        callback.onFailure(e);
                     }
                     // Do what you want to do with the response.
                 } else {
@@ -118,7 +120,8 @@ public class NRLStellar extends NRLCoin {
     }
 
     private void checkTransactions(NRLCallback callback) {
-        String url_getTransaction = "/address/txs/" + this.walletAddress;
+        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
+        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

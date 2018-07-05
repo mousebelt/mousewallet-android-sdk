@@ -35,6 +35,7 @@ import okhttp3.Response;
 
 @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
 public class NRLNeo extends NRLCoin {
+    String url_server = "http://54.152.5.218/api/v1";
 
     Network network = Neo.MAIN_NET;
     int coinType = 888;
@@ -113,8 +114,8 @@ public class NRLNeo extends NRLCoin {
     }
 
     private void checkBalance(NRLCallback callback) {
-        this.walletAddress = "AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf";
-        String url_getbalance = "/balance/" + this.walletAddress;
+        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
+        String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -157,8 +158,8 @@ public class NRLNeo extends NRLCoin {
 
     private void checkTransactions(NRLCallback callback) {
         //AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf
-        this.walletAddress = "AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf";
-        String url_getTransaction = "/address/txs/" + this.walletAddress;
+        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
+        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

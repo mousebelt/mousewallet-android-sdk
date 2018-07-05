@@ -39,10 +39,6 @@ public class NRLCoin {
         this.Curve = curve;
     }
 
-//    public NRLCoin(List<Integer> expected, String path) {
-//
-//    }
-
     //should be overrided
     void generateAddress() {
 

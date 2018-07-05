@@ -2,22 +2,27 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.math.BigDecimal;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
+import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip32.networks.Bitcoin;
+import io.github.novacrypto.bip32.networks.Litecoin;
+import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
+import io.github.novacrypto.bip44.BIP44;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Base58Encode;
+import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import module.nrlwallet.core.BRCoreAddress;
 import module.nrlwallet.core.BRCoreChainParams;
 import module.nrlwallet.core.BRCoreKey;
@@ -40,11 +45,12 @@ public class NRLBitcoin extends NRLCoin {
     AddressIndex addressIndex;
     String extendedPrivateKey;
     String extendedPublicKey;
+    String walletAddress1;
     String walletAddress;
     String privateKey;
-    String Mnemonic;
     BRCoreWalletManager manager;
     BRCoreWallet wallet;
+    BRCorePeerManager brCorePeerManager;
     long balance;
     private Executor listenerExecutor = Executors.newSingleThreadExecutor();
 
@@ -58,22 +64,69 @@ public class NRLBitcoin extends NRLCoin {
     private List<Integer> expected;
     private String path;
     private int[] list;
+    BRCoreKey brCoreKey;
 
-    public NRLBitcoin(byte[] seed, String mnemonic) {
+    public NRLBitcoin(byte[] seed) {
 
         super(seed, Bitcoin.MAIN_NET, 0, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
-        bSeed = seed;
-        Mnemonic = mnemonic;
 
-        this.createWallet1();
+        bSeed = seed;
+
+        this.createWallet();
+    }
+
+    private void test() {
+        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Bitcoin.MAIN_NET);
+        String DerivedAddress = root
+                .derive("m/44'/0'/0'/0/0")
+                .neuter().p2pkhAddress();
+        System.out.println(DerivedAddress);
+        root.derive("m/44'/0'/0'/0/0");
+
+        Account account = BIP44.m().purpose44()
+                        .coinType(0)
+                        .account(0);
+        final ExtendedPublicKey accountKey = root.derive(account, Account.DERIVATION).neuter();
+
+        final ExtendedPrivateKey privateKey = root.derive("m/44'/0'/0'");
+        String AccountExtendedPrivateKeyString = privateKey.extendedBase58();
+        System.out.println(AccountExtendedPrivateKeyString);
+
+        String AccountExtendedPublicKeyString = accountKey.extendedBase58();
+        System.out.println(AccountExtendedPublicKeyString);
+
     }
     private void createWallet1() {
+
+//        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Bitcoin.MAIN_NET);
+//        String DerivedAddress = root
+//                .derive("m/44'/0'/0'/0/0")
+//                .neuter().p2pkhAddress();
+//        System.out.println(DerivedAddress);
+//        try {
+//            byte[] tmp = new BRCoreMasterPubKey("tone absurd popular virus fatal possible skirt local head open siren damp".getBytes("UTF-8"), true).serialize();
+//
+//            BRCoreMasterPubKey brCoreMasterPubKey = new BRCoreMasterPubKey(tmp, true);
+//            walletAddress1 = brCoreMasterPubKey.getPubKeyAsCoreKey().address();
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+////        BRCoreKey k = new BRCoreKey(tmp, false);
+////        BRCoreAddress addr = new BRCoreAddress(DerivedAddress);
+////        walletAddress1 = addr.stringify();
+//
+//        BRCoreMasterPubKey brCoreMasterPubKey = new BRCoreMasterPubKey("tone absurd popular virus fatal possible skirt local head open siren damp".getBytes(), true);
+//        String address1 = brCoreMasterPubKey.getPubKeyAsCoreKey().address();
+
         BRCoreMasterPubKey brCoreMasterPubKey = new BRCoreMasterPubKey(bSeed, true);
+        String address = brCoreMasterPubKey.getPubKeyAsCoreKey().address();
+
         BRCoreWallet.Listener walletListener = getWalletListener();
+        brCoreKey = brCoreMasterPubKey.getPubKeyAsCoreKey();
         wallet = createWallet(new BRCoreTransaction[]{}, brCoreMasterPubKey, walletListener);
         createListener();
         balance = wallet.getBalance();
-        walletAddress = wallet.getReceiveAddress().stringify();
+        walletAddress1 = wallet.getReceiveAddress().stringify();
         privateKey = brCoreMasterPubKey.getPubKeyAsCoreKey().getPrivKey();
     }
 
@@ -90,16 +143,38 @@ public class NRLBitcoin extends NRLCoin {
     }
 
     private void createWallet() {
-        BRCoreMasterPubKey brCoreMasterPubKey = new BRCoreMasterPubKey(bSeed, true);
-        BRCoreChainParams chainParams = BRCoreChainParams.testnetChainParams;
+        String mnemonic = "tone absurd popular virus fatal possible skirt local head open siren damp";
+        BRCoreMasterPubKey pubKey = new BRCoreMasterPubKey("tone absurd popular virus fatal possible skirt local head open siren damp".getBytes(), true);
+
+        BRCoreChainParams chainParams = BRCoreChainParams.mainnetChainParams;
         double createTime = System.currentTimeMillis();
-        manager = new BRCoreWalletManager(brCoreMasterPubKey, chainParams, createTime);
-        createListener();
+
+        manager = new BRCoreWalletManager(pubKey, chainParams, createTime);
+        wallet = manager.getWallet();
+        if(wallet.getReceiveAddress().isValid()) {
+            walletAddress = wallet.getReceiveAddress().stringify();
+        } else {
+        }
+        manager.getPeerManager().connect();
+        try {
+            Thread.sleep (1 * 1000);
+            System.err.println ("Retry");
+            manager.getPeerManager().disconnect();
+            manager.getPeerManager().connect();
+            manager.getPeerManager().rescan();
+
+//            Thread.sleep(3 * 60 * 1000);
+            System.err.println("Times Up - Done");
+
+            Thread.sleep(2 * 1000);
+        } catch (InterruptedException ex) {
+            System.err.println("Interrupted - Done");
+        }
+        manager.getPeerManager().disconnect();
+        System.gc();
+
+//        createListener();
 //        manager.syncStarted();
-        BRCoreWallet wallet = manager.getWallet();
-        walletAddress = brCoreMasterPubKey.getPubKeyAsCoreKey().address();
-        byte[] pubKey = new BRCoreMasterPubKey(bSeed, true).serialize();
-        extendedPublicKey = Base58Encode.encode(pubKey);
         balance = wallet.getBalance();
     }
 
@@ -141,7 +216,7 @@ public class NRLBitcoin extends NRLCoin {
 
             }
         };
-        BRCorePeerManager brCorePeerManager = new BRCorePeerManager(
+        brCorePeerManager = new BRCorePeerManager(
                 BRCoreChainParams.testnetChainParams,
                 wallet,
                 0,
@@ -188,7 +263,7 @@ public class NRLBitcoin extends NRLCoin {
         return arr_address;
     }
 
-    public JSONArray getTransctions() {
+    public void getTransctions(NRLCallback callback) {
         JSONArray jsonArray = new JSONArray();
         BRCoreTransaction[] transactions = manager.getWallet().getTransactions();
         for (BRCoreTransaction transaction : wallet.getTransactions()) {
@@ -201,10 +276,11 @@ public class NRLBitcoin extends NRLCoin {
                 object.put("output_address", transaction.getOutputAddresses()); //[string]
             } catch (JSONException e) {
                 e.printStackTrace();
+                callback.onFailure(e);
             }
             jsonArray.put(object);
         }
-        return jsonArray;
+        callback.onResponseArray(jsonArray);
     }
 
     public String getBalance() {
@@ -214,6 +290,10 @@ public class NRLBitcoin extends NRLCoin {
     public void createTransaction(long amount, String address) {
         if(address == null) return;
         BRCoreTransaction transaction = manager.getWallet().createTransaction(amount, new BRCoreAddress(address));
+        if(!transaction.isSigned()) {
+            transaction.sign(brCoreKey, 0);
+        }
+        brCorePeerManager.publishTransaction(transaction);
     }
 
 
