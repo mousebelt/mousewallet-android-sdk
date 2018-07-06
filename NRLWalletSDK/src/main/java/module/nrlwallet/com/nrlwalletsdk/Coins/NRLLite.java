@@ -74,7 +74,7 @@ public class NRLLite extends NRLCoin {
     AddressIndex addressIndex;
     String extendedPrivateKey;
     String extendedPublicKey;
-    String walletAddress;
+    private String walletAddress;
     String privateKey;
     int count = 0;
     String Wif = "";
@@ -231,7 +231,7 @@ public class NRLLite extends NRLCoin {
         return integers;
     }
     public void checkBalance(NRLCallback callback) {
-//        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
+        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
         String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -264,7 +264,7 @@ public class NRLLite extends NRLCoin {
     }
 
     private void checkTransactions(NRLCallback callback) {
-//        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
+        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
@@ -283,7 +283,50 @@ public class NRLLite extends NRLCoin {
                         if(msg.equals("success")) {
                             JSONObject data = jsonObj.getJSONObject("data");
                             transactions = data.getJSONArray("result");
-                            callback.onResponseArray(transactions);
+                            Double vValue = new Double(0);
+                            JSONArray transactionArray = new JSONArray();
+                            for(int i = 0; i < transactions.length(); i++) {
+                                JSONObject detail = (JSONObject) transactions.get(i);
+                                JSONArray vout = detail.getJSONArray("vout");
+                                JSONArray vin = detail.getJSONArray("vin");
+                                Double voutVal = new Double(0);;
+                                Double vinVal = new Double(0);;
+                                for(int j = 0; j < vout.length(); j++) {
+                                    JSONObject voutDetail = ((JSONObject)vout.get(j)).getJSONObject("scriptPubKey");
+                                    JSONArray addresses = voutDetail.getJSONArray("addresses");
+                                    boolean isaddress = false;
+                                    for(int k = 0; k < addresses.length(); k++) {
+                                        if(addresses.getString(k).equals(walletAddress)) {
+                                            isaddress = true;
+                                            break;
+                                        }
+                                    }
+                                    if(isaddress){
+                                        voutVal += ((JSONObject)vout.get(j)).getDouble("value");
+                                    }
+                                }
+                                for(int j = 0; j < vin.length(); j++) {
+                                    JSONObject vinDetail = (JSONObject)vin.get(j);
+                                    JSONObject address = vinDetail.getJSONObject("address");
+                                    JSONArray addresses = address.getJSONObject("scriptPubKey").getJSONArray("addresses");
+                                    boolean isaddress = false;
+                                    for(int k = 0; k < addresses.length(); k++) {
+                                        if(addresses.getString(k).equals(walletAddress)) {
+                                            isaddress = true;
+                                            break;
+                                        }
+                                    }
+                                    if(isaddress){
+                                        vinVal += address.getDouble("value");
+                                    }
+                                }
+                                vValue = vinVal - voutVal;
+                                JSONObject transactionData = new JSONObject();
+                                transactionData.put("value", vValue);
+                                transactionData.put("txid", detail.getString("txid"));
+                                transactionArray.put(transactionData);
+                            }
+                            callback.onResponseArray(transactionArray);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

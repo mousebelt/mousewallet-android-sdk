@@ -164,7 +164,7 @@ public class NRLNeo extends NRLCoin {
 
     private void checkTransactions(NRLCallback callback) {
         //AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf
-//        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
+        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
@@ -183,7 +183,34 @@ public class NRLNeo extends NRLCoin {
                         if(msg.equals("success")) {
                             JSONObject data = jsonObj.getJSONObject("data");
                             trnasactions = data.getJSONArray("result");
-                            callback.onResponseArray(trnasactions);
+                            JSONArray arrTransaction = new JSONArray();
+                            for(int i = 0; i < trnasactions.length(); i ++) {
+                                JSONObject transaction = trnasactions.getJSONObject(i);
+                                JSONArray vin = transaction.getJSONArray("vin");
+                                JSONArray vout = transaction.getJSONArray("vout");
+                                Double transactionVal = new Double(0);
+                                Double vinVal = new Double(0);
+                                Double voutVal = new Double(0);
+                                for(int j = 0; j < vin.length(); j++ ) {
+                                    JSONObject vinObj = vin.getJSONObject(j);
+                                    JSONObject addresses = vinObj.getJSONObject("address");
+                                    if(addresses.getString("address").equals(walletAddress)) {
+                                        vinVal += Double.parseDouble(addresses.getString("value"));
+                                    }
+                                }
+                                for(int j = 0; j < vout.length(); j++ ) {
+                                    JSONObject voutObjArr = vout.getJSONObject(j);
+                                    if(voutObjArr.getString("address").equals(walletAddress)) {
+                                        voutVal += Double.parseDouble(voutObjArr.getString("value"));
+                                    }
+                                }
+                                transactionVal = vinVal - voutVal;
+                                JSONObject transactionData = new JSONObject();
+                                transactionData.put("txid", transaction.getString("txid"));
+                                transactionData.put("value", transactionVal);
+                                arrTransaction.put(transactionData);
+                            }
+                            callback.onResponseArray(arrTransaction);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
