@@ -120,7 +120,7 @@ public class NRLStellar extends NRLCoin {
         });
     }
 
-    private void checkTransactions(NRLCallback callback) {
+    private void checkTransactions1(NRLCallback callback) {
 //        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
@@ -153,7 +153,7 @@ public class NRLStellar extends NRLCoin {
         });
     }
 
-    public void getOperation(NRLCallback callback) {
+    public void checkTransactions(NRLCallback callback) {
 //        this.walletAddress = "GC7YV53NUWB7YZVE4UZM22FZIDFNTIU3L4BFTWX3X5XTKBP2ZAABE6RY";
         String url_getTransaction = url_server + "/address/payments/" + this.walletAddress;
 
