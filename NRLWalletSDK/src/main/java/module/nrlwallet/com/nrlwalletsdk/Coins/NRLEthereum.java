@@ -215,7 +215,7 @@ public class NRLEthereum extends NRLCoin {
     }
 
     private void checkTransactions(NRLCallback callback) {
-//        this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
+        this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
@@ -234,7 +234,19 @@ public class NRLEthereum extends NRLCoin {
                         if(msg.equals("success")) {
                             JSONObject data = jsonObj.getJSONObject("data");
                             transactions = data.getJSONArray("result");
-                            callback.onResponseArray(transactions);
+                            JSONArray arrTransactions = new JSONArray();
+                            for(int i = 0; i < transactions.length(); i++ ) {
+                                JSONObject object = transactions.getJSONObject(i);
+                                JSONObject retunValue = new JSONObject();
+                                retunValue.put("txid", object.getString("blockHash"));
+                                if(object.getString("from").equals(walletAddress)){
+                                    retunValue.put("value", "-" + object.getString("value"));
+                                }else {
+                                    retunValue.put("value", "+" + object.getString("value"));
+                                }
+                                arrTransactions.put(retunValue);
+                            }
+                            callback.onResponseArray(arrTransactions);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

@@ -174,7 +174,19 @@ public class NRLStellar extends NRLCoin {
                         if(msg.equals("success")) {
                             JSONObject data = jsonObj.getJSONObject("data");
                             operations = data.getJSONArray("result");
-                            callback.onResponseArray(operations);
+                            JSONArray arrTransactions = new JSONArray();
+                            for(int i = 0; i < operations.length(); i++) {
+                                JSONObject returnVal = new JSONObject();
+                                JSONObject object = operations.getJSONObject(i);
+                                returnVal.put("txid", object.getString("transaction_hash"));
+                                if(object.getString("from").equals(walletAddress)){
+                                    returnVal.put("value", "-" + object.getString("amount"));
+                                }else {
+                                    returnVal.put("value", "+" + object.getString("amount"));
+                                }
+                                arrTransactions.put(returnVal);
+                            }
+                            callback.onResponseArray(arrTransactions);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

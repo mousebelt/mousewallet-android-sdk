@@ -164,7 +164,7 @@ public class NRLNeo extends NRLCoin {
 
     private void checkTransactions(NRLCallback callback) {
         //AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf
-        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
+//        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
