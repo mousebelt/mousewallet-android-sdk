@@ -115,10 +115,6 @@ public class NRLNeo extends NRLCoin {
         checkBalance(callback);
     }
 
-    public void getTransactions(NRLCallback callback) {
-        checkTransactions(callback);
-    }
-
     private void checkBalance(NRLCallback callback) {
 //        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
         String url_getbalance = url_server + "/balance/" + this.walletAddress;
@@ -161,8 +157,39 @@ public class NRLNeo extends NRLCoin {
         });
     }
 
+    public void getTransactionsJson(NRLCallback callback) {
+        //AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf
+//        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
+        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
+        new HTTPRequest().run(url_getTransaction, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
 
-    private void checkTransactions(NRLCallback callback) {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String body =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(body);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            trnasactions = data.getJSONArray("result");
+                            callback.onResponseArray(trnasactions);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                }
+            }
+        });
+    }
+
+    public void getTransactions(NRLCallback callback) {
         //AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf
 //        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;

@@ -151,11 +151,8 @@ public class NRLBitcoin extends NRLCoin {
 
         manager = new BRCoreWalletManager(pubKey, chainParams, createTime);
         wallet = manager.getWallet();
+        privateKey = pubKey.getPubKeyAsCoreKey().getPrivKey();
         if(wallet.getReceiveAddress().isValid()) {
-//            BRCoreAddress[] addressed = wallet.getAllAddresses();
-//            for(int i = 0; i < addressed.length; i ++) {
-//                System.out.println("************----------- btc address -----   : " + addressed[i].stringify());
-//            }
             walletAddress = wallet.getReceiveAddress().stringify();
         } else {
         }

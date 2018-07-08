@@ -15,6 +15,9 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletFile;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -29,6 +32,7 @@ import io.github.novacrypto.bip32.networks.Bitcoin;
 import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
+import module.nrlwallet.com.nrlwalletsdk.Cryptography.ByteUtilities;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
 import module.nrlwallet.com.nrlwalletsdk.Network.CoinType;
 import module.nrlwallet.com.nrlwalletsdk.Network.Ethereum;
@@ -80,7 +84,7 @@ public class NRLEthereum extends NRLCoin {
 
 // Web3j
             Credentials credentials = Credentials.create(privKey.toString(16));
-            walletAddress = credentials.getAddress();
+            this.walletAddress = credentials.getAddress();
             extendedPrivateKey = credentials.getEcKeyPair().getPrivateKey() + "";
 
             this.getTransactionCount();
@@ -132,9 +136,6 @@ public class NRLEthereum extends NRLCoin {
 
     public void getBalance(NRLCallback callback) {
         this.checkBalance(callback);
-    }
-    public void getTransactions(NRLCallback callback) {
-        this.checkTransactions(callback);
     }
 
     public void getGasPrice() {
@@ -214,8 +215,39 @@ public class NRLEthereum extends NRLCoin {
         });
     }
 
-    private void checkTransactions(NRLCallback callback) {
-        this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
+    public void getTransactionsJson(NRLCallback callback) {
+//        this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
+        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
+        new HTTPRequest().run(url_getTransaction, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String body =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(body);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            transactions = data.getJSONArray("result");
+                            callback.onResponseArray(transactions);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                }
+            }
+        });
+    }
+
+    public void getTransactions(NRLCallback callback) {
+//        this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
@@ -259,7 +291,7 @@ public class NRLEthereum extends NRLCoin {
         });
     }
 
-    public void createTransaction(String amount, String address, String memo, long fee) {
+    public void createTransaction(String amount, String address, String memo, double fee) {
 //////// PLEASE MAKE GASEPRICE
 //        tx = try EthereumTransaction(
 //                nonce: EthereumQuantity(quantity: BigUInt(nonce)),
@@ -268,8 +300,9 @@ public class NRLEthereum extends NRLCoin {
 //        to: EthereumAddress(hex: to, eip55: false),
 //        value: EthereumQuantity(quantity: BigUInt(value))
 //)
+
         BigInteger nonce = BigInteger.valueOf(this.count);
-        BigInteger gas_price = BigInteger.valueOf(fee);
+        BigInteger gas_price = BigInteger.valueOf((long) fee);
         //nonce, <gas price>, <gas limit>, <toAddress>, <value>
         RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(21000), address, amount);
 

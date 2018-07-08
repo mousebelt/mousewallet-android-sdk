@@ -106,6 +106,7 @@ public class NRLLite extends NRLCoin {
 
 
             wallet = Wallet.fromSeed(params, seed);
+            String aaa = wallet.currentReceiveAddress().toBase58();
             wallet.clearTransactions(0);
             File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
 
@@ -214,56 +215,6 @@ public class NRLLite extends NRLCoin {
     }
 
     public void getTransactions(NRLCallback callback) {
-        this.checkTransactions(callback);
-    }
-
-    private void generatePubkeyFromPrivatekey(byte[] seed) {
-        byte[] publickey = Secp256k1.getPublicKey(seed);
-        String bbb = HexStringConverter.getHexStringConverterInstance().asHex(publickey);
-        String aaa = Base58Encode.encode(publickey);
-        System.out.println("************----------- Bitcoin public key     : " + aaa);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
-    private static Integer[] concat(Integer[] input, int index) {
-        final Integer[] integers = Arrays.copyOf(input, input.length + 1);
-        integers[input.length] = index;
-        return integers;
-    }
-    public void checkBalance(NRLCallback callback) {
-//        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
-        String url_getbalance = url_server + "/balance/" + this.walletAddress;
-        new HTTPRequest().run(url_getbalance, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                callback.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String result =   (response.body().string());
-
-                    try {
-                        JSONObject jsonObj = new JSONObject(result);
-                        String msg = jsonObj.get("msg").toString();
-                        if(msg.equals("success")) {
-                            JSONObject data = jsonObj.getJSONObject("data");
-                            balance = data.getString("balance");
-                            callback.onResponse(balance);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    // Do what you want to do with the response.
-                } else {
-                    // Request not successful
-                }
-            }
-        });
-    }
-
-    private void checkTransactions(NRLCallback callback) {
 //        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
@@ -337,6 +288,84 @@ public class NRLLite extends NRLCoin {
                 }
             }
         });
+    }
+
+    private void generatePubkeyFromPrivatekey(byte[] seed) {
+        byte[] publickey = Secp256k1.getPublicKey(seed);
+        String bbb = HexStringConverter.getHexStringConverterInstance().asHex(publickey);
+        String aaa = Base58Encode.encode(publickey);
+        System.out.println("************----------- Bitcoin public key     : " + aaa);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
+    private static Integer[] concat(Integer[] input, int index) {
+        final Integer[] integers = Arrays.copyOf(input, input.length + 1);
+        integers[input.length] = index;
+        return integers;
+    }
+    public void checkBalance(NRLCallback callback) {
+//        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
+        String url_getbalance = url_server + "/balance/" + this.walletAddress;
+        new HTTPRequest().run(url_getbalance, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String result =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(result);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            balance = data.getString("balance");
+                            callback.onResponse(balance);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    // Do what you want to do with the response.
+                } else {
+                    // Request not successful
+                }
+            }
+        });
+    }
+
+    public void getTransactionsJson(NRLCallback callback) {
+//        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
+        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
+        new HTTPRequest().run(url_getTransaction, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String body =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(body);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            transactions = data.getJSONArray("result");
+                            callback.onResponseArray(transactions);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                }
+            }
+        });
+
     }
 
     public void createTransaction(long amount, String address, String memo, long fee) {
