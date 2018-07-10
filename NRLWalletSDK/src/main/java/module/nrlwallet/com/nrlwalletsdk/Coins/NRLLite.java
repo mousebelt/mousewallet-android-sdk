@@ -63,6 +63,7 @@ import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedKey;
 import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HexStringConverter;
+import module.nrlwallet.com.nrlwalletsdk.Utils.LitecoinNetParams;
 import module.nrlwallet.com.nrlwalletsdk.Utils.WIF;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
@@ -99,7 +100,6 @@ public class NRLLite extends NRLCoin {
         super(seed, Litecoin.MAIN_NET, 2, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         str_seed = s_seed;
-        this.init();
         createWallet();
 //        this.getData(seed);
     }
@@ -107,12 +107,13 @@ public class NRLLite extends NRLCoin {
 
     private void createWallet() {
         Long creationtime = new Date().getTime();
-        NetworkParameters params = MainNetParams.get();
+        NetworkParameters params = LitecoinNetParams.get();
         try {
             DeterministicSeed seed = new DeterministicSeed(str_seed, bSeed, "", creationtime);
 
             wallet = Wallet.fromSeed(params, seed);
-            String aaa = wallet.currentReceiveAddress().toBase58();
+            walletAddress = wallet.currentReceiveAddress().toBase58();
+//            privateKey = wallet.getActiveKeyChain().getWatchingKey().getPrivKey().toString();
             wallet.clearTransactions(0);
             File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
 
@@ -366,19 +367,35 @@ public class NRLLite extends NRLCoin {
 
     }
 
-    public void createTransaction(long amount, String address, String memo, long fee) {
-        NetworkParameters params = MainNetParams.get();
+    public void createTransaction(long amount, String address, String memo, long fee, NRLCallback callback) {
         Coin value = Coin.valueOf(amount);
-        WalletAppKit kit = new WalletAppKit(params, new File("."), "lite");
-        kit.startAsync();
-//        kit.awaitRunning();
+        NetworkParameters params = LitecoinNetParams.get();
         Address to = new Address(params, address);
-        SendRequest req = SendRequest.to(to, Coin.valueOf(amount));
         try {
-            Wallet.SendResult result = kit.wallet().sendCoins(kit.peerGroup(), to, value);
+            Transaction transaction = wallet.createSend(to, value);
+            callback.onResponse(transaction.toString());
         } catch (InsufficientMoneyException e) {
-
+            e.printStackTrace();
+            callback.onFailure(e);
+        } catch (Wallet.CompletionException e) {
+            e.printStackTrace();
+            callback.onFailure(e);
         }
+
+
+//        NetworkParameters params = LitecoinNetParams.get();
+//        Coin value = Coin.valueOf(amount);
+//        WalletAppKit kit = new WalletAppKit(params, new File("."), "lite");
+//        kit.startAsync();
+//        kit.awaitRunning();
+//        Address to = new Address(params, address);
+//        try {
+//            SendRequest req = SendRequest.to(to, Coin.valueOf(amount));
+//            Wallet.SendResult result = kit.wallet().sendCoins(kit.peerGroup(), to, value);
+//            callback.onResponse(result.toString());
+//        } catch (InsufficientMoneyException e) {
+//            callback.onFailure(e);
+//        }
 
     }
 

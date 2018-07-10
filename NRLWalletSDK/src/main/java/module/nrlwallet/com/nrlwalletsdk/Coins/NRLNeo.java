@@ -56,7 +56,7 @@ public class NRLNeo extends NRLCoin {
     public NRLNeo(byte[] bseed) {
         super(bseed, Neo.MAIN_NET, 888, "Nist256p1 seed", "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551");
         this.bseed = bseed;
-        this.test();
+        this.init();
     }
 
     private void test() {
@@ -281,7 +281,7 @@ public class NRLNeo extends NRLCoin {
 
     }
     //network string, scriptHash string, wif string, sendingAssetID string, amount float64, remark string, networkFeeAmountInGAS float64
-    public void createTransaction(double amount, String address, String memo, double fee) {
+    public void createTransaction(double amount, String address, String memo, double fee, NRLCallback callback) {
         String str_network = network.toString();
         String str_hash = neoWallet.hashCode() + "";
         String str_wif = neoWallet.getWIF();
@@ -289,8 +289,10 @@ public class NRLNeo extends NRLCoin {
         double d_fee = Double.longBitsToDouble((long) fee);
         try {
             RawTransaction transaction = Neoutils.mintTokensRawTransactionMobile(str_network, str_hash, str_wif, address, d_amount, memo, d_fee);
+            callback.onResponse(transaction.toString());
         } catch (Exception e) {
             e.printStackTrace();
+            callback.onFailure(e);
         }
 
     }

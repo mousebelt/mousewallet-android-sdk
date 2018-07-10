@@ -31,9 +31,9 @@ public class MainActivity extends Activity {
 //        strMnemonic = "tape have dawn eagle ginger wagon couple sunset okay gentle curve put";//sb.toString();
 
 //        this.getEthereumWallet(strMnemonic);//done
-//        this.getLitecoinWallet(strMnemonic);//okkkk------
+        this.getLitecoinWallet(strMnemonic);//okkkk------
 //        this.getBitcoinWallet(strMnemonic);//okkkk
-        this.getNeoWallet(strMnemonic);//okkkkk----
+//        this.getNeoWallet(strMnemonic);//okkkkk----
 //        this.getStellarWallet(strMnemonic);//okkkk
     }
 
@@ -141,7 +141,22 @@ public class MainActivity extends Activity {
         System.out.println("************----------- NEO Private Key : " + neoPrivateKey);
         System.out.println("************----------- NEO address     : " + neoAddress);
 
-        nrlNeo.createTransaction(0.001, "ATdP62ufbPWhcs3avSCSTX79cbAJ4STHVY", "", 0.00001);
+        nrlNeo.createTransaction(0.001, "ATdP62ufbPWhcs3avSCSTX79cbAJ4STHVY", "", 0.00001, new NRLCallback(){
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
     }
 
     private void getBitcoinWallet(String strMnemonic) {
@@ -221,7 +236,22 @@ public class MainActivity extends Activity {
             }
         });
 
-        nrlLite.createTransaction(1, "LZSTRc6imhZLuz9aDQs8GTrLw3cjBHSMzJ", "", (long) 0.01);
+        nrlLite.createTransaction((long)0.0001, "LZSTRc6imhZLuz9aDQs8GTrLw3cjBHSMzJ", "", (long) 0.01, new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
     }
 
     private void getStellarWallet(String strMnemonic) {
