@@ -5,6 +5,8 @@ import android.support.annotation.RequiresApi;
 
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 
+import org.bitcoin.Secp256k1Context;
+import org.bouncycastle.math.ec.custom.sec.SecP256R1Curve;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,10 +24,12 @@ import javax.crypto.spec.SecretKeySpec;
 import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
+import io.github.novacrypto.bip32.networks.Bitcoin;
 import io.github.novacrypto.bip32.networks.Litecoin;
 import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.BIP44;
 import javassist.bytecode.ByteArray;
+import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
 import module.nrlwallet.com.nrlwalletsdk.Network.Neo;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
@@ -56,11 +60,15 @@ public class NRLNeo extends NRLCoin {
     public NRLNeo(byte[] bseed) {
         super(bseed, Neo.MAIN_NET, 888, "Nist256p1 seed", "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551");
         this.bseed = bseed;
-        this.init();
+        this.test();
     }
 
     private void test() {
-//        String strMnemonic = "cost alpha light gravity result unique multiply stadium fitness catalog diesel beauty";
+        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bseed, Neo.MAIN_NET);
+        String DerivedAddress = root
+                .derive("m/44'/888'/0'/0/0")
+                .neuter().p2pkhAddress();
+
 //        byte[] aaa = Neoutils.hexTobytes(strMnemonic);
 //
 //
@@ -85,16 +93,10 @@ public class NRLNeo extends NRLCoin {
     }
 
     private void init() {
-
-
-
-
         Mac sha512_HMAC = null;
         String path = "m/44'/888'/0'/0/0";
 
         final byte[] b_seedkey = seedKey.getBytes();
-        final byte[] b_path = path.getBytes();
-
         byte[] buf = path.getBytes(Charset.defaultCharset());
 
         try {

@@ -24,5 +24,26 @@ public enum Ethereum implements Network {
         public byte p2shVersion() {
             return 0x32;
         }
+    },
+    TEST_NET {
+        @Override
+        public int getPrivateVersion() {
+            return 0x04358394;
+        }
+
+        @Override
+        public int getPublicVersion() {
+            return 0x043587cf;
+        }
+
+        @Override
+        public byte p2pkhVersion() {
+            return 0x30;
+        }
+
+        @Override
+        public byte p2shVersion() {
+            return 0x32;
+        }
     }
 }

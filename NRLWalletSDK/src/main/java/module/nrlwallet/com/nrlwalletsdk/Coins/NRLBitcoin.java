@@ -289,13 +289,14 @@ public class NRLBitcoin extends NRLCoin {
         return this.balance + "";
     }
 
-    public void createTransaction(long amount, String address) {
+    public void createTransaction(long amount, String address, NRLCallback callback) {
         if(address == null) return;
         BRCoreTransaction transaction = manager.getWallet().createTransaction(amount, new BRCoreAddress(address));
         if(!transaction.isSigned()) {
             transaction.sign(brCoreKey, 0);
         }
         brCorePeerManager.publishTransaction(transaction);
+        callback.onResponse("done");
     }
 
 

@@ -37,7 +37,7 @@ import okhttp3.Response;
 
 public class NRLEthereum extends NRLCoin {
     String url_server = "https://eth.mousebelt.com/api/v1";
-    Network network = Ethereum.MAIN_NET;
+    Network network = Ethereum.TEST_NET;
     int coinType = 60;
     String seedKey = "Bitcoin seed";
     String Mnemonic = "";
@@ -54,7 +54,7 @@ public class NRLEthereum extends NRLCoin {
     JSONArray transactions = new JSONArray();
 
     public NRLEthereum(byte[] seed, String strMnemonic) {
-        super(seed, Ethereum.MAIN_NET, 60, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
+        super(seed, Ethereum.TEST_NET, 60, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         Mnemonic = strMnemonic;
 //        this.init();
@@ -90,7 +90,7 @@ public class NRLEthereum extends NRLCoin {
                 .external()
                 .address(0);
 
-        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
+        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.TEST_NET);
         String DerivedAddress = root
                 .derive("m/44'/60'/0'/0/0")
                 .neuter().p2pkhAddress();
@@ -98,7 +98,7 @@ public class NRLEthereum extends NRLCoin {
         root.derive("m/44'/60'/0'/0/0");
 
         this.rootKey = new ExtendedPrivateKeyBIP32().getRootKey(bSeed, CoinType.ETHEREUM);
-        privateKey = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
+        privateKey = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.TEST_NET);
         ExtendedPrivateKey child = privateKey.derive(addressIndex, AddressIndex.DERIVATION);
         ExtendedPublicKey childPub = child.neuter();
         extendedPrivateKey = child.extendedBase58();   //Extended Private Key
