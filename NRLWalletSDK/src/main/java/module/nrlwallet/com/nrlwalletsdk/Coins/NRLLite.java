@@ -181,7 +181,6 @@ public class NRLLite extends NRLCoin {
     }
 
     private void getTransactionCount() {
-//        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
         String url_getbalance = url_server + "/address/gettransactioncount/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -214,7 +213,6 @@ public class NRLLite extends NRLCoin {
     }
 
     public void getTransactions(NRLCallback callback) {
-//        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
@@ -303,7 +301,6 @@ public class NRLLite extends NRLCoin {
         return integers;
     }
     public void checkBalance(NRLCallback callback) {
-//        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
         String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -336,7 +333,6 @@ public class NRLLite extends NRLCoin {
     }
 
     public void getTransactionsJson(NRLCallback callback) {
-//        this.walletAddress = "LNPYC9GcGcKw38dTAyskkbnwn7TxmC5e4J";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override

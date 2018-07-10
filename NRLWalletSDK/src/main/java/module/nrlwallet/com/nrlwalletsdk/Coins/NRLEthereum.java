@@ -130,7 +130,6 @@ public class NRLEthereum extends NRLCoin {
 
     }
     private void getTransactionCount() {
-//        this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
         String url_getbalance = url_server + "/address/gettransactioncount/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -160,7 +159,6 @@ public class NRLEthereum extends NRLCoin {
     }
 
     private void checkBalance(NRLCallback callback) {
-//        this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
         String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -187,7 +185,6 @@ public class NRLEthereum extends NRLCoin {
                                     return;
                                 }
                             }
-
                         }else {
                             callback.onResponse("0");
                         }
@@ -204,7 +201,6 @@ public class NRLEthereum extends NRLCoin {
     }
 
     public void getTransactionsJson(NRLCallback callback) {
-//        this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
@@ -235,7 +231,6 @@ public class NRLEthereum extends NRLCoin {
     }
 
     public void getTransactions(NRLCallback callback) {
-//        this.walletAddress = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
@@ -307,7 +302,7 @@ public class NRLEthereum extends NRLCoin {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                callback.onResponse("Sent Transaction");
+                callback.onResponse(response.toString());
 
             }
         });

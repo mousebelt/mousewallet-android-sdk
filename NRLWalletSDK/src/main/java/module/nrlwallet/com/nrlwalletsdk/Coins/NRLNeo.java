@@ -33,6 +33,7 @@ import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
 import module.nrlwallet.com.nrlwalletsdk.Network.Neo;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
+import neoutils.NEP5;
 import neoutils.Neoutils;
 import neoutils.RawTransaction;
 import neoutils.SharedSecret;
@@ -47,6 +48,7 @@ public class NRLNeo extends NRLCoin {
 
     Network network = Neo.MAIN_NET;
     int coinType = 888;
+    String Mnemonic = "";
     String seedKey = "Nist256p1 seed";
     String curve = "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551";
     byte[] bseed;
@@ -57,10 +59,11 @@ public class NRLNeo extends NRLCoin {
     JSONArray trnasactions;
     public String balance;
 
-    public NRLNeo(byte[] bseed) {
+    public NRLNeo(byte[] bseed, String mnemonic) {
         super(bseed, Neo.MAIN_NET, 888, "Nist256p1 seed", "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551");
         this.bseed = bseed;
-        this.test();
+        this.Mnemonic = mnemonic;
+        this.init();
     }
 
     private void test() {
@@ -69,6 +72,8 @@ public class NRLNeo extends NRLCoin {
                 .derive("m/44'/888'/0'/0/0")
                 .neuter().p2pkhAddress();
 
+        String bbb = Neoutils.bytesToHex(bseed);
+        String aaa = Neoutils.scriptHashToNEOAddress(bbb);
 //        byte[] aaa = Neoutils.hexTobytes(strMnemonic);
 //
 //
@@ -78,6 +83,7 @@ public class NRLNeo extends NRLCoin {
         try {
             neoWallet = Neoutils.generateFromWIF("L59tWNmwh6RsmijTLGmkq8ZKuJyocH41mCFBLVrCbjMwP6tWE8xh");
             byte[] b_privatekey = neoWallet.getPrivateKey();
+            privateKey = Neoutils.bytesToHex(b_privatekey);
             byte[] b_publickey = neoWallet.getPublicKey();
 //            neoWallet = Neoutils.generateFromPrivateKey(this.privateKey);
             walletAddress = neoWallet.getAddress();
@@ -148,7 +154,6 @@ public class NRLNeo extends NRLCoin {
     }
 
     private void checkBalance(NRLCallback callback) {
-//        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
         String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -190,8 +195,6 @@ public class NRLNeo extends NRLCoin {
     }
 
     public void getTransactionsJson(NRLCallback callback) {
-        //AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf
-//        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
@@ -222,8 +225,6 @@ public class NRLNeo extends NRLCoin {
     }
 
     public void getTransactions(NRLCallback callback) {
-        //AeVkPRiies6pMdWJoh78eHR9s6bGp5AGJf
-//        this.walletAddress = "AJXPjfQ6EmRpRsoS94EzrfSPDUc8m8Zio5";
         String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override

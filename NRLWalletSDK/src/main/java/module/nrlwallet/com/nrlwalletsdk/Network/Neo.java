@@ -17,7 +17,7 @@ public enum Neo implements Network {
 
         @Override
         public byte p2pkhVersion() {
-            return 0x30;
+            return 0x21;
         }
 
         @Override
