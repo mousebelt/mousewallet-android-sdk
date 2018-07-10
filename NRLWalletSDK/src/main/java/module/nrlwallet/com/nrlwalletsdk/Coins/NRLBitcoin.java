@@ -35,6 +35,7 @@ import module.nrlwallet.core.BRCoreWallet;
 import module.nrlwallet.core.BRCoreWalletManager;
 
 public class NRLBitcoin extends NRLCoin {
+    String url_server = "https://btc.mousebelt.com/api/v1";
 
     Network network = Bitcoin.MAIN_NET;
     int coinType = 0;

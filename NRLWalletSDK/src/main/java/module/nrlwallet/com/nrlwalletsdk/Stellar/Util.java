@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-class Util {
+public class Util {
 
   public static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 

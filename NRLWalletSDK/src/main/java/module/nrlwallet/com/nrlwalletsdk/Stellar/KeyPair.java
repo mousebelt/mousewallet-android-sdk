@@ -53,6 +53,10 @@ public class KeyPair {
     mPrivateKey = privateKey;
   }
 
+  public EdDSAPrivateKey getmPrivateKey() {
+    return mPrivateKey;
+  }
+
   /**
    * Returns true if this Keypair is capable of signing
    */

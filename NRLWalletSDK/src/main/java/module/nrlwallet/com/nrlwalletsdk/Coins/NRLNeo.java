@@ -3,10 +3,7 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,18 +13,25 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import io.github.novacrypto.bip32.ExtendedPrivateKey;
+import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
-import jnr.ffi.Struct;
+import io.github.novacrypto.bip32.networks.Litecoin;
+import io.github.novacrypto.bip44.Account;
+import io.github.novacrypto.bip44.BIP44;
+import javassist.bytecode.ByteArray;
 import module.nrlwallet.com.nrlwalletsdk.Network.Neo;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import neoutils.Neoutils;
 import neoutils.RawTransaction;
+import neoutils.SharedSecret;
 import neoutils.Wallet;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -35,7 +39,7 @@ import okhttp3.Response;
 
 @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
 public class NRLNeo extends NRLCoin {
-    String url_server = "http://54.152.5.218/api/v1";
+    String url_server = "https://neo.mousebelt.com/api/v1";
 
     Network network = Neo.MAIN_NET;
     int coinType = 888;
@@ -49,15 +53,41 @@ public class NRLNeo extends NRLCoin {
     JSONArray trnasactions;
     public String balance;
 
-    private NRLCallback callback;
-
     public NRLNeo(byte[] bseed) {
         super(bseed, Neo.MAIN_NET, 888, "Nist256p1 seed", "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551");
         this.bseed = bseed;
-        this.init();
+        this.test();
+    }
+
+    private void test() {
+//        String strMnemonic = "cost alpha light gravity result unique multiply stadium fitness catalog diesel beauty";
+//        byte[] aaa = Neoutils.hexTobytes(strMnemonic);
+//
+//
+//        byte[] a1 = Neoutils.reverseBytes(bseed);
+//        byte[] slice = Arrays.copyOfRange(aaa, 0, 32);
+//        String wif = Neoutils.bytesToHex(slice);
+        try {
+            neoWallet = Neoutils.generateFromWIF("L59tWNmwh6RsmijTLGmkq8ZKuJyocH41mCFBLVrCbjMwP6tWE8xh");
+            byte[] b_privatekey = neoWallet.getPrivateKey();
+            byte[] b_publickey = neoWallet.getPublicKey();
+//            neoWallet = Neoutils.generateFromPrivateKey(this.privateKey);
+            walletAddress = neoWallet.getAddress();
+            Boolean isValid = Neoutils.validateNEOAddress(walletAddress);
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void init() {
+
+
+
 
         Mac sha512_HMAC = null;
         String path = "m/44'/888'/0'/0/0";
@@ -251,16 +281,17 @@ public class NRLNeo extends NRLCoin {
 
     }
     //network string, scriptHash string, wif string, sendingAssetID string, amount float64, remark string, networkFeeAmountInGAS float64
-    public void createTransaction(long amount, String address, String memo, long fee) {
+    public void createTransaction(double amount, String address, String memo, double fee) {
         String str_network = network.toString();
         String str_hash = neoWallet.hashCode() + "";
         String str_wif = neoWallet.getWIF();
-        double d_amount = Double.longBitsToDouble(amount);
-        double d_fee = Double.longBitsToDouble(fee);
+        double d_amount = Double.longBitsToDouble((long)amount);
+        double d_fee = Double.longBitsToDouble((long) fee);
         try {
             RawTransaction transaction = Neoutils.mintTokensRawTransactionMobile(str_network, str_hash, str_wif, address, d_amount, memo, d_fee);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 }

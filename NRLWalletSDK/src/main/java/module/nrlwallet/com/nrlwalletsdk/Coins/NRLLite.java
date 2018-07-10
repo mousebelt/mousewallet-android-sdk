@@ -17,6 +17,9 @@ import org.bitcoinj.core.StoredBlock;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.listeners.DownloadProgressTracker;
+import org.bitcoinj.crypto.ChildNumber;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDUtils;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.net.discovery.DnsDiscovery;
 import org.bitcoinj.params.MainNetParams;
@@ -25,6 +28,7 @@ import org.bitcoinj.store.BlockStore;
 import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.store.SPVBlockStore;
 import org.bitcoinj.utils.MonetaryFormat;
+import org.bitcoinj.wallet.DeterministicKeyChain;
 import org.bitcoinj.wallet.DeterministicSeed;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.UnreadableWalletException;
@@ -32,9 +36,11 @@ import org.bitcoinj.wallet.Wallet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.crypto.Credentials;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.Arrays;
 import java.util.List;
@@ -64,7 +70,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class NRLLite extends NRLCoin {
-    String url_server = "http://34.239.180.150/api/v1";
+    String url_server = "https://ltc.mousebelt.com/api/v1";
     Network network = Bitcoin.MAIN_NET;
     int coinType = 2;
     String seedKey = "Bitcoin seed";
@@ -98,12 +104,12 @@ public class NRLLite extends NRLCoin {
 //        this.getData(seed);
     }
 
+
     private void createWallet() {
         Long creationtime = new Date().getTime();
         NetworkParameters params = MainNetParams.get();
         try {
-            DeterministicSeed seed = new DeterministicSeed(str_seed, null, "", creationtime);
-
+            DeterministicSeed seed = new DeterministicSeed(str_seed, bSeed, "", creationtime);
 
             wallet = Wallet.fromSeed(params, seed);
             String aaa = wallet.currentReceiveAddress().toBase58();
@@ -153,8 +159,6 @@ public class NRLLite extends NRLCoin {
         walletAddress = root
                 .derive("m/44'/2'/0'/0/0")
                 .neuter().p2pkhAddress();
-        System.out.println(walletAddress);
-
         Account account = BIP44.m().purpose44()
                 .coinType(2)
                 .account(0);
@@ -162,14 +166,8 @@ public class NRLLite extends NRLCoin {
 
         final ExtendedPrivateKey privateKey = root.derive("m/44'/2'/0'");
         extendedPrivateKey = privateKey.extendedBase58();
-
         extendedPublicKey = accountKey.extendedBase58();
-        System.out.println(extendedPublicKey);
 
-//        Derive<Integer[]> derive = new CkdFunctionDerive<>(NRLLite::concat, new Integer[0]);
-//        Integer[] actual = derive.derive(addressIndex, AddressIndex.DERIVATION);
-
-//        this.getTransactionCount();
     }
 
     public String getPrivateKey() {

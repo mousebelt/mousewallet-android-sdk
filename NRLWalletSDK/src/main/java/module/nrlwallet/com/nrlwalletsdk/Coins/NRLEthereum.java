@@ -1,46 +1,34 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
-import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDUtils;
 import org.bitcoinj.wallet.DeterministicKeyChain;
 import org.bitcoinj.wallet.DeterministicSeed;
 import org.bitcoinj.wallet.UnreadableWalletException;
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
-import org.web3j.crypto.WalletFile;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 
 import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
-import io.github.novacrypto.bip32.networks.Bitcoin;
-import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
-import module.nrlwallet.com.nrlwalletsdk.Cryptography.ByteUtilities;
-import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
 import module.nrlwallet.com.nrlwalletsdk.Network.CoinType;
 import module.nrlwallet.com.nrlwalletsdk.Network.Ethereum;
 import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
-import module.nrlwallet.core.BRCoreKey;
-import module.nrlwallet.core.BRCoreMasterPubKey;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -48,7 +36,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class NRLEthereum extends NRLCoin {
-    String url_server = "http://18.232.254.235/api/v1";
+    String url_server = "https://eth.mousebelt.com/api/v1";
     Network network = Ethereum.MAIN_NET;
     int coinType = 60;
     String seedKey = "Bitcoin seed";
@@ -76,7 +64,8 @@ public class NRLEthereum extends NRLCoin {
     private void createAddress() {
         DeterministicSeed seed = null;
         try {
-            seed = new DeterministicSeed(Mnemonic, null, "", 1409478661L);
+            Long creationtime = new Date().getTime();
+            seed = new DeterministicSeed(Mnemonic, null, "", creationtime);
             DeterministicKeyChain chain = DeterministicKeyChain.builder().seed(seed).build();
             List<ChildNumber> keyPath = HDUtils.parsePath("M/44H/60H/0H/0/0");
             DeterministicKey key = chain.getKeyByPath(keyPath, true);
@@ -85,8 +74,7 @@ public class NRLEthereum extends NRLCoin {
 // Web3j
             Credentials credentials = Credentials.create(privKey.toString(16));
             this.walletAddress = credentials.getAddress();
-            extendedPrivateKey = credentials.getEcKeyPair().getPrivateKey() + "";
-
+            extendedPrivateKey = "0x" + privKey.toString(16);
             this.getTransactionCount();
             System.out.println(credentials.getAddress());
         } catch (UnreadableWalletException e) {
@@ -291,16 +279,7 @@ public class NRLEthereum extends NRLCoin {
         });
     }
 
-    public void createTransaction(String amount, String address, String memo, double fee) {
-//////// PLEASE MAKE GASEPRICE
-//        tx = try EthereumTransaction(
-//                nonce: EthereumQuantity(quantity: BigUInt(nonce)),
-//        gasPrice: EthereumQuantity(quantity: BigUInt(fee)),
-//        gas: EthereumQuantity(quantity: BigUInt(ethereumGasAmount)),
-//        to: EthereumAddress(hex: to, eip55: false),
-//        value: EthereumQuantity(quantity: BigUInt(value))
-//)
-
+    public void createTransaction(String amount, String address, String memo, double fee, NRLCallback callback) {
         BigInteger nonce = BigInteger.valueOf(this.count);
         BigInteger gas_price = BigInteger.valueOf((long) fee);
         //nonce, <gas price>, <gas limit>, <toAddress>, <value>
@@ -323,11 +302,12 @@ public class NRLEthereum extends NRLCoin {
         new HTTPRequest().run(url_sendTransaction, formBody, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                callback.onFailure(e);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                callback.onResponse("Sent Transaction");
 
             }
         });
