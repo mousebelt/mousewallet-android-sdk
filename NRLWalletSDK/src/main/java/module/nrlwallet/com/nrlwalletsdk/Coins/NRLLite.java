@@ -15,6 +15,8 @@ import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.PeerGroup;
 import org.bitcoinj.core.StoredBlock;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionBroadcast;
+import org.bitcoinj.core.TransactionBroadcaster;
 import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.listeners.DownloadProgressTracker;
 import org.bitcoinj.crypto.ChildNumber;
@@ -90,6 +92,7 @@ public class NRLLite extends NRLCoin {
 
     Wallet wallet;
     String str_seed;
+    File chainFile;
 
     private List<Integer> expected;
     private String path;
@@ -115,7 +118,7 @@ public class NRLLite extends NRLCoin {
             walletAddress = wallet.currentReceiveAddress().toBase58();
 //            privateKey = wallet.getActiveKeyChain().getWatchingKey().getPrivKey().toString();
             wallet.clearTransactions(0);
-            File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
+            chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
 
             if (chainFile.exists()) {
                 chainFile.delete();
@@ -363,36 +366,37 @@ public class NRLLite extends NRLCoin {
 
     }
 
-    public void createTransaction(long amount, String address, String memo, long fee, NRLCallback callback) {
-        Coin value = Coin.valueOf(amount);
-        NetworkParameters params = LitecoinNetParams.get();
-        Address to = new Address(params, address);
-        try {
-            Transaction transaction = wallet.createSend(to, value);
-//            callback.onResponse(transaction.toString());
-            callback.onResponse("success");
-        } catch (InsufficientMoneyException e) {
-            e.printStackTrace();
-            callback.onFailure(e);
-        } catch (Wallet.CompletionException e) {
-            e.printStackTrace();
-            callback.onFailure(e);
-        }
-
-
-//        NetworkParameters params = LitecoinNetParams.get();
+    public void createTransaction(String amount, String address, String memo, long fee, NRLCallback callback) {
 //        Coin value = Coin.valueOf(amount);
-//        WalletAppKit kit = new WalletAppKit(params, new File("."), "lite");
-//        kit.startAsync();
-//        kit.awaitRunning();
+//        NetworkParameters params = LitecoinNetParams.get();
 //        Address to = new Address(params, address);
 //        try {
-//            SendRequest req = SendRequest.to(to, Coin.valueOf(amount));
-//            Wallet.SendResult result = kit.wallet().sendCoins(kit.peerGroup(), to, value);
-//            callback.onResponse(result.toString());
+//            Transaction transaction = wallet.createSend(to, value);
+//            callback.onResponse("success");
 //        } catch (InsufficientMoneyException e) {
+//            e.printStackTrace();
+//            callback.onFailure(e);
+//        } catch (Wallet.CompletionException e) {
+//            e.printStackTrace();
 //            callback.onFailure(e);
 //        }
+
+        NetworkParameters params = LitecoinNetParams.get();
+        Coin value = Coin.parseCoin(amount);
+        try {
+            Address to = new Address(params, address);
+            TransactionBroadcaster transactionBroadcaster = new TransactionBroadcaster() {
+                @Override
+                public TransactionBroadcast broadcastTransaction(Transaction tx) {
+//                    callback.onResponse(tx.toString());
+                    callback.onResponse("success");
+                    return null;
+                }
+            };
+            wallet.sendCoins(transactionBroadcaster, to, value);
+        } catch (InsufficientMoneyException e) {
+            callback.onFailure(e);
+        }
 
     }
 
