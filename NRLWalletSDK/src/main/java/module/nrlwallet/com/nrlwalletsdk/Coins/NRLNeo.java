@@ -118,19 +118,6 @@ public class NRLNeo extends NRLCoin {
             walletAddress = neoWallet.getAddress();
             Boolean isValid = Neoutils.validateNEOAddress(walletAddress);
 
-
-//            SecretKeySpec keySpec1 = new SecretKeySpec(bseed, HMAC_SHA512);
-//            sha512_HMAC.init(keySpec1);
-//            byte [] mac_data1 = sha512_HMAC.doFinal(b_path);
-//            byte[] slice1 = Arrays.copyOfRange(mac_data1, 32, 64);
-//            String b1 = Neoutils.bytesToHex(slice1);
-//            neoWallet = Neoutils.generateFromPrivateKey(b1);
-//            walletAddress = neoWallet.getAddress();
-
-
-
-
-
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (InvalidKeyException e) {

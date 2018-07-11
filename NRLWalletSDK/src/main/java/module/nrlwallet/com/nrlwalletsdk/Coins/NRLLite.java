@@ -367,19 +367,6 @@ public class NRLLite extends NRLCoin {
     }
 
     public void createTransaction(String amount, String address, String memo, long fee, NRLCallback callback) {
-//        Coin value = Coin.valueOf(amount);
-//        NetworkParameters params = LitecoinNetParams.get();
-//        Address to = new Address(params, address);
-//        try {
-//            Transaction transaction = wallet.createSend(to, value);
-//            callback.onResponse("success");
-//        } catch (InsufficientMoneyException e) {
-//            e.printStackTrace();
-//            callback.onFailure(e);
-//        } catch (Wallet.CompletionException e) {
-//            e.printStackTrace();
-//            callback.onFailure(e);
-//        }
 
         NetworkParameters params = LitecoinNetParams.get();
         Coin value = Coin.parseCoin(amount);
@@ -389,7 +376,7 @@ public class NRLLite extends NRLCoin {
                 @Override
                 public TransactionBroadcast broadcastTransaction(Transaction tx) {
 //                    callback.onResponse(tx.toString());
-                    callback.onResponse("success");
+                    callback.onResponse("success " + tx.toString());
                     return null;
                 }
             };

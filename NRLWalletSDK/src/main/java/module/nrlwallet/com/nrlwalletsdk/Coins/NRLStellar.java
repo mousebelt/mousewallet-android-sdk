@@ -1,6 +1,7 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 
 import org.json.JSONArray;
@@ -8,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 import javax.annotation.Nullable;
@@ -57,13 +59,13 @@ public class NRLStellar extends NRLCoin {
         this.bseed = bseed;
         this.init();
     }
-
+    
     private void init() {
-        byte[] tmpseed = Arrays.copyOfRange(bseed, 0, 32);
+        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
         keyPair = KeyPair.fromSecretSeed(tmpseed);
         account = new Account(keyPair, 2908908335136768L);
         walletAddress = keyPair.getAccountId();
-
+        this.createWallet();
     }
 
     public String getPrivateKey() {
@@ -77,6 +79,23 @@ public class NRLStellar extends NRLCoin {
 
     public void getBalance(NRLCallback callback) {
         this.checkBalance(callback);
+    }
+
+    private void createWallet() {
+        String url_getbalance = url_server + "/account/" + this.walletAddress;
+        new HTTPRequest().run(url_getbalance, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+
+                }
+            }
+        });
     }
 
     private void checkBalance(NRLCallback callback) {
