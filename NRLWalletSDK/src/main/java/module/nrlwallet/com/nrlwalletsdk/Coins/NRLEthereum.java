@@ -159,7 +159,8 @@ public class NRLEthereum extends NRLCoin {
     }
 
     private void checkBalance(NRLCallback callback) {
-        String url_getbalance = url_server + "/balance/" + this.walletAddress;
+        String add = "0xD0b3e80c208A5a91BAffE2216E62a1616C38d3bb";
+        String url_getbalance = url_server + "/balance/" + add;//this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -176,15 +177,17 @@ public class NRLEthereum extends NRLCoin {
                         if(msg.equals("success")) {
                             JSONObject data = jsonObj.getJSONObject("data");
                             JSONArray balances = data.getJSONArray("balances");
-                            for(int i = 0; i < balances.length(); i++) {
-                                JSONObject obj = balances.getJSONObject(i);
-                                String ticker = obj.getString("symbol");
-                                if(ticker.equals("ETH")){
-                                    balance = obj.getString("balance");
-                                    callback.onResponse(balance);
-                                    return;
-                                }
-                            }
+                            callback.onResponseArray(balances);
+                            return;
+//                            for(int i = 0; i < balances.length(); i++) {
+//                                JSONObject obj = balances.getJSONObject(i);
+//                                String ticker = obj.getString("symbol");
+//                                if(ticker.equals("ETH")){
+//                                    balance = obj.getString("balance");
+//                                    callback.onResponse(balance);
+//                                    return;
+//                                }
+//                            }
                         }else {
                             callback.onResponse("0");
                         }
@@ -231,7 +234,8 @@ public class NRLEthereum extends NRLCoin {
     }
 
     public void getTransactions(NRLCallback callback) {
-        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
+        String add = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
+        String url_getTransaction = url_server + "/address/txs/" + add;//this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -275,7 +279,7 @@ public class NRLEthereum extends NRLCoin {
     }
 
     public void createTransaction(String amount, String address, String memo, double fee, NRLCallback callback) {
-        BigInteger nonce = BigInteger.valueOf(this.count);
+        BigInteger nonce = BigInteger.valueOf(this.count * 1000000000);
         BigInteger gas_price = BigInteger.valueOf((long) fee);
         //nonce, <gas price>, <gas limit>, <toAddress>, <value>
         RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(21000), address, amount);
