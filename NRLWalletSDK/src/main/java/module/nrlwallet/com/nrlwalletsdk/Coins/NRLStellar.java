@@ -258,7 +258,8 @@ public class NRLStellar extends NRLCoin {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                callback.onResponse(response.toString());
+//                callback.onResponse(response.body().string());
+                callback.onResponse("success");
             }
         });
     }

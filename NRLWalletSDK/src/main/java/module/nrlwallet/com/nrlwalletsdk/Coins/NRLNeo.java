@@ -292,7 +292,8 @@ public class NRLNeo extends NRLCoin {
         double d_fee = Double.longBitsToDouble((long) fee);
         try {
             RawTransaction transaction = Neoutils.mintTokensRawTransactionMobile(str_network, str_hash, str_wif, address, d_amount, memo, d_fee);
-            callback.onResponse(transaction.toString());
+//            callback.onResponse(transaction.getTXID());
+            callback.onResponse("success");
         } catch (Exception e) {
             e.printStackTrace();
             callback.onFailure(e);

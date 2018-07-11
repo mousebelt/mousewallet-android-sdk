@@ -369,7 +369,8 @@ public class NRLLite extends NRLCoin {
         Address to = new Address(params, address);
         try {
             Transaction transaction = wallet.createSend(to, value);
-            callback.onResponse(transaction.toString());
+//            callback.onResponse(transaction.toString());
+            callback.onResponse("success");
         } catch (InsufficientMoneyException e) {
             e.printStackTrace();
             callback.onFailure(e);
