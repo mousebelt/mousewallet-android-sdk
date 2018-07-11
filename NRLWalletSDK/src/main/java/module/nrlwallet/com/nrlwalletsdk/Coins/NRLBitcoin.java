@@ -290,7 +290,12 @@ public class NRLBitcoin extends NRLCoin {
     }
 
     public void createTransaction(long amount, String address, NRLCallback callback) {
-        if(address == null) return;
+        if(address == null){
+            callback.onFailure(new Throwable("address null"));
+        }
+        if(amount <= 0) {
+            callback.onFailure(new Throwable("amount is 0"));
+        }
         BRCoreTransaction transaction = manager.getWallet().createTransaction(amount, new BRCoreAddress(address));
         if(transaction == null) {
             callback.onFailure(new Throwable("transaction null"));
@@ -309,14 +314,6 @@ public class NRLBitcoin extends NRLCoin {
         public WrappedExceptionPeerManagerListener(BRCorePeerManager.Listener listener) {
             this.listener = listener;
         }
-
-        //        private <T> void safeHandler (Supplier<Void> supplier) {
-        //            try { supplier.get(); }
-        //            catch (Exception ex) {
-        //                ex.printStackTrace(System.err);
-        //            }
-        //        }
-
         @Override
         public void syncStarted() {
             try { listener.syncStarted(); }
