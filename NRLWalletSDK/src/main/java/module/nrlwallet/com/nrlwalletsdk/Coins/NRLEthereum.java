@@ -1,5 +1,6 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
+import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDUtils;
@@ -26,6 +27,7 @@ import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
 import module.nrlwallet.com.nrlwalletsdk.Network.CoinType;
 import module.nrlwallet.com.nrlwalletsdk.Network.Ethereum;
+import module.nrlwallet.com.nrlwalletsdk.Stellar.Util;
 import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
@@ -37,7 +39,7 @@ import okhttp3.Response;
 
 public class NRLEthereum extends NRLCoin {
     String url_server = "https://eth.mousebelt.com/api/v1";
-    Network network = Ethereum.TEST_NET;
+    Network network = Ethereum.MAIN_NET;
     int coinType = 60;
     String seedKey = "Bitcoin seed";
     String Mnemonic = "";
@@ -54,7 +56,7 @@ public class NRLEthereum extends NRLCoin {
     JSONArray transactions = new JSONArray();
 
     public NRLEthereum(byte[] seed, String strMnemonic) {
-        super(seed, Ethereum.TEST_NET, 60, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
+        super(seed, Ethereum.MAIN_NET, 60, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         Mnemonic = strMnemonic;
 //        this.init();
@@ -75,7 +77,7 @@ public class NRLEthereum extends NRLCoin {
             Credentials credentials = Credentials.create(privKey.toString(16));
             this.walletAddress = credentials.getAddress();
             extendedPrivateKey = "0x" + privKey.toString(16);
-            this.getTransactionCount();
+//            this.getTransactionCount();
             System.out.println(credentials.getAddress());
         } catch (UnreadableWalletException e) {
             e.printStackTrace();
@@ -90,7 +92,7 @@ public class NRLEthereum extends NRLCoin {
                 .external()
                 .address(0);
 
-        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.TEST_NET);
+        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
         String DerivedAddress = root
                 .derive("m/44'/60'/0'/0/0")
                 .neuter().p2pkhAddress();
@@ -98,7 +100,7 @@ public class NRLEthereum extends NRLCoin {
         root.derive("m/44'/60'/0'/0/0");
 
         this.rootKey = new ExtendedPrivateKeyBIP32().getRootKey(bSeed, CoinType.ETHEREUM);
-        privateKey = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.TEST_NET);
+        privateKey = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
         ExtendedPrivateKey child = privateKey.derive(addressIndex, AddressIndex.DERIVATION);
         ExtendedPublicKey childPub = child.neuter();
         extendedPrivateKey = child.extendedBase58();   //Extended Private Key
@@ -159,8 +161,7 @@ public class NRLEthereum extends NRLCoin {
     }
 
     private void checkBalance(NRLCallback callback) {
-        String add = "0xD0b3e80c208A5a91BAffE2216E62a1616C38d3bb";
-        String url_getbalance = url_server + "/balance/" + add;//this.walletAddress;
+        String url_getbalance = url_server + "/balance/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -234,8 +235,7 @@ public class NRLEthereum extends NRLCoin {
     }
 
     public void getTransactions(NRLCallback callback) {
-        String add = "0xC400b9D93A23b0be5d41ab337aD605988Aef8463";
-        String url_getTransaction = url_server + "/address/txs/" + add;//this.walletAddress;
+        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
         new HTTPRequest().run(url_getTransaction, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -279,19 +279,22 @@ public class NRLEthereum extends NRLCoin {
     }
 
     public void createTransaction(String amount, String address, String memo, double fee, NRLCallback callback) {
-        BigInteger nonce = BigInteger.valueOf(this.count * 1000000000);
-        BigInteger gas_price = BigInteger.valueOf((long) fee);
+        BigInteger nonce = BigInteger.valueOf(3);//this.count);
+        BigInteger gas_price = BigInteger.valueOf((long) 13000000000L);
+        // gas price 1,000,000,000 ===10e9
+        // amount 1ETH = 1,000,000,000,000,000,000 WEI ==== 10e18
         //nonce, <gas price>, <gas limit>, <toAddress>, <value>
         RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(21000), address, amount);
 
         Credentials credentials = Credentials.create(this.getPrivateKey());
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
         String str_Raw = "";
-        try {
-            str_Raw = new String(signedMessage, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        str_Raw = bytesToHex(signedMessage);
+//        try {
+//            str_Raw = new String(signedMessage, "UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
         String url_sendTransaction = url_server + "/sendsignedtransaction/";
         FormBody.Builder formBuilder = new FormBody.Builder()
                 .add("raw", str_Raw);
@@ -307,6 +310,9 @@ public class NRLEthereum extends NRLCoin {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
 //                callback.onResponse(response.body().string());
+                System.out.println("************----------- response     : " + response.message());
+                System.out.println("************----------- response     : " + response.toString());
+                System.out.println("************----------- response     : " + call.toString());
                 callback.onResponse("success");
 
             }
@@ -314,4 +320,15 @@ public class NRLEthereum extends NRLCoin {
 
     }
 
+    public char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
+
+    public  String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for ( int j = 0; j < bytes.length; j++ ) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
 }

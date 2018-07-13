@@ -70,6 +70,8 @@ import module.nrlwallet.com.nrlwalletsdk.Utils.WIF;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class NRLLite extends NRLCoin {
@@ -106,22 +108,32 @@ public class NRLLite extends NRLCoin {
         createWallet();
 //        this.getData(seed);
     }
-
+    private void checkWallet() {
+        NetworkParameters params = LitecoinNetParams.get();
+        if(chainFile.exists()){
+            try {
+                SPVBlockStore chainStore = new SPVBlockStore(params, chainFile);
+//                chainStore.getParams().
+            } catch (BlockStoreException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void createWallet() {
         Long creationtime = new Date().getTime();
         NetworkParameters params = LitecoinNetParams.get();
         try {
             DeterministicSeed seed = new DeterministicSeed(str_seed, bSeed, "", creationtime);
-
+            chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
             wallet = Wallet.fromSeed(params, seed);
             walletAddress = wallet.currentReceiveAddress().toBase58();
 //            privateKey = wallet.getActiveKeyChain().getWatchingKey().getPrivKey().toString();
             wallet.clearTransactions(0);
-            chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
+
 
             if (chainFile.exists()) {
-                chainFile.delete();
+//                chainFile.delete();
             }
 
             balance = wallet.getBalance().toString();
@@ -150,7 +162,7 @@ public class NRLLite extends NRLCoin {
             System.out.println(wallet.toString());
 
             // shutting down again
-            peerGroup.stop();
+//            peerGroup.stopAsync();
         } catch (UnreadableWalletException e) {
             e.printStackTrace();
         } catch (BlockStoreException e) {
@@ -271,7 +283,7 @@ public class NRLLite extends NRLCoin {
                                         vinVal += address.getDouble("value");
                                     }
                                 }
-                                vValue = vinVal - voutVal;
+                                vValue = -vinVal + voutVal;
                                 JSONObject transactionData = new JSONObject();
                                 transactionData.put("value", vValue);
                                 transactionData.put("txid", detail.getString("txid"));
@@ -347,7 +359,6 @@ public class NRLLite extends NRLCoin {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String body =   (response.body().string());
-
                     try {
                         JSONObject jsonObj = new JSONObject(body);
                         String msg = jsonObj.get("msg").toString();
@@ -367,7 +378,39 @@ public class NRLLite extends NRLCoin {
     }
 
     public void createTransaction(String amount, String address, String memo, long fee, NRLCallback callback) {
+        NetworkParameters params = LitecoinNetParams.get();
+        Transaction tx = new Transaction(params);
+        Coin coin = Coin.parseCoin(amount);
+        Address to = new Address(params, address);
+        tx.addOutput(coin, to);
+        SendRequest sendRequest = SendRequest.forTx(tx);
+//        wallet.signTransaction(sendRequest);
 
+        String url_sendTransaction = url_server + "/sendsignedtransaction/";
+        FormBody.Builder formBuilder = new FormBody.Builder()
+                .add("raw", sendRequest.toString());
+
+        RequestBody formBody = formBuilder.build();
+
+        new HTTPRequest().run(url_sendTransaction, formBody, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+//                callback.onResponse(response.body().string());
+                System.out.println("************----------- response     : " + response.message());
+                System.out.println("************----------- response     : " + response.toString());
+                System.out.println("************----------- response     : " + call.toString());
+                callback.onResponse("success");
+
+            }
+        });
+    }
+
+    public void createTransaction1(String amount, String address, String memo, long fee, NRLCallback callback) {
         NetworkParameters params = LitecoinNetParams.get();
         Coin value = Coin.parseCoin(amount);
         try {
@@ -380,11 +423,9 @@ public class NRLLite extends NRLCoin {
                     return null;
                 }
             };
-            wallet.sendCoins(transactionBroadcaster, to, value);
+            this.wallet.sendCoins(transactionBroadcaster, to, value);
         } catch (InsufficientMoneyException e) {
             callback.onFailure(e);
         }
-
     }
-
 }

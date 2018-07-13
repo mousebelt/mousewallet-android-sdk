@@ -1,8 +1,6 @@
 package module.nrlwallet.com.nrlwalletsdk.Utils;
 
-import org.json.JSONObject;
-
-import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -24,7 +22,11 @@ public class HTTPRequest {
                 .url(url)
                 .get()
                 .build();
-
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectTimeout(360, TimeUnit.SECONDS);
+        builder.readTimeout(360, TimeUnit.SECONDS);
+        builder.writeTimeout(360, TimeUnit.SECONDS);
+        client = builder.build();
         Call call = client.newCall(request);
         call.enqueue(callback);
         return call;
@@ -38,6 +40,11 @@ public class HTTPRequest {
                 .post(formBody)
                 .build();
 
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectTimeout(360, TimeUnit.SECONDS);
+        builder.readTimeout(360, TimeUnit.SECONDS);
+        builder.writeTimeout(360, TimeUnit.SECONDS);
+        client = builder.build();
         Call call = client.newCall(request);
         call.enqueue(callback);
         return call;
