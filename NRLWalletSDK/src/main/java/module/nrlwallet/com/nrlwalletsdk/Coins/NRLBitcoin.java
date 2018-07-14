@@ -2,14 +2,44 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
+
+import org.bitcoinj.core.Address;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.DumpedPrivateKey;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.InsufficientMoneyException;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionConfidence;
+import org.bitcoinj.core.TransactionOutPoint;
+import org.bitcoinj.core.UTXO;
+import org.bitcoinj.crypto.ChildNumber;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDUtils;
+import org.bitcoinj.kits.WalletAppKit;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.wallet.DeterministicKeyChain;
+import org.bitcoinj.wallet.DeterministicSeed;
+import org.bitcoinj.wallet.SendRequest;
+import org.bitcoinj.wallet.UnreadableWalletException;
+import org.bitcoinj.wallet.Wallet;
+import org.bitcoinj.wallet.WalletTransaction;
+import org.bitcoinj.wallet.listeners.WalletEventListener;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.crypto.Credentials;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -21,7 +51,13 @@ import io.github.novacrypto.bip32.networks.Litecoin;
 import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
+import jersey.repackaged.com.google.common.util.concurrent.MoreExecutors;
+import module.nrlwallet.com.nrlwalletsdk.Common.ValidationException;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Base58Encode;
+import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedKey;
+import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
+import module.nrlwallet.com.nrlwalletsdk.Utils.Util;
+import module.nrlwallet.com.nrlwalletsdk.Utils.WIF;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import module.nrlwallet.core.BRCoreAddress;
 import module.nrlwallet.core.BRCoreChainParams;
@@ -33,6 +69,9 @@ import module.nrlwallet.core.BRCorePeerManager;
 import module.nrlwallet.core.BRCoreTransaction;
 import module.nrlwallet.core.BRCoreWallet;
 import module.nrlwallet.core.BRCoreWalletManager;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class NRLBitcoin extends NRLCoin {
     String url_server = "https://btc.mousebelt.com/api/v1";
@@ -43,17 +82,16 @@ public class NRLBitcoin extends NRLCoin {
     String curve = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
     byte[] bSeed;
     String mNemonic;
-    String rootKey;
-    AddressIndex addressIndex;
-    String extendedPrivateKey;
-    String extendedPublicKey;
     String walletAddress1;
     String walletAddress;
     String privateKey;
+    WalletAppKit kit;
+    JSONArray transactions = new JSONArray();
     BRCoreWalletManager manager;
     BRCoreWallet wallet;
     BRCorePeerManager brCorePeerManager;
-    long balance;
+    Double balance;
+    public boolean syncstatus = false;
     private Executor listenerExecutor = Executors.newSingleThreadExecutor();
 
     static {
@@ -74,31 +112,87 @@ public class NRLBitcoin extends NRLCoin {
 
         bSeed = seed;
         mNemonic = mnemonic;
-        this.createWallet();
+        this.createWalletAddress();
+//        this.createWallet();
     }
 
-    private void test() {
-        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Bitcoin.MAIN_NET);
-        String DerivedAddress = root
-                .derive("m/44'/0'/0'/0/0")
-                .neuter().p2pkhAddress();
-        System.out.println(DerivedAddress);
-        root.derive("m/44'/0'/0'/0/0");
+    private void createWalletAddress() {
+        File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"btc.spvchain");
+        if (chainFile.exists()) {
+            chainFile.delete();
+        }
+        NetworkParameters params = MainNetParams.get();
+        kit = new WalletAppKit(params, chainFile, "btc");
+        long createTime = System.currentTimeMillis();
+        try{
+            DeterministicSeed seed = new DeterministicSeed(mNemonic, bSeed, "", createTime);
+            kit.restoreWalletFromSeed(seed);
+        }catch (UnreadableWalletException e){
 
-        Account account = BIP44.m().purpose44()
-                        .coinType(0)
-                        .account(0);
-        final ExtendedPublicKey accountKey = root.derive(account, Account.DERIVATION).neuter();
-
-        final ExtendedPrivateKey privateKey = root.derive("m/44'/0'/0'");
-        String AccountExtendedPrivateKeyString = privateKey.extendedBase58();
-        System.out.println(AccountExtendedPrivateKeyString);
-
-        String AccountExtendedPublicKeyString = accountKey.extendedBase58();
-        System.out.println(AccountExtendedPublicKeyString);
-
+        }
+        kit.startAsync();
+        kit.awaitRunning();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+//        kit.stopAsync();
+//        kit.awaitTerminated();
+        walletAddress = kit.wallet().currentReceiveAddress().toBase58();
     }
-    private void createWallet1() {
+
+    private void getTransactionHistory() {
+        List<Transaction> history = kit.wallet().getTransactionsByTime();
+        int count = kit.wallet().getPendingTransactions().size();
+        for(int i = 0; i < history.size(); i++) {
+            Transaction transaction = history.get(i);
+            String hash = transaction.getHashAsString();
+        }
+    }
+    boolean sentCoins = false;
+    public void sendTransaction(long amount, String address, NRLCallback callback) {
+        try{
+            // Adjust how many coins to send. E.g. the minimum; or everything.
+            Coin sendValue = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
+            // Coin sendValue = wallet.getBalance().minus(Transaction.DEFAULT_TX_FEE);
+            NetworkParameters params = MainNetParams.get();
+            Address sendToAdr = Address.fromBase58(params, address);
+            SendRequest request = SendRequest.to(sendToAdr, sendValue);
+
+            Wallet.SendResult result = kit.wallet().sendCoins(request);
+            result.broadcastComplete.addListener(() -> {
+                System.out.println("Coins were sent. Transaction hash: " + result.tx.getHashAsString());
+                sentCoins = true;
+            }, MoreExecutors.sameThreadExecutor());
+
+            while (!sentCoins) {
+                Thread.sleep(100);
+            }
+            callback.onResponse(result.toString());
+        }catch (InsufficientMoneyException e){
+            System.err.println(e.getMessage());
+            callback.onFailure(e);
+
+        }catch (InterruptedException e){
+            System.err.println(e.getMessage());
+            callback.onFailure(e);
+        }
+    }
+    private void createWallet_() {
+        try {
+            ExtendedKey m = ExtendedKey.create(bSeed);
+            ExtendedKey ka = module.nrlwallet.com.nrlwalletsdk.Utils.BIP44.getKeyType(m, coinType,0, 0);
+            ExtendedKey ck = ka.getChild(coinType);
+            walletAddress = ck.getAddress();
+            privateKey = WIF.getWif(ck.getMaster());
+        } catch (ValidationException e) {
+            e.printStackTrace();
+        }
+//        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Bitcoin.MAIN_NET);
+//        walletAddress = root
+//                .derive("m/44'/0'/0'/0/0")
+//                .neuter().p2pkhAddress();
 
 //        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Bitcoin.MAIN_NET);
 //        String DerivedAddress = root
@@ -127,7 +221,7 @@ public class NRLBitcoin extends NRLCoin {
         brCoreKey = brCoreMasterPubKey.getPubKeyAsCoreKey();
         wallet = createWallet(new BRCoreTransaction[]{}, brCoreMasterPubKey, walletListener);
         createListener();
-        balance = wallet.getBalance();
+//        balance = wallet.getBalance();
         walletAddress1 = wallet.getReceiveAddress().stringify();
         privateKey = brCoreMasterPubKey.getPubKeyAsCoreKey().getPrivKey();
     }
@@ -158,10 +252,11 @@ public class NRLBitcoin extends NRLCoin {
         } else {
         }
         manager.getPeerManager().connect();
+        manager.syncStarted();
         try {
             Thread.sleep (10 * 1000);
             System.err.println ("Retry");
-            manager.getPeerManager().disconnect();
+//            manager.getPeerManager().disconnect();
             manager.getPeerManager().connect();
             manager.getPeerManager().rescan();
 
@@ -174,10 +269,6 @@ public class NRLBitcoin extends NRLCoin {
         }
         manager.getPeerManager().disconnect();
         System.gc();
-
-//        createListener();
-//        manager.syncStarted();
-        balance = wallet.getBalance();
     }
 
     private void createListener() {
@@ -238,6 +329,125 @@ public class NRLBitcoin extends NRLCoin {
         return walletAddress;
     }
 
+    public void getBalance(NRLCallback callback) {
+        this.checkBalance(callback);
+    }
+
+    private void checkBalance(NRLCallback callback) {
+        String url_getbalance = url_server + "/balance/" + this.walletAddress;
+        new HTTPRequest().run(url_getbalance, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String result =   (response.body().string());
+                    try {
+                        JSONObject jsonObj = new JSONObject(result);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            balance = data.getDouble("balance");
+                            String balances = String.valueOf(balance);
+                            callback.onResponse(balances);
+                            return;
+                        }else {
+                            callback.onResponse("0");
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        callback.onFailure(e);
+                    }
+                } else {
+                    // Request not successful
+                    callback.onResponse("0");
+                }
+            }
+        });
+    }
+
+    public void getTransactions(NRLCallback callback) {
+        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
+        new HTTPRequest().run(url_getTransaction, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String body =   (response.body().string());
+
+                    try {
+                        JSONObject jsonObj = new JSONObject(body);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")) {
+                            JSONObject data = jsonObj.getJSONObject("data");
+                            transactions = data.getJSONArray("result");
+                            Double vValue = new Double(0);
+                            JSONArray arrTransactions = new JSONArray();
+
+                            for(int i = 0; i < transactions.length(); i++) {
+                                JSONObject detail = (JSONObject) transactions.get(i);
+                                JSONArray vout = detail.getJSONArray("vout");
+                                JSONArray vin = detail.getJSONArray("vin");
+                                Double voutVal = new Double(0);
+
+                                Double vinVal = new Double(0);
+                                ;
+                                for (int j = 0; j < vout.length(); j++) {
+                                    JSONObject voutDetail = ((JSONObject) vout.get(j)).getJSONObject("scriptPubKey");
+                                    JSONArray addresses = voutDetail.getJSONArray("addresses");
+                                    boolean isaddress = false;
+                                    for (int k = 0; k < addresses.length(); k++) {
+                                        if (addresses.getString(k).equals(walletAddress)) {
+                                            isaddress = true;
+                                            break;
+                                        }
+                                    }
+                                    if (isaddress) {
+                                        voutVal += ((JSONObject) vout.get(j)).getDouble("value");
+                                    }
+                                }
+                                for (int j = 0; j < vin.length(); j++) {
+                                    JSONObject vinDetail = (JSONObject) vin.get(j);
+                                    JSONObject address = vinDetail.getJSONObject("address");
+                                    JSONArray addresses = address.getJSONObject("scriptPubKey").getJSONArray("addresses");
+                                    boolean isaddress = false;
+                                    for (int k = 0; k < addresses.length(); k++) {
+                                        if (addresses.getString(k).equals(walletAddress)) {
+                                            isaddress = true;
+                                            break;
+                                        }
+                                    }
+                                    if (isaddress) {
+                                        vinVal += address.getDouble("value");
+                                    }
+                                }
+                                vValue = -vinVal + voutVal;
+                                JSONObject transactionData = new JSONObject();
+                                transactionData.put("value", vValue);
+                                transactionData.put("txid", detail.getString("txid"));
+                                arrTransactions.put(transactionData);
+                            }
+                            callback.onResponseArray(arrTransactions);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    // Do what you want to do with the response.
+                } else {
+                    // Request not successful
+                }
+            }
+        });
+    }
+
+
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
     private static Integer[] concat(Integer[] input, int index) {
         final Integer[] integers = Arrays.copyOf(input, input.length + 1);
@@ -268,7 +478,7 @@ public class NRLBitcoin extends NRLCoin {
     public void getTransctions(NRLCallback callback) {
         JSONArray jsonArray = new JSONArray();
         BRCoreTransaction[] transactions = manager.getWallet().getTransactions();
-        for (BRCoreTransaction transaction : wallet.getTransactions()) {
+        for (BRCoreTransaction transaction : transactions) {
             JSONObject object = new JSONObject();
             try {
                 object.put("tx", transaction.toString());
@@ -289,12 +499,28 @@ public class NRLBitcoin extends NRLCoin {
         return this.balance + "";
     }
 
+    public void createTransaction1(long amount, String address, NRLCallback callback) {
+        //String to a private key
+//        File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"btc.spvchain");
+        NetworkParameters params = MainNetParams.get();
+//        WalletAppKit kit = new WalletAppKit(params, chainFile, "btc");
+        Coin value = Coin.valueOf(amount);
+        Address to = Address.fromBase58(params, address);
+        try{
+            Wallet.SendResult result = kit.wallet().sendCoins(kit.peerGroup(), to, value);
+            System.out.println("coins sent. transaction hash: " + result.tx.getHashAsString());
+        } catch (InsufficientMoneyException e) {
+
+        }
+    }
+
     public void createTransaction(long amount, String address, NRLCallback callback) {
         if(address == null){
             callback.onFailure(new Throwable("address null"));
         }
         if(amount <= 0) {
             callback.onFailure(new Throwable("amount is 0"));
+            return;
         }
         BRCoreTransaction transaction = manager.getWallet().createTransaction(amount, new BRCoreAddress(address));
         if(transaction == null) {
@@ -398,5 +624,4 @@ public class NRLBitcoin extends NRLCoin {
             }
         };
     }
-
 }

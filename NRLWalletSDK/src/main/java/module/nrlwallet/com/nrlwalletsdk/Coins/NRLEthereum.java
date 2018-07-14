@@ -110,10 +110,6 @@ public class NRLEthereum extends NRLCoin {
         this.getTransactionCount();
     }
 
-    public String getRootKey() {
-        return this.rootKey;
-    }
-
     @Override
     public String getAddress() {
         return this.walletAddress;
@@ -128,9 +124,6 @@ public class NRLEthereum extends NRLCoin {
         this.checkBalance(callback);
     }
 
-    public void getGasPrice() {
-
-    }
     private void getTransactionCount() {
         String url_getbalance = url_server + "/address/gettransactioncount/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
@@ -290,11 +283,6 @@ public class NRLEthereum extends NRLCoin {
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
         String str_Raw = "";
         str_Raw = bytesToHex(signedMessage);
-//        try {
-//            str_Raw = new String(signedMessage, "UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
         String url_sendTransaction = url_server + "/sendsignedtransaction/";
         FormBody.Builder formBuilder = new FormBody.Builder()
                 .add("raw", str_Raw);

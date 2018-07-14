@@ -67,19 +67,7 @@ public class NRLNeo extends NRLCoin {
     }
 
     private void test() {
-        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bseed, Neo.MAIN_NET);
-        String DerivedAddress = root
-                .derive("m/44'/888'/0'/0/0")
-                .neuter().p2pkhAddress();
-
-        String bbb = Neoutils.bytesToHex(bseed);
-        String aaa = Neoutils.scriptHashToNEOAddress(bbb);
-//        byte[] aaa = Neoutils.hexTobytes(strMnemonic);
-//
-//
-//        byte[] a1 = Neoutils.reverseBytes(bseed);
-//        byte[] slice = Arrays.copyOfRange(aaa, 0, 32);
-//        String wif = Neoutils.bytesToHex(slice);
+        byte[] aaa = SecureRandom.getSeed(32);
         try {
             neoWallet = Neoutils.generateFromWIF("L59tWNmwh6RsmijTLGmkq8ZKuJyocH41mCFBLVrCbjMwP6tWE8xh");
             byte[] b_privatekey = neoWallet.getPrivateKey();
