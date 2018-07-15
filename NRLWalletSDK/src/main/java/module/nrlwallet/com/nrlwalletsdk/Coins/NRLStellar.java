@@ -66,7 +66,7 @@ public class NRLStellar extends NRLCoin {
         walletAddress = keyPair.getAccountId();
         createWallet();
     }
-    
+
     public String getPrivateKey() {
         return this.privateKey;
     }
@@ -290,7 +290,7 @@ public class NRLStellar extends NRLCoin {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     System.out.println("************----------- response : " + response.body().string());
-                    callback.onResponse(response.body().string());
+                    callback.onResponse("Success!");
                 }else{
                     callback.onResponse("Failed");
                 }
