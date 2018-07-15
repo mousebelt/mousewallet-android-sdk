@@ -1,19 +1,18 @@
-package module.nrlwallet.com.nrlwalletsdk.Utils;
+package module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params;
 
-import org.bitcoinj.core.Utils;
-import org.bitcoinj.params.AbstractBitcoinNetParams;
-import org.bitcoinj.params.MainNetParams;
-import org.bouncycastle.util.encoders.Hex;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.NetworkParameters;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Utils;
+import org.spongycastle.util.encoders.Hex;
 
-public class LitecoinNetParams extends AbstractBitcoinNetParams{
-    /**
-     * The string returned by getId() for the Litecoin main net netparams.
-     */
-    public static final String ID_LITECOIN_MAINNET = "org.bitcoinj.litecoin_mainnet";
+import static com.google.common.base.Preconditions.checkState;
+
+
+public class LitecoinMainNetParams extends AbstractBitcoinNetParams {
     public static final int MAINNET_MAJORITY_WINDOW = MainNetParams.MAINNET_MAJORITY_WINDOW;
     public static final int MAINNET_MAJORITY_REJECT_BLOCK_OUTDATED = MainNetParams.MAINNET_MAJORITY_REJECT_BLOCK_OUTDATED;
     public static final int MAINNET_MAJORITY_ENFORCE_BLOCK_UPGRADE = MainNetParams.MAINNET_MAJORITY_ENFORCE_BLOCK_UPGRADE;
-    public LitecoinNetParams() {
+
+    public LitecoinMainNetParams() {
         super();
         id = ID_LITECOIN_MAINNET;
         // Genesis hash is 12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2
@@ -34,7 +33,7 @@ public class LitecoinNetParams extends AbstractBitcoinNetParams{
         genesisBlock.setNonce(2084524493);
 
         String genesisHash = genesisBlock.getHashAsString();
-//        checkState(genesisHash.equals("5155a7ed2219a75c0735c58b5d459c6d07d97917570e27b9d1d4546fb8431381"));
+        checkState(genesisHash.equals("5155a7ed2219a75c0735c58b5d459c6d07d97917570e27b9d1d4546fb8431381"));
         alertSigningKey = Hex.decode("040184710fa689ad5023690c80f3a49c8f13f8d45b8c857fbcbc8bc4a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac7b03a9");
 
         majorityEnforceBlockUpgrade = MAINNET_MAJORITY_ENFORCE_BLOCK_UPGRADE;
@@ -58,11 +57,11 @@ public class LitecoinNetParams extends AbstractBitcoinNetParams{
     }
 
 
-    private static LitecoinNetParams instance;
+    private static LitecoinMainNetParams instance;
 
-    public static synchronized LitecoinNetParams get() {
+    public static synchronized NetworkParameters get() {
         if (instance == null) {
-            instance = new LitecoinNetParams();
+            instance = new LitecoinMainNetParams();
         }
         return instance;
     }

@@ -5,7 +5,7 @@ import android.support.annotation.RequiresApi;
 
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 
-import org.bitcoin.Secp256k1Context;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoin.Secp256k1Context;
 import org.bouncycastle.math.ec.custom.sec.SecP256R1Curve;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +58,8 @@ public class NRLNeo extends NRLCoin {
     Wallet neoWallet;
     JSONArray trnasactions;
     public String balance;
+    String neoAssetID = "c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b";
+    String gasAssetID = "602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7";
 
     public NRLNeo(byte[] bseed, String mnemonic) {
         super(bseed, Neo.MAIN_NET, 888, "Nist256p1 seed", "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551");
@@ -260,13 +262,16 @@ public class NRLNeo extends NRLCoin {
     }
     //network string, scriptHash string, wif string, sendingAssetID string, amount float64, remark string, networkFeeAmountInGAS float64
     public void createTransaction(double amount, String address, String memo, double fee, NRLCallback callback) {
-        String str_network = network.toString();
-        String str_hash = neoWallet.hashCode() + "";
+
+
+        String str_network = "private";//neoAssetID;//"main";//network.toString();
+        String str_hash = "5f03828cb45198eedd659d264b6d3a1c889978ce";//neoWallet.hashCode() + "";
         String str_wif = neoWallet.getWIF();
-        double d_amount = Double.longBitsToDouble((long)amount);
-        double d_fee = Double.longBitsToDouble((long) fee);
+        double d_amount =  amount;//Double.longBitsToDouble(amount);
+        double d_fee = fee;//Double.longBitsToDouble((long) fee);
+        String assetID = "NEO";
         try {
-            RawTransaction transaction = Neoutils.mintTokensRawTransactionMobile(str_network, str_hash, str_wif, address, d_amount, memo, d_fee);
+            RawTransaction transaction = Neoutils.mintTokensRawTransactionMobile(str_network, str_hash, str_wif, assetID, d_amount, memo, d_fee);
 //            callback.onResponse(transaction.getTXID());
             callback.onResponse("success");
         } catch (Exception e) {

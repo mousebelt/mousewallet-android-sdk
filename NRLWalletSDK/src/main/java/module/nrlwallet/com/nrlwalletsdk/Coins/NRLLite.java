@@ -3,38 +3,6 @@ package module.nrlwallet.com.nrlwalletsdk.Coins;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.BitcoinSerializer;
-import org.bitcoinj.core.Block;
-import org.bitcoinj.core.BlockChain;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.DumpedPrivateKey;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.InsufficientMoneyException;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.PeerGroup;
-import org.bitcoinj.core.StoredBlock;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionBroadcast;
-import org.bitcoinj.core.TransactionBroadcaster;
-import org.bitcoinj.core.VerificationException;
-import org.bitcoinj.core.listeners.DownloadProgressTracker;
-import org.bitcoinj.crypto.ChildNumber;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDUtils;
-import org.bitcoinj.kits.WalletAppKit;
-import org.bitcoinj.net.discovery.DnsDiscovery;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.TestNet3Params;
-import org.bitcoinj.store.BlockStore;
-import org.bitcoinj.store.BlockStoreException;
-import org.bitcoinj.store.SPVBlockStore;
-import org.bitcoinj.utils.MonetaryFormat;
-import org.bitcoinj.wallet.DeterministicKeyChain;
-import org.bitcoinj.wallet.DeterministicSeed;
-import org.bitcoinj.wallet.SendRequest;
-import org.bitcoinj.wallet.UnreadableWalletException;
-import org.bitcoinj.wallet.Wallet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +15,8 @@ import java.util.Date;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
@@ -57,6 +27,31 @@ import io.github.novacrypto.bip32.networks.Litecoin;
 import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Address;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Block;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.BlockChain;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Coin;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.ECKey;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.FilteredBlock;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.InsufficientMoneyException;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.NetworkParameters;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Peer;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.PeerGroup;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Transaction;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcast;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcaster;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.listeners.DownloadProgressTracker;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.net.discovery.DnsDiscovery;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.LitecoinMainNetParams;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.LitecoinTestNet3Params;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.TestNet3Params;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStoreException;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.SPVBlockStore;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.SendRequest;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.UnreadableWalletException;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.Wallet;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.orchid.encoders.Hex;
 import module.nrlwallet.com.nrlwalletsdk.Common.ValidationException;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Base58Encode;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
@@ -64,8 +59,6 @@ import module.nrlwallet.com.nrlwalletsdk.Network.CoinType;
 import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedKey;
 import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
-import module.nrlwallet.com.nrlwalletsdk.Utils.HexStringConverter;
-import module.nrlwallet.com.nrlwalletsdk.Utils.LitecoinNetParams;
 import module.nrlwallet.com.nrlwalletsdk.Utils.WIF;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
@@ -76,7 +69,7 @@ import okhttp3.Response;
 
 public class NRLLite extends NRLCoin {
     String url_server = "https://ltc.mousebelt.com/api/v1";
-    Network network = Bitcoin.MAIN_NET;
+    Network network = Litecoin.MAIN_NET;
     int coinType = 2;
     String seedKey = "Bitcoin seed";
     String curve = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
@@ -105,48 +98,33 @@ public class NRLLite extends NRLCoin {
         super(seed, Litecoin.MAIN_NET, 2, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         str_seed = s_seed;
-        createWallet();
-//        this.getData(seed);
-    }
-    private void checkWallet() {
-        NetworkParameters params = LitecoinNetParams.get();
-        if(chainFile.exists()){
-            try {
-                SPVBlockStore chainStore = new SPVBlockStore(params, chainFile);
-//                chainStore.getParams().
-            } catch (BlockStoreException e) {
-                e.printStackTrace();
-            }
-        }
+        this.createWallet();
     }
 
     private void createWallet() {
         Long creationtime = new Date().getTime();
-        NetworkParameters params = LitecoinNetParams.get();
+        NetworkParameters params = LitecoinMainNetParams.get();
         try {
-            DeterministicSeed seed = new DeterministicSeed(str_seed, bSeed, "", creationtime);
-            chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
+            DeterministicSeed seed = new DeterministicSeed(str_seed, null, "", creationtime);
             wallet = Wallet.fromSeed(params, seed);
             walletAddress = wallet.currentReceiveAddress().toBase58();
 //            privateKey = wallet.getActiveKeyChain().getWatchingKey().getPrivKey().toString();
             wallet.clearTransactions(0);
-
-
+            chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
             if (chainFile.exists()) {
-//                chainFile.delete();
+                chainFile.delete();
             }
-
-            balance = wallet.getBalance().toString();
 
             // Setting up the BlochChain, the BlocksStore and connecting to the network.
             SPVBlockStore chainStore = new SPVBlockStore(params, chainFile);
             BlockChain chain = new BlockChain(params, chainStore);
-            PeerGroup peerGroup = new PeerGroup(params, chain);
-            peerGroup.addPeerDiscovery(new DnsDiscovery(params));
+            PeerGroup peers = new PeerGroup(params, chain);
+            peers.addPeerDiscovery(new DnsDiscovery(params));
 
             // Now we need to hook the wallet up to the blockchain and the peers. This registers event listeners that notify our wallet about new transactions.
             chain.addWallet(wallet);
-            peerGroup.addWallet(wallet);
+            peers.addWallet(wallet);
+
             DownloadProgressTracker bListener = new DownloadProgressTracker() {
                 @Override
                 public void doneDownload() {
@@ -155,17 +133,23 @@ public class NRLLite extends NRLCoin {
             };
 
             // Now we re-download the blockchain. This replays the chain into the wallet. Once this is completed our wallet should know of all its transactions and print the correct balance.
-            peerGroup.start();
-            peerGroup.startBlockChainDownload(bListener);
+            peers.start();
+            peers.startBlockChainDownload(bListener);
+
+            bListener.await();
 
             // Print a debug message with the details about the wallet. The correct balance should now be displayed.
             System.out.println(wallet.toString());
 
             // shutting down again
+            peers.stop();
+            // shutting down again
 //            peerGroup.stopAsync();
         } catch (UnreadableWalletException e) {
             e.printStackTrace();
         } catch (BlockStoreException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -304,7 +288,6 @@ public class NRLLite extends NRLCoin {
 
     private void generatePubkeyFromPrivatekey(byte[] seed) {
         byte[] publickey = Secp256k1.getPublicKey(seed);
-        String bbb = HexStringConverter.getHexStringConverterInstance().asHex(publickey);
         String aaa = Base58Encode.encode(publickey);
         System.out.println("************----------- Bitcoin public key     : " + aaa);
     }
@@ -377,22 +360,24 @@ public class NRLLite extends NRLCoin {
 
     }
 
-    public void createTransaction(String amount, String address, String memo, long fee, NRLCallback callback) {
-        NetworkParameters params = LitecoinNetParams.get();
+    public void createTransaction1(String amount, String address, String memo, long fee, NRLCallback callback) {
+        NetworkParameters params = LitecoinMainNetParams.get();
+//        DumpedPrivateKey dpk = DumpedPrivateKey.fromBase58(params, )
+//        ECKey key = dpk.getKey();
         Transaction tx = new Transaction(params);
         Coin coin = Coin.parseCoin(amount);
         Address to = new Address(params, address);
         tx.addOutput(coin, to);
         SendRequest sendRequest = SendRequest.forTx(tx);
+
 //        wallet.signTransaction(sendRequest);
 
         String url_sendTransaction = url_server + "/sendsignedtransaction/";
-        FormBody.Builder formBuilder = new FormBody.Builder()
-                .add("raw", sendRequest.toString());
 
-        RequestBody formBody = formBuilder.build();
+        String json = "{\"raw\":\"" + tx.toString() + "\"}";
+        RequestBody body = RequestBody.create(HTTPRequest.JSON, json);
 
-        new HTTPRequest().run(url_sendTransaction, formBody, new Callback() {
+        new HTTPRequest().run(url_sendTransaction, body, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 callback.onFailure(e);
@@ -400,18 +385,27 @@ public class NRLLite extends NRLCoin {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-//                callback.onResponse(response.body().string());
-                System.out.println("************----------- response     : " + response.message());
-                System.out.println("************----------- response     : " + response.toString());
-                System.out.println("************----------- response     : " + call.toString());
-                callback.onResponse("success");
+                if(response.isSuccessful()){
+                    String body =   (response.body().string());
+                    try {
+                        JSONObject object = new JSONObject(body);
+                        String transactionID = object.getString("data");
+                        callback.onResponse(transactionID);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        callback.onFailure(e);
+                    }
+
+                }else{
+                    callback.onResponse("Failed");
+                }
 
             }
         });
     }
 
-    public void createTransaction1(String amount, String address, String memo, long fee, NRLCallback callback) {
-        NetworkParameters params = LitecoinNetParams.get();
+    public void createTransaction(String amount, String address, String memo, long fee, NRLCallback callback) {
+        NetworkParameters params = LitecoinMainNetParams.get();
         Coin value = Coin.parseCoin(amount);
         try {
             Address to = new Address(params, address);

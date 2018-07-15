@@ -1,21 +1,10 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
-import com.google.common.io.BaseEncoding;
-import com.google.gson.JsonObject;
-
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.Sha256Hash;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Arrays;
-
 
 import io.github.novacrypto.bip32.Network;
 import module.nrlwallet.com.nrlwalletsdk.Network.Neo;
@@ -24,19 +13,14 @@ import module.nrlwallet.com.nrlwalletsdk.Stellar.AssetTypeNative;
 import module.nrlwallet.com.nrlwalletsdk.Stellar.KeyPair;
 import module.nrlwallet.com.nrlwalletsdk.Stellar.PaymentOperation;
 import module.nrlwallet.com.nrlwalletsdk.Stellar.Transaction;
-import module.nrlwallet.com.nrlwalletsdk.Stellar.xdr.SequenceNumber;
-import module.nrlwallet.com.nrlwalletsdk.Stellar.xdr.SimplePaymentResult;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-@RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
 public class NRLStellar extends NRLCoin {
     String url_server = "https://xlm.mousebelt.com/api/v1";
     Network network = Neo.MAIN_NET;
@@ -61,7 +45,9 @@ public class NRLStellar extends NRLCoin {
     }
 
     private void init() {
-        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
+        byte[] tmpseed = new byte[0];
+        System.arraycopy(bseed , 32, tmpseed, 0,32);
+//        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
         keyPair = KeyPair.fromSecretSeed(tmpseed);
         walletAddress = keyPair.getAccountId();
         createWallet();
@@ -261,7 +247,9 @@ public class NRLStellar extends NRLCoin {
         module.nrlwallet.com.nrlwalletsdk.Stellar.Network.usePublicNetwork();
         KeyPair destination = KeyPair.fromAccountId(destinationAddress);
 
-        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
+//        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
+        byte[] tmpseed = new byte[0];
+        System.arraycopy(bseed , 32, tmpseed, 0,32);
         KeyPair source = KeyPair.fromSecretSeed(tmpseed);
         account = new Account(source, sequenceNumber);
 

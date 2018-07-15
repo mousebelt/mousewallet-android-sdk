@@ -22,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -138,6 +139,14 @@ public class Util
                 Log.e(TAG, "correctTextSizeIfNeeded: Failed to rescale, limit reached, final: " + px);
                 break;
             }
+        }
+    }
+    public static byte[] stringToBytes(String string) {
+        try {
+            if (string == null) return null;
+            return string.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return null;
         }
     }
 }

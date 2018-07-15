@@ -1,12 +1,11 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
-import org.bitcoinj.core.Utils;
-import org.bitcoinj.crypto.ChildNumber;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDUtils;
-import org.bitcoinj.wallet.DeterministicKeyChain;
-import org.bitcoinj.wallet.DeterministicSeed;
-import org.bitcoinj.wallet.UnreadableWalletException;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.crypto.ChildNumber;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.crypto.DeterministicKey;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.crypto.HDUtils;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicKeyChain;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.UnreadableWalletException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,25 +14,17 @@ import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
-import io.github.novacrypto.bip32.ExtendedPrivateKey;
-import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
-import io.github.novacrypto.bip44.AddressIndex;
-import io.github.novacrypto.bip44.BIP44;
-import module.nrlwallet.com.nrlwalletsdk.Network.CoinType;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
 import module.nrlwallet.com.nrlwalletsdk.Network.Ethereum;
-import module.nrlwallet.com.nrlwalletsdk.Stellar.Util;
-import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
@@ -45,15 +36,12 @@ public class NRLEthereum extends NRLCoin {
     String Mnemonic = "";
     String curve = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
     byte[] bSeed;
-    String rootKey;
-    AddressIndex addressIndex;
-    String extendedPrivateKey;
-    String extendedPublicKey;
     String walletAddress;
-    String balance = "0";
     int count = 0;
-    ExtendedPrivateKey privateKey;
+    String privateKey;
+    String privateKey_origin;
     JSONArray transactions = new JSONArray();
+    Credentials credentials;
 
     public NRLEthereum(byte[] seed, String strMnemonic) {
         super(seed, Ethereum.MAIN_NET, 60, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
@@ -74,41 +62,42 @@ public class NRLEthereum extends NRLCoin {
             BigInteger privKey = key.getPrivKey();
 
 // Web3j
-            Credentials credentials = Credentials.create(privKey.toString(16));
+            credentials = Credentials.create(privKey.toString(16));
+            this.privateKey = credentials.getEcKeyPair().getPrivateKey().toString(16);
+            privateKey_origin = "0x" + credentials.getEcKeyPair().getPrivateKey().toString(16);
+
             this.walletAddress = credentials.getAddress();
-            extendedPrivateKey = "0x" + privKey.toString(16);
-//            this.getTransactionCount();
-            System.out.println(credentials.getAddress());
+            this.getTransactionCount();
         } catch (UnreadableWalletException e) {
             e.printStackTrace();
         }
     }
 
-    private void init() {
-        addressIndex = BIP44.m()
-                .purpose44()
-                .coinType(coinType)
-                .account(0)
-                .external()
-                .address(0);
-
-        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
-        String DerivedAddress = root
-                .derive("m/44'/60'/0'/0/0")
-                .neuter().p2pkhAddress();
-        System.out.println(DerivedAddress);
-        root.derive("m/44'/60'/0'/0/0");
-
-        this.rootKey = new ExtendedPrivateKeyBIP32().getRootKey(bSeed, CoinType.ETHEREUM);
-        privateKey = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
-        ExtendedPrivateKey child = privateKey.derive(addressIndex, AddressIndex.DERIVATION);
-        ExtendedPublicKey childPub = child.neuter();
-        extendedPrivateKey = child.extendedBase58();   //Extended Private Key
-        extendedPublicKey = childPub.extendedBase58();    //Extended Public Key
-        walletAddress = childPub.p2pkhAddress();
-        String str4 = childPub.p2shAddress();
-        this.getTransactionCount();
-    }
+//    private void init() {
+//        addressIndex = BIP44.m()
+//                .purpose44()
+//                .coinType(coinType)
+//                .account(0)
+//                .external()
+//                .address(0);
+//
+//        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
+//        String DerivedAddress = root
+//                .derive("m/44'/60'/0'/0/0")
+//                .neuter().p2pkhAddress();
+//        System.out.println(DerivedAddress);
+//        root.derive("m/44'/60'/0'/0/0");
+//
+//        this.rootKey = new ExtendedPrivateKeyBIP32().getRootKey(bSeed, CoinType.ETHEREUM);
+//        ExtendedPrivateKey extendedPrivateKey = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
+//        ExtendedPrivateKey child = extendedPrivateKey.derive(addressIndex, AddressIndex.DERIVATION);
+//        ExtendedPublicKey childPub = child.neuter();
+//        extendedPrivateKey = child.extendedBase58();   //Extended Private Key
+//        extendedPublicKey = childPub.extendedBase58();    //Extended Public Key
+//        walletAddress = childPub.p2pkhAddress();
+//        String str4 = childPub.p2shAddress();
+//        this.getTransactionCount();
+//    }
 
     @Override
     public String getAddress() {
@@ -117,14 +106,14 @@ public class NRLEthereum extends NRLCoin {
 
     @Override
     public String getPrivateKey() {
-        return this.extendedPrivateKey;
+        return this.privateKey;
     }
 
     public void getBalance(NRLCallback callback) {
         this.checkBalance(callback);
     }
 
-    private void getTransactionCount() {
+    public void getTransactionCount() {
         String url_getbalance = url_server + "/address/gettransactioncount/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -272,24 +261,27 @@ public class NRLEthereum extends NRLCoin {
     }
 
     public void createTransaction(String amount, String address, String memo, double fee, NRLCallback callback) {
-        BigInteger nonce = BigInteger.valueOf(3);//this.count);
-        BigInteger gas_price = BigInteger.valueOf((long) 13000000000L);
+        BigInteger nonce = BigInteger.valueOf(5);//this.count);
+        BigInteger gas_price = BigInteger.valueOf((long) 5500000000L);
+        String amount_data = "0x" + amount;
         // gas price 1,000,000,000 ===10e9
         // amount 1ETH = 1,000,000,000,000,000,000 WEI ==== 10e18
         //nonce, <gas price>, <gas limit>, <toAddress>, <value>
-        RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(21000), address, amount);
+        RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(41000), address, amount_data);
 
-        Credentials credentials = Credentials.create(this.getPrivateKey());
+//        credentials = Credentials.create(this.getPrivateKey());
+//        credentials = Credentials.create(this.privateKey_origin);
+
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
         String str_Raw = "";
         str_Raw = bytesToHex(signedMessage);
+        System.out.println("************----------- : " + str_Raw);
         String url_sendTransaction = url_server + "/sendsignedtransaction/";
-        FormBody.Builder formBuilder = new FormBody.Builder()
-                .add("raw", str_Raw);
 
-        RequestBody formBody = formBuilder.build();
+        String json = "{\"raw\":\"" + str_Raw + "\"}";
+        RequestBody body = RequestBody.create(HTTPRequest.JSON, json);
 
-        new HTTPRequest().run(url_sendTransaction, formBody, new Callback() {
+        new HTTPRequest().run(url_sendTransaction, body, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 callback.onFailure(e);
@@ -297,11 +289,21 @@ public class NRLEthereum extends NRLCoin {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-//                callback.onResponse(response.body().string());
-                System.out.println("************----------- response     : " + response.message());
-                System.out.println("************----------- response     : " + response.toString());
-                System.out.println("************----------- response     : " + call.toString());
-                callback.onResponse("success");
+                if(response.isSuccessful()){
+                    String body =   (response.body().string());
+                    try {
+                        JSONObject object = new JSONObject(body);
+                        String transactionID = object.getString("data");
+                        count++;
+                        callback.onResponse(transactionID);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        callback.onFailure(e);
+                    }
+
+                }else{
+                    callback.onResponse("Failed");
+                }
 
             }
         });
