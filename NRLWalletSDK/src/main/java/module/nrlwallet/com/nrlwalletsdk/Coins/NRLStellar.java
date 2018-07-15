@@ -4,6 +4,7 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 
 import com.google.common.io.BaseEncoding;
+import com.google.gson.JsonObject;
 
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.Sha256Hash;
@@ -23,6 +24,8 @@ import module.nrlwallet.com.nrlwalletsdk.Stellar.AssetTypeNative;
 import module.nrlwallet.com.nrlwalletsdk.Stellar.KeyPair;
 import module.nrlwallet.com.nrlwalletsdk.Stellar.PaymentOperation;
 import module.nrlwallet.com.nrlwalletsdk.Stellar.Transaction;
+import module.nrlwallet.com.nrlwalletsdk.Stellar.xdr.SequenceNumber;
+import module.nrlwallet.com.nrlwalletsdk.Stellar.xdr.SimplePaymentResult;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
@@ -31,6 +34,7 @@ import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
 public class NRLStellar extends NRLCoin {
@@ -43,13 +47,11 @@ public class NRLStellar extends NRLCoin {
     String sseed;
     String privateKey = "";
     String walletAddress;
-    String Wif;
     KeyPair keyPair;
     Account account;
     String balance = "0";
-    JSONArray transactions = new JSONArray();
+    private long sequenceNumber;
     JSONArray operations = new JSONArray();
-    OkHttpClient client = new OkHttpClient();
 
     public NRLStellar(byte[] bseed, String seed) {
         super(bseed, Neo.MAIN_NET, 148, "ed25519 seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
@@ -58,52 +60,30 @@ public class NRLStellar extends NRLCoin {
         this.init();
     }
 
-    private void sample() {
-        String addressToConvert = "1BGJEft81aaudqaCCcNnhsRQBA3Y96KYtx";
-        byte[] decoded = org.bitcoinj.core.Utils.parseAsHexOrBase58(addressToConvert);
-        // We should throw off header byte that is 0 for Bitcoin (Main)
-        byte[] pureBytes = new byte[20];
-        System.arraycopy(decoded, 1, pureBytes, 0, 20);
-        // Than we should prepend the following bytes:
-        byte[] scriptSig = new byte[pureBytes.length + 2];
-        scriptSig[0] = 0x00;
-        scriptSig[1] = 0x14;
-        System.arraycopy(pureBytes, 0, scriptSig, 2, pureBytes.length);
-        byte[] addressBytes = org.bitcoinj.core.Utils.sha256hash160(scriptSig);
-        // Here are the address bytes
-        byte[] readyForAddress = new byte[addressBytes.length + 1 + 4];
-        // prepending p2sh header:
-        readyForAddress[0] = (byte) 5;
-        System.arraycopy(addressBytes, 0, readyForAddress, 1, addressBytes.length);
-        // But we should also append check sum:
-        byte[] checkSum = Sha256Hash.hashTwice(readyForAddress, 0, addressBytes.length + 1);
-        System.arraycopy(checkSum, 0, readyForAddress, addressBytes.length + 1, 4);
-        // To get the final address:
-        String segwitAddress = Base58.encode(readyForAddress);
-    }
-
     private void init() {
         byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
         keyPair = KeyPair.fromSecretSeed(tmpseed);
-        account = new Account(keyPair, 2908908335136768L);
         walletAddress = keyPair.getAccountId();
-        this.createWallet();
+        createWallet();
     }
 
+    public long getSequenceNumber() {
+        return this.sequenceNumber;
+    }
     public String getPrivateKey() {
         return this.privateKey;
     }
 
     @Override
     public String getAddress() {
-        return walletAddress;
+        return this.walletAddress;
     }
 
     public void getBalance(NRLCallback callback) {
         this.checkBalance(callback);
     }
 
-    private void createWallet() {
+    public void createWallet() {
         String url_getbalance = url_server + "/account/" + this.walletAddress;
         new HTTPRequest().run(url_getbalance, new Callback() {
             @Override
@@ -114,7 +94,16 @@ public class NRLStellar extends NRLCoin {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
+                    ResponseBody results = response.body();
+                    try {
+                        JSONObject object = new JSONObject(results.string());
+                        JSONObject data = object.getJSONObject("data");
 
+                        sequenceNumber = Long.parseLong(data.getString("sequence"));
+//                        account = new Account(keyPair, sequenceNumber);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -153,38 +142,6 @@ public class NRLStellar extends NRLCoin {
                     } catch (JSONException e) {
                         e.printStackTrace();
                         callback.onFailure(e);
-                    }
-                    // Do what you want to do with the response.
-                } else {
-                    // Request not successful
-                }
-            }
-        });
-    }
-
-    private void checkTransactions1(NRLCallback callback) {
-        String url_getTransaction = url_server + "/address/txs/" + this.walletAddress;
-        new HTTPRequest().run(url_getTransaction, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                callback.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String body =   (response.body().string());
-
-                    try {
-                        JSONObject jsonObj = new JSONObject(body);
-                        String msg = jsonObj.get("msg").toString();
-                        if(msg.equals("success")) {
-                            JSONObject data = jsonObj.getJSONObject("data");
-                            transactions = data.getJSONArray("result");
-                            callback.onResponseArray(transactions);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
                     // Do what you want to do with the response.
                 } else {
@@ -249,13 +206,19 @@ public class NRLStellar extends NRLCoin {
                             for(int i = 0; i < operations.length(); i++) {
                                 JSONObject returnVal = new JSONObject();
                                 JSONObject object = operations.getJSONObject(i);
-                                returnVal.put("txid", object.getString("transaction_hash"));
-                                if(object.getString("from").equals(walletAddress)){
-                                    returnVal.put("value", "-" + object.getString("amount"));
-                                }else {
-                                    returnVal.put("value", "+" + object.getString("amount"));
+                                if(object.getString("type").equals("payment")){
+                                    returnVal.put("txid", object.getString("transaction_hash"));
+                                    if(object.getString("from").equals(walletAddress)){
+                                        returnVal.put("value", "-" + object.getString("amount"));
+                                    }else {
+                                        returnVal.put("value", "+" + object.getString("amount"));
+                                    }
+                                    arrTransactions.put(returnVal);
+                                } else if(object.getString("type").equals("create_account")) {
+
                                 }
-                                arrTransactions.put(returnVal);
+
+
                             }
                             callback.onResponseArray(arrTransactions);
                         }
@@ -269,29 +232,57 @@ public class NRLStellar extends NRLCoin {
             }
         });
     }
+    public void SendTransaction(long amount, String destinationAddress,NRLCallback callback) {
+        String url_getbalance = url_server + "/account/" + this.walletAddress;
+        new HTTPRequest().run(url_getbalance, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    ResponseBody results = response.body();
+                    try {
+                        JSONObject object = new JSONObject(results.string());
+                        JSONObject data = object.getJSONObject("data");
+                        sequenceNumber = Long.parseLong(data.getString("sequence"));
+                        createTransaction(amount, destinationAddress, callback);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        callback.onFailure(e);
+                    }
+                }
+            }
+        });
+    }
 
     public void createTransaction(long amount, String destinationAddress, NRLCallback callback) {
         module.nrlwallet.com.nrlwalletsdk.Stellar.Network.usePublicNetwork();
         KeyPair destination = KeyPair.fromAccountId(destinationAddress);
-        byte[] tmpseed = Arrays.copyOfRange(bseed, 0, 32);
+
+        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
         KeyPair source = KeyPair.fromSecretSeed(tmpseed);
-        Account sourceAccount = new Account(source, 2908908335136768L);//3009998980382720L);
+        account = new Account(source, sequenceNumber);
+
         PaymentOperation operation = new PaymentOperation.Builder(destination, new AssetTypeNative(), amount).build();
 
-        Transaction transaction = new Transaction.Builder(sourceAccount)
+        Transaction transaction = new Transaction.Builder(this.account)
                 .addOperation(operation)
                 .build();
 
-        transaction.sign(keyPair);
+        transaction.sign(source);
+
 
         System.out.println(transaction.toEnvelopeXdrBase64());
         String url_getTransaction = url_server + "/transaction";
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("tx", transaction.toEnvelopeXdrBase64())
-                .build();
+        String json = "{\"tx\":\"" + transaction.toEnvelopeXdrBase64() + "\"}";
+        RequestBody body = RequestBody.create(HTTPRequest.JSON, json);
 
-        new HTTPRequest().run(url_getTransaction, requestBody, new Callback() {
+
+        new HTTPRequest().run(url_getTransaction, body, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 callback.onFailure(e);
@@ -299,8 +290,8 @@ public class NRLStellar extends NRLCoin {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-//                callback.onResponse(response.body().string());
-                callback.onResponse("success");
+                System.out.println("************----------- response : " + response.body().string());
+                callback.onResponse(response.body().string());
             }
         });
     }
