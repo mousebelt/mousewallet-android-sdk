@@ -66,36 +66,7 @@ public class NRLStellar extends NRLCoin {
         walletAddress = keyPair.getAccountId();
         createWallet();
     }
-
-    public void sendTransaction(long amount, String destinationAddress, NRLCallback callback) {
-        String url_getbalance = url_server + "/account/" + this.walletAddress;
-        new HTTPRequest().run(url_getbalance, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-                callback.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    ResponseBody results = response.body();
-                    try {
-                        JSONObject object = new JSONObject(results.string());
-                        JSONObject data = object.getJSONObject("data");
-
-                        sequenceNumber = Long.parseLong(data.getString("sequence"));
-                        createTransaction(amount, destinationAddress, callback);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        callback.onFailure(e);
-                    }
-                }else{
-                    callback.onResponse("Failed");
-                }
-            }
-        });
-    }
+    
     public String getPrivateKey() {
         return this.privateKey;
     }
