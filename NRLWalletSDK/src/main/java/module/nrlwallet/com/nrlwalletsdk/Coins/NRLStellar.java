@@ -67,8 +67,34 @@ public class NRLStellar extends NRLCoin {
         createWallet();
     }
 
-    public long getSequenceNumber() {
-        return this.sequenceNumber;
+    public void sendTransaction(long amount, String destinationAddress, NRLCallback callback) {
+        String url_getbalance = url_server + "/account/" + this.walletAddress;
+        new HTTPRequest().run(url_getbalance, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    ResponseBody results = response.body();
+                    try {
+                        JSONObject object = new JSONObject(results.string());
+                        JSONObject data = object.getJSONObject("data");
+
+                        sequenceNumber = Long.parseLong(data.getString("sequence"));
+                        createTransaction(amount, destinationAddress, callback);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        callback.onFailure(e);
+                    }
+                }else{
+                    callback.onResponse("Failed");
+                }
+            }
+        });
     }
     public String getPrivateKey() {
         return this.privateKey;
@@ -146,6 +172,7 @@ public class NRLStellar extends NRLCoin {
                     // Do what you want to do with the response.
                 } else {
                     // Request not successful
+                    callback.onResponse("Failed");
                 }
             }
         });
@@ -290,8 +317,12 @@ public class NRLStellar extends NRLCoin {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                System.out.println("************----------- response : " + response.body().string());
-                callback.onResponse(response.body().string());
+                if (response.isSuccessful()) {
+                    System.out.println("************----------- response : " + response.body().string());
+                    callback.onResponse(response.body().string());
+                }else{
+                    callback.onResponse("Failed");
+                }
             }
         });
     }
