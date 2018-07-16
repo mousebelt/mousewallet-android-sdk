@@ -177,7 +177,7 @@ public class NRLBitcoin extends NRLCoin {
 
     public void setTransaction(long amount, String address, NRLCallback callback) {
 
-        NetworkParameters params = LitecoinMainNetParams.get();
+        NetworkParameters params = MainNetParams.get();
         Coin value = Coin.valueOf(amount);
         try {
             Address to = Address.fromBase58(params, address);
