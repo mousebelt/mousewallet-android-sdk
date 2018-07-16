@@ -1,18 +1,36 @@
-package module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params;
+/*
+ * Copyright 2013 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package module.nrlwallet.com.nrlwalletsdk.libdohj.params;
 
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.*;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStore;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStoreException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.utils.MonetaryFormat;
-
+import module.nrlwallet.com.nrlwalletsdk.libdohj.core.AltcoinNetworkParameters;
+import module.nrlwallet.com.nrlwalletsdk.libdohj.core.AltcoinSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.math.BigInteger;
-
 import static module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Coin.COIN;
 
 /**
  * Common parameters for Litecoin networks.
  */
-public abstract class AbstractLitecoinParams extends NetworkParameters {
+public abstract class AbstractLitecoinParams extends NetworkParameters implements AltcoinNetworkParameters {
     /** Standard format for the LITE denomination. */
     public static final MonetaryFormat LITE;
     /** Standard format for the mLITE denomination. */
@@ -43,18 +61,26 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
 
     static {
         LITE = MonetaryFormat.BTC.noCode()
-                .code(0, CODE_LITE)
-                .code(3, CODE_MLITE)
-                .code(7, CODE_LITEOSHI);
+            .code(0, CODE_LITE)
+            .code(3, CODE_MLITE)
+            .code(7, CODE_LITEOSHI);
         MLITE = LITE.shift(3).minDecimals(2).optionalDecimals(2);
         LITEOSHI = LITE.shift(7).minDecimals(0).optionalDecimals(2);
     }
+
+    /** The string returned by getId() for the main, production network where people trade things. */
+    public static final String ID_LITE_MAINNET = "org.litecoin.production";
+    /** The string returned by getId() for the testnet. */
+    public static final String ID_LITE_TESTNET = "org.litecoin.test";
+    /** The string returned by getId() for regtest. */
+    public static final String ID_LITE_REGTEST = "regtest";
 
     public static final int LITECOIN_PROTOCOL_VERSION_MINIMUM = 70002;
     public static final int LITECOIN_PROTOCOL_VERSION_CURRENT = 70003;
 
     private static final Coin BASE_SUBSIDY = COIN.multiply(50);
 
+    protected Logger log = LoggerFactory.getLogger(AbstractLitecoinParams.class);
 
     public AbstractLitecoinParams() {
         super();
@@ -65,6 +91,19 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
         packetMagic = 0xfbc0b6db;
         bip32HeaderPub = 0x0488C42E; //The 4 byte header that serializes in base58 to "xpub". (?)
         bip32HeaderPriv = 0x0488E1F4; //The 4 byte header that serializes in base58 to "xprv" (?)
+    }
+
+    @Override
+    public Coin getBlockSubsidy(final int height) {
+        return BASE_SUBSIDY.shiftRight(height / getSubsidyDecreaseBlockCount());
+    }
+
+    /**
+     * Get the hash to use for a block.
+     */
+    @Override
+    public Sha256Hash getBlockDifficultyHash(Block block) {
+        return ((AltcoinBlock) block).getScryptHash();
     }
 
     public MonetaryFormat getMonetaryFormat() {
@@ -78,7 +117,7 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
 
     @Override
     public Coin getMinNonDustOutput() {
-        return COIN;
+        return Coin.COIN;
     }
 
     @Override
@@ -94,7 +133,7 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
 
     @Override
     public void checkDifficultyTransitions(StoredBlock storedPrev, Block nextBlock, BlockStore blockStore)
-            throws VerificationException, BlockStoreException {
+        throws VerificationException, BlockStoreException {
         try {
             final long newTargetCompact = calculateNewDifficultyTarget(storedPrev, nextBlock, blockStore);
             final long receivedTargetCompact = nextBlock.getDifficultyTarget();
@@ -117,14 +156,14 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
      * be provided.
      */
     public long calculateNewDifficultyTarget(StoredBlock storedPrev, Block nextBlock, BlockStore blockStore)
-            throws VerificationException, BlockStoreException, CheckpointEncounteredException {
+        throws VerificationException, BlockStoreException, CheckpointEncounteredException {
         final Block prev = storedPrev.getHeader();
         final int previousHeight = storedPrev.getHeight();
         final int retargetInterval = this.getInterval();
 
         // Is this supposed to be a difficulty transition point?
         if ((storedPrev.getHeight() + 1) % retargetInterval != 0) {
-            if (id.equals(ID_LITECOIN_TESTNET)) {
+            if (this.allowMinDifficultyBlocks()) {
                 // Special difficulty rule for testnet:
                 // If the new block's timestamp is more than 5 minutes
                 // then allow mining of a min-difficulty block.
@@ -173,13 +212,14 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
 
         //We used checkpoints...
         if (cursor == null) {
+            log.debug("Difficulty transition: Hit checkpoint!");
             throw new CheckpointEncounteredException();
         }
 
         Block blockIntervalAgo = cursor.getHeader();
         return this.calculateNewDifficultyTargetInner(previousHeight, prev.getTimeSeconds(),
-                prev.getDifficultyTarget(), blockIntervalAgo.getTimeSeconds(),
-                nextBlock.getDifficultyTarget());
+            prev.getDifficultyTarget(), blockIntervalAgo.getTimeSeconds(),
+            nextBlock.getDifficultyTarget());
     }
 
     /**
@@ -194,10 +234,10 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
      * @return New difficulty target as compact bytes.
      */
     protected long calculateNewDifficultyTargetInner(int previousHeight, final Block prev,
-                                                     final Block nextBlock, final Block blockIntervalAgo) {
+            final Block nextBlock, final Block blockIntervalAgo) {
         return this.calculateNewDifficultyTargetInner(previousHeight, prev.getTimeSeconds(),
-                prev.getDifficultyTarget(), blockIntervalAgo.getTimeSeconds(),
-                nextBlock.getDifficultyTarget());
+            prev.getDifficultyTarget(), blockIntervalAgo.getTimeSeconds(),
+            nextBlock.getDifficultyTarget());
     }
 
     /**
@@ -211,8 +251,8 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
      * @return New difficulty target as compact bytes.
      */
     protected long calculateNewDifficultyTargetInner(int previousHeight, long previousBlockTime,
-                                                     final long lastDifficultyTarget, final long lastRetargetTime,
-                                                     final long nextDifficultyTarget) {
+        final long lastDifficultyTarget, final long lastRetargetTime,
+        final long nextDifficultyTarget) {
         final int retargetTimespan = this.getTargetTimespan();
         int actualTime = (int) (previousBlockTime - lastRetargetTime);
         final int minTimespan = retargetTimespan / 4;
@@ -225,6 +265,7 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
         newTarget = newTarget.divide(BigInteger.valueOf(retargetTimespan));
 
         if (newTarget.compareTo(this.getMaxTarget()) > 0) {
+            log.info("Difficulty hit proof of work limit: {}", newTarget.toString(16));
             newTarget = this.getMaxTarget();
         }
 
@@ -236,6 +277,10 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
         return Utils.encodeCompactBits(newTarget);
     }
 
+    @Override
+    public AltcoinSerializer getSerializer(boolean parseRetain) {
+        return new AltcoinSerializer(this, parseRetain);
+    }
 
     @Override
     public int getProtocolVersionNum(final ProtocolVersion version) {
@@ -251,6 +296,13 @@ public abstract class AbstractLitecoinParams extends NetworkParameters {
         }
     }
 
+    /**
+     * Whether this network has special rules to enable minimum difficulty blocks
+     * after a long interval between two blocks (i.e. testnet).
+     */
+    public boolean allowMinDifficultyBlocks() {
+        return this.isTestNet();
+    }
 
     public int getTargetSpacing() {
         return this.getTargetTimespan() / this.getInterval();

@@ -1,17 +1,10 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.util.Log;
-
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Address;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Block;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.BlockChain;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Coin;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.FilteredBlock;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.InsufficientMoneyException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.NetworkParameters;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Peer;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.PeerGroup;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Transaction;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcast;
@@ -19,11 +12,11 @@ import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadc
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.listeners.DownloadProgressTracker;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.kits.WalletAppKit;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.net.discovery.DnsDiscovery;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.LitecoinMainNetParams;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.MainNetParams;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStoreException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.SPVBlockStore;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.Protos;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.SendRequest;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.UnreadableWalletException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.Wallet;
@@ -32,14 +25,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
-
-import javax.annotation.Nullable;
 
 import io.github.novacrypto.bip32.Network;
 import io.github.novacrypto.bip32.networks.Bitcoin;
 import jersey.repackaged.com.google.common.util.concurrent.MoreExecutors;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.WalletProtobufSerializer;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
@@ -83,26 +77,22 @@ public class NRLBitcoin extends NRLCoin {
     void getWallet() {
         File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"btc.spvchain");
         if(chainFile.exists()){
-            try{
-                SPVBlockStore chainStore = new SPVBlockStore(params, chainFile);
-                BlockChain chain = new BlockChain(params, chainStore);
-                PeerGroup peerGroup = new PeerGroup(params, chain);
-                peerGroup.addPeerDiscovery(new DnsDiscovery(params));
-
-                // Now we need to hook the wallet up to the blockchain and the peers. This registers event listeners that notify our wallet about new transactions.
-                chain.addWallet(wallet);
-                peerGroup.addWallet(wallet);
-                chain.addWallet(wallet);
-                peerGroup.addWallet(wallet);
-                wallet.allowSpendingUnconfirmedTransactions();
-
-                wallet.saveToFile(chainFile);
-                // Print a debug message with the details about the wallet. The correct balance should now be displayed.
-                System.out.println(wallet.toString());
-            }catch (BlockStoreException e) {
+            FileInputStream stream = null;
+            try {
+                stream = new FileInputStream(chainFile);
+                Protos.Wallet proto = WalletProtobufSerializer.parseToProto(stream);
+                System.out.println(proto.toString());
+                return;
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
-            }catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }else{
             createWallet();
@@ -161,6 +151,7 @@ public class NRLBitcoin extends NRLCoin {
             peerGroup.stop();
             Thread.sleep(1000);
             wallet.saveToFile(chainFile);
+            Thread.sleep(1000);
 
         }catch (UnreadableWalletException e){
             e.printStackTrace();
@@ -175,10 +166,12 @@ public class NRLBitcoin extends NRLCoin {
 
     boolean sentCoins = false;
 
+
     public void setTransaction(long amount, String address, NRLCallback callback) {
 
         NetworkParameters params = MainNetParams.get();
         Coin value = Coin.valueOf(amount);
+
         try {
             Address to = Address.fromBase58(params, address);
             TransactionBroadcaster transactionBroadcaster = new TransactionBroadcaster() {
@@ -189,9 +182,23 @@ public class NRLBitcoin extends NRLCoin {
                     return null;
                 }
             };
-            this.wallet.sendCoins(transactionBroadcaster, to, value);
+            wallet.sendCoins(transactionBroadcaster, to, value);
         } catch (InsufficientMoneyException e) {
+            System.out.println("Not enough coins in your wallet. Missing " + e.missing.getValue() + " satoshis are missing (including fees)");
+            System.out.println("Send money to: " + kit.wallet().currentReceiveAddress().toString());
             callback.onFailure(e);
+        } catch (Wallet.DustySendRequested e){
+            System.err.println(e.getMessage());
+
+        } catch (Wallet.CouldNotAdjustDownwards e) {
+            System.err.println(e.getMessage());
+
+        } catch (Wallet.ExceededMaxTransactionSize e) {
+            System.err.println(e.getMessage());
+
+        } catch (Wallet.MultipleOpReturnRequested e) {
+            System.err.println(e.getMessage());
+
         }
     }
     public void sendTransaction1(long amount, String address, NRLCallback callback) {

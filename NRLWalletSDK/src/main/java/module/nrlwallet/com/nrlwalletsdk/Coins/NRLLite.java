@@ -6,64 +6,43 @@ import android.support.annotation.RequiresApi;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.web3j.crypto.Credentials;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.Nullable;
 
 import io.github.novacrypto.bip32.ExtendedPrivateKey;
 import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
-import io.github.novacrypto.bip32.derivation.CkdFunctionDerive;
-import io.github.novacrypto.bip32.derivation.Derive;
-import io.github.novacrypto.bip32.networks.Bitcoin;
 import io.github.novacrypto.bip32.networks.Litecoin;
 import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
 import io.github.novacrypto.bip44.BIP44;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Address;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Block;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.BlockChain;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Coin;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.ECKey;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.FilteredBlock;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.InsufficientMoneyException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.NetworkParameters;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Peer;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.PeerGroup;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Transaction;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcast;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcaster;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.listeners.DownloadProgressTracker;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.net.discovery.DnsDiscovery;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.LitecoinMainNetParams;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.LitecoinTestNet3Params;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.TestNet3Params;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStoreException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.SPVBlockStore;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.SendRequest;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.UnreadableWalletException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.Wallet;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.orchid.encoders.Hex;
-import module.nrlwallet.com.nrlwalletsdk.Common.ValidationException;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Base58Encode;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
-import module.nrlwallet.com.nrlwalletsdk.Network.CoinType;
-import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedKey;
-import module.nrlwallet.com.nrlwalletsdk.Utils.ExtendedPrivateKeyBIP32;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
-import module.nrlwallet.com.nrlwalletsdk.Utils.WIF;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
+import module.nrlwallet.com.nrlwalletsdk.libdohj.params.LitecoinMainNetParams;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
@@ -89,9 +68,7 @@ public class NRLLite extends NRLCoin {
     String str_seed;
     File chainFile;
 
-    private List<Integer> expected;
-    private String path;
-    private int[] list;
+    NetworkParameters params = LitecoinMainNetParams.get();
 
     public NRLLite(byte[] seed, String s_seed) {
 
@@ -103,14 +80,14 @@ public class NRLLite extends NRLCoin {
 
     private void createWallet() {
         Long creationtime = new Date().getTime();
-        NetworkParameters params = LitecoinMainNetParams.get();
+        long createTime = 1531233924L;
         try {
-            DeterministicSeed seed = new DeterministicSeed(str_seed, null, "", creationtime);
+            DeterministicSeed seed = new DeterministicSeed(str_seed, null, "", createTime);
             wallet = Wallet.fromSeed(params, seed);
             walletAddress = wallet.currentReceiveAddress().toBase58();
 //            privateKey = wallet.getActiveKeyChain().getWatchingKey().getPrivKey().toString();
             wallet.clearTransactions(0);
-            chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"lite.spvchain");
+            chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"ltc.spvchain");
             if (chainFile.exists()) {
                 chainFile.delete();
             }
@@ -143,13 +120,15 @@ public class NRLLite extends NRLCoin {
 
             // shutting down again
             peers.stop();
-            // shutting down again
-//            peerGroup.stopAsync();
+            wallet.saveToFile(chainFile);
+            Thread.sleep(1000);
         } catch (UnreadableWalletException e) {
             e.printStackTrace();
         } catch (BlockStoreException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -361,7 +340,6 @@ public class NRLLite extends NRLCoin {
     }
 
     public void createTransaction1(String amount, String address, String memo, long fee, NRLCallback callback) {
-        NetworkParameters params = LitecoinMainNetParams.get();
 //        DumpedPrivateKey dpk = DumpedPrivateKey.fromBase58(params, )
 //        ECKey key = dpk.getKey();
         Transaction tx = new Transaction(params);
@@ -405,7 +383,6 @@ public class NRLLite extends NRLCoin {
     }
 
     public void createTransaction(String amount, String address, String memo, long fee, NRLCallback callback) {
-        NetworkParameters params = LitecoinMainNetParams.get();
         Coin value = Coin.parseCoin(amount);
         try {
             Address to = new Address(params, address);
@@ -419,6 +396,19 @@ public class NRLLite extends NRLCoin {
             };
             this.wallet.sendCoins(transactionBroadcaster, to, value);
         } catch (InsufficientMoneyException e) {
+            System.err.println(e.getMessage());
+            callback.onFailure(e);
+        } catch (Wallet.DustySendRequested e){
+            System.err.println(e.getMessage());
+            callback.onFailure(e);
+        } catch (Wallet.CouldNotAdjustDownwards e) {
+            System.err.println(e.getMessage());
+            callback.onFailure(e);
+        } catch (Wallet.ExceededMaxTransactionSize e) {
+            System.err.println(e.getMessage());
+            callback.onFailure(e);
+        } catch (Wallet.MultipleOpReturnRequested e) {
+            System.err.println(e.getMessage());
             callback.onFailure(e);
         }
     }

@@ -34,6 +34,7 @@ import module.nrlwallet.com.nrlwalletsdk.Network.Neo;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import neoutils.NEP5;
+import neoutils.NativeAsset;
 import neoutils.Neoutils;
 import neoutils.RawTransaction;
 import neoutils.SharedSecret;
@@ -58,6 +59,7 @@ public class NRLNeo extends NRLCoin {
     Wallet neoWallet;
     JSONArray trnasactions;
     public String balance;
+    JSONArray arrUTXO;
     String neoAssetID = "c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b";
     String gasAssetID = "602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7";
 
@@ -262,22 +264,62 @@ public class NRLNeo extends NRLCoin {
     }
     //network string, scriptHash string, wif string, sendingAssetID string, amount float64, remark string, networkFeeAmountInGAS float64
     public void createTransaction(double amount, String address, String memo, double fee, NRLCallback callback) {
-
-
-        String str_network = "private";//neoAssetID;//"main";//network.toString();
-        String str_hash = "5f03828cb45198eedd659d264b6d3a1c889978ce";//neoWallet.hashCode() + "";
+        this.updateUTXO();
+/*
+        String str_network = "private";
+        String str_hash =  neoWallet.hashCode() + "";//Neoutils.scriptHashToNEOAddress(address);//
         String str_wif = neoWallet.getWIF();
+
+        neoWallet.setAddress(address);
+        str_wif = neoWallet.getWIF();
+
+
         double d_amount =  amount;//Double.longBitsToDouble(amount);
         double d_fee = fee;//Double.longBitsToDouble((long) fee);
-        String assetID = "NEO";
+        String assetID = "c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b";
         try {
-            RawTransaction transaction = Neoutils.mintTokensRawTransactionMobile(str_network, str_hash, str_wif, assetID, d_amount, memo, d_fee);
+            RawTransaction transaction = Neoutils.mintTokensRawTransactionMobile(str_network, str_hash, str_wif , assetID, d_amount, memo, d_fee);
 //            callback.onResponse(transaction.getTXID());
             callback.onResponse("success");
         } catch (Exception e) {
             e.printStackTrace();
             callback.onFailure(e);
         }
+        */
+    }
 
+    public void updateUTXO() {
+
+        String url_getTransaction = url_server + "/address/utxo/" + this.walletAddress;
+        new HTTPRequest().run(url_getTransaction, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String body =   (response.body().string());
+                    arrUTXO = new JSONArray();
+                    try {
+                        JSONObject jsonObj = new JSONObject(body);
+                        String msg = jsonObj.get("msg").toString();
+                        if(msg.equals("success")){
+                            JSONArray data = jsonObj.getJSONArray("data");
+                            for(int i = 0; i < data.length(); i++) {
+                                JSONObject obj = data.getJSONObject(i);
+                                arrUTXO.put(obj);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    // Do what you want to do with the response.
+                } else {
+                    // Request not successful
+                }
+            }
+        });
     }
 }

@@ -18,13 +18,8 @@
 package module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core;
 
 import com.google.common.base.Objects;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Block;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.StoredBlock;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.VerificationException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.net.discovery.*;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.*;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.LitecoinMainNetParams;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.LitecoinTestNet3Params;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.script.*;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStore;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStoreException;
@@ -39,6 +34,8 @@ import java.util.*;
 import static module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Coin.*;
 
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.utils.VersionTally;
+import module.nrlwallet.com.nrlwalletsdk.libdohj.params.LitecoinMainNetParams;
+import module.nrlwallet.com.nrlwalletsdk.libdohj.params.LitecoinTestNet3Params;
 
 /**
  * <p>NetworkParameters contains the data needed for working with an instantiation of a Bitcoin chain.</p>
@@ -69,17 +66,17 @@ public abstract class NetworkParameters {
     /**
      * Unit test network.
      */
-    public static final String ID_UNITTESTNET = "module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.unittest";
+    public static final String ID_UNITTESTNET = "org.bitcoinj.unittest";
 
     /**
      * The string returned by getId() for the Litecoin test net netparams.
      */
-    public static final String ID_LITECOIN_TESTNET = "module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.litecoin_testnet";
+    public static final String ID_LITECOIN_TESTNET = "org.bitcoinj.litecoin_testnet";
 
     /**
      * The string returned by getId() for the Litecoin main net netparams.
      */
-    public static final String ID_LITECOIN_MAINNET = "module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.litecoin_mainnet";
+    public static final String ID_LITECOIN_MAINNET = "org.bitcoinj.litecoin_mainnet";
 
     /**
      * The string used by the payment protocol to represent the main net.
@@ -141,7 +138,7 @@ public abstract class NetworkParameters {
         genesisBlock = createGenesis(this);
     }
 
-    private static Block createGenesis(NetworkParameters n) {
+    public static Block createGenesis(NetworkParameters n) {
         Block genesisBlock = new Block(n, Block.BLOCK_VERSION_GENESIS);
         Transaction t = new Transaction(n);
         try {
@@ -340,7 +337,7 @@ public abstract class NetworkParameters {
     }
 
     /**
-     * Returns discovery objects for seeds implementing the Cartographer protocol. See {@link module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.net.discovery.HttpDiscovery} for more info.
+     * Returns discovery objects for seeds implementing the Cartographer protocol. See {@link org.bitcoinj.net.discovery.HttpDiscovery} for more info.
      */
     public HttpDiscovery.Details[] getHttpSeeds() {
         return httpSeeds;
@@ -376,7 +373,7 @@ public abstract class NetworkParameters {
     }
 
     /**
-     * First byte of a base58 encoded address. See {@link module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Address}. This is the same as acceptableAddressCodes[0] and
+     * First byte of a base58 encoded address. See {@link org.bitcoinj.core.Address}. This is the same as acceptableAddressCodes[0] and
      * is the one used for "normal" addresses. Other types of address may be encountered with version codes found in
      * the acceptableAddressCodes array.
      */
@@ -392,7 +389,7 @@ public abstract class NetworkParameters {
     }
 
     /**
-     * First byte of a base58 encoded dumped private key. See {@link module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.DumpedPrivateKey}.
+     * First byte of a base58 encoded dumped private key. See {@link org.bitcoinj.core.DumpedPrivateKey}.
      */
     public int getDumpedPrivateKeyHeader() {
         return dumpedPrivateKeyHeader;
@@ -438,7 +435,7 @@ public abstract class NetworkParameters {
     }
 
     /**
-     * The key used to sign {@link module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.AlertMessage}s. You can use {@link module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.ECKey#verify(byte[], byte[], byte[])} to verify
+     * The key used to sign {@link org.bitcoinj.core.AlertMessage}s. You can use {@link org.bitcoinj.core.ECKey#verify(byte[], byte[], byte[])} to verify
      * signatures using it.
      */
     public byte[] getAlertSigningKey() {
