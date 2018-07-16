@@ -264,10 +264,16 @@ public class NRLEthereum extends NRLCoin {
         BigInteger nonce = BigInteger.valueOf(5);//this.count);
         BigInteger gas_price = BigInteger.valueOf((long) 5500000000L);
         String amount_data = "0x" + amount;
+        BigInteger send_amount = BigInteger.valueOf(Long.valueOf(amount));
         // gas price 1,000,000,000 ===10e9
         // amount 1ETH = 1,000,000,000,000,000,000 WEI ==== 10e18
         //nonce, <gas price>, <gas limit>, <toAddress>, <value>
-        RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(41000), address, amount_data);
+        RawTransaction rawTransaction;
+        if(memo.equals("ETH")){
+            rawTransaction = RawTransaction.createEtherTransaction(nonce, gas_price, BigInteger.valueOf(21000), address, send_amount);
+        } else {
+            rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(41000), address,send_amount, memo);
+        }
 
 //        credentials = Credentials.create(this.getPrivateKey());
 //        credentials = Credentials.create(this.privateKey_origin);
