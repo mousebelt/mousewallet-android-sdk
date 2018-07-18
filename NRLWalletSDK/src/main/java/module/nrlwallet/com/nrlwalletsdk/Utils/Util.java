@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import static android.content.Context.FINGERPRINT_SERVICE;
 public class Util
 {
     public static final String TAG = Util.class.getName();
+    private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
     public static byte[] concat(byte[] a, byte[] b) {
         byte[] c = new byte[a.length + b.length];
@@ -43,7 +45,15 @@ public class Util
         System.arraycopy(b, 0, c, a.length, b.length);
         return c;
     }
-
+    public static String bytesToHex1(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for ( int j = 0; j < bytes.length; j++ ) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
     public static String toBitString(final byte[] b) {
         final char[] bits = new char[8 * b.length];
         for (int i = 0; i < b.length; i++) {
@@ -61,6 +71,19 @@ public class Util
             }
         }
         return String.valueOf(bits);
+    }
+
+    public static String removePrefix(String ss) {
+        return ss.replaceFirst("^0x", "");
+    }
+    public static byte[] revesedArray(byte[] data) {
+        int length = data.length;
+        byte[] revesedArr = new byte[length];
+        for(int i = 0; i < length; i++) {
+            revesedArr[length-i-1] = data[i];
+        }
+        return revesedArr;
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
@@ -97,6 +120,10 @@ public class Util
                     + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
+    }
+    public static long toSafeMemory(BigDecimal bigDecimal, int decimal) {
+        BigDecimal tmp = new BigDecimal(Math.pow(10.0, (double) decimal));
+        return bigDecimal.multiply(tmp).longValue();
     }
 
     public static String getAgentString(Context app, String cfnetwork) {
