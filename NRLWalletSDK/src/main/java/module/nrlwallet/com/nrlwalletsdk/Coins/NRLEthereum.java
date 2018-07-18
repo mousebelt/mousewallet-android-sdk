@@ -9,11 +9,17 @@ import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.UnreadableWalle
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.contracts.token.ERC20Interface;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.tx.ChainId;
+import org.web3j.tx.Transfer;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
@@ -260,7 +266,14 @@ public class NRLEthereum extends NRLCoin {
         });
     }
 
-    public void createTransaction(String amount, String address, String memo, double fee, NRLCallback callback) {
+    //amount : send amount
+    //address : receive address
+    //memo :
+    //fee
+    //tokenID : ERC20 token id
+    //tokenAddress : ERC20 token address
+    //value : d
+    public void createTransaction(String amount, String address, String memo, double fee, long tokenID, String tokenAddress, String value, NRLCallback callback) {
         BigInteger nonce = BigInteger.valueOf(5);//this.count);
         BigInteger gas_price = BigInteger.valueOf((long) 5500000000L);
         String amount_data = "0x" + amount;
@@ -270,9 +283,15 @@ public class NRLEthereum extends NRLCoin {
         //nonce, <gas price>, <gas limit>, <toAddress>, <value>
         RawTransaction rawTransaction;
         if(memo.equals("ETH")){
-            rawTransaction = RawTransaction.createEtherTransaction(nonce, gas_price, BigInteger.valueOf(21000), address, send_amount);
-        } else {
-            rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(41000), address,send_amount, memo);
+            rawTransaction = RawTransaction.createEtherTransaction(nonce, gas_price, BigInteger.valueOf(21000), amount_data, send_amount);
+        } else {    //ERC20 Token
+            String data = null;
+            try {
+                data = inputData(tokenID, address, value);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(21000), tokenAddress, BigInteger.ZERO, data);
         }
 
 //        credentials = Credentials.create(this.getPrivateKey());
@@ -326,5 +345,39 @@ public class NRLEthereum extends NRLCoin {
             hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
         return new String(hexChars);
+    }
+    public String inputData(long contractId, String address, String value) throws Exception {
+        if (!WalletUtils.isValidAddress(address)) {
+            throw new Exception("address error");
+        }
+        String strContract = "0x" + Long.toHexString(contractId);
+        String strAddress = stringTo64Symbols(address);
+        String strValue = stringValueFormat(value, 16);
+        strValue = stringTo64Symbols(strValue);
+        return strContract + strAddress + strValue;
+    }
+    public String stringValueFormat(String value, int radix) {
+        BigDecimal bigDecimal = new BigDecimal(value);
+        long divide = 1000000000000000000L;
+        BigDecimal bd = new BigDecimal(divide);
+        BigDecimal doubleWithStringValue = bd.multiply(bigDecimal);
+        return doubleWithStringValue.toBigInteger().toString(radix);
+    }
+    public String stringTo64Symbols(String line) {
+        if (line.charAt(0) == '0' && line.charAt(1) == 'x') {
+            StringBuilder buffer = new StringBuilder(line);
+            buffer.deleteCharAt(0);
+            buffer.deleteCharAt(0);
+            line = buffer.toString();
+        }
+
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("0000000000000000000000000000000000000000000000000000000000000000");
+
+        for (int i = 0; i < line.length(); i++) {
+            buffer.setCharAt(64 - i - 1, line.charAt(line.length() - i - 1));
+        }
+        return buffer.toString();
+
     }
 }

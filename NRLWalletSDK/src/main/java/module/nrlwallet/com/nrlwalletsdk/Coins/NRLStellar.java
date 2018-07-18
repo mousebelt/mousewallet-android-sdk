@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import io.github.novacrypto.bip32.Network;
 import module.nrlwallet.com.nrlwalletsdk.Network.Neo;
@@ -45,9 +46,7 @@ public class NRLStellar extends NRLCoin {
     }
 
     private void init() {
-        byte[] tmpseed = new byte[0];
-        System.arraycopy(bseed , 32, tmpseed, 0,32);
-//        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
+        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
         keyPair = KeyPair.fromSecretSeed(tmpseed);
         walletAddress = keyPair.getAccountId();
         createWallet();
@@ -247,9 +246,7 @@ public class NRLStellar extends NRLCoin {
         module.nrlwallet.com.nrlwalletsdk.Stellar.Network.usePublicNetwork();
         KeyPair destination = KeyPair.fromAccountId(destinationAddress);
 
-//        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
-        byte[] tmpseed = new byte[0];
-        System.arraycopy(bseed , 32, tmpseed, 0,32);
+        byte[] tmpseed = Arrays.copyOfRange(bseed, 32, 64);
         KeyPair source = KeyPair.fromSecretSeed(tmpseed);
         account = new Account(source, sequenceNumber);
 
