@@ -72,9 +72,9 @@ public class NRLBitcoin extends NRLCoin {
 
         bSeed = seed;
         mNemonic = mnemonic;
-        this.createWallet();
+        this.getWallet();
     }
-    void getWallet() {
+    void getWallet1() {
         File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"btc.spvchain");
         if(chainFile.exists()){
             FileInputStream stream = null;
@@ -96,6 +96,23 @@ public class NRLBitcoin extends NRLCoin {
             }
         }else{
             createWallet();
+        }
+    }
+    void getWallet() {
+        long createTime = 1529131310L;//System.currentTimeMillis() - 3600*24*30*1000;//1529126900000
+        try {
+            DeterministicSeed deterministicSeed = new DeterministicSeed(mNemonic, null, "", createTime);
+            File chainFile = new File(android.os.Environment.getExternalStorageDirectory(), "btc.spvchain");
+            if (chainFile.exists()) {
+                chainFile.delete();
+            }
+
+            kit = new WalletAppKit(params, chainFile, "spvchain");
+            kit.restoreWalletFromSeed(deterministicSeed);
+            kit.startAsync();
+            kit.awaitRunning();
+        }catch (UnreadableWalletException e){
+            e.printStackTrace();
         }
     }
 
@@ -142,7 +159,7 @@ public class NRLBitcoin extends NRLCoin {
 
             bListener.await();
 
-            wallet.allowSpendingUnconfirmedTransactions();
+//            wallet.allowSpendingUnconfirmedTransactions();
 
             // Print a debug message with the details about the wallet. The correct balance should now be displayed.
             System.out.println(wallet.toString());
@@ -174,30 +191,30 @@ public class NRLBitcoin extends NRLCoin {
 
         try {
             Address to = Address.fromBase58(params, address);
-            TransactionBroadcaster transactionBroadcaster = new TransactionBroadcaster() {
-                @Override
-                public TransactionBroadcast broadcastTransaction(Transaction tx) {
-//                    callback.onResponse(tx.toString());
-                    callback.onResponse("success " + tx.toString());
-                    return null;
-                }
-            };
-            wallet.sendCoins(transactionBroadcaster, to, value);
+//            SendRequest sendRequest = SendRequest.to(to, value);
+
+            Wallet.SendResult result = kit.wallet().sendCoins(kit.peerGroup(), to, value);
+            callback.onResponse(result.tx.getHashAsString());
+            System.out.println("coins sent. transaction hash: " + result.tx.getHashAsString());
         } catch (InsufficientMoneyException e) {
             System.out.println("Not enough coins in your wallet. Missing " + e.missing.getValue() + " satoshis are missing (including fees)");
             System.out.println("Send money to: " + kit.wallet().currentReceiveAddress().toString());
             callback.onFailure(e);
         } catch (Wallet.DustySendRequested e){
             System.err.println(e.getMessage());
+            callback.onFailure(e);
 
         } catch (Wallet.CouldNotAdjustDownwards e) {
             System.err.println(e.getMessage());
+            callback.onFailure(e);
 
         } catch (Wallet.ExceededMaxTransactionSize e) {
             System.err.println(e.getMessage());
+            callback.onFailure(e);
 
         } catch (Wallet.MultipleOpReturnRequested e) {
             System.err.println(e.getMessage());
+            callback.onFailure(e);
 
         }
     }
@@ -237,16 +254,17 @@ public class NRLBitcoin extends NRLCoin {
 
     @Override
     public String getAddress() {
-        return walletAddress;
+        return kit.wallet().currentReceiveAddress().toBase58();
     }
 
     public String getBalance() {
-        String balance1 = wallet.getBalance().value + "";
+        String balance1 = kit.wallet().getBalance().value + "";
         return balance1;
     }
 
-    public void getBalance1(NRLCallback callback) {
-        this.checkBalance(callback);
+    public void getBalance(NRLCallback callback) {
+        String balance1 = kit.wallet().getBalance().value + "";
+        callback.onResponse(balance1);
     }
 
     private void checkBalance(NRLCallback callback) {
