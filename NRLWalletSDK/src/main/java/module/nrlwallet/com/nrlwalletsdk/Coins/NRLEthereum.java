@@ -1,5 +1,6 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
+import io.ethmobile.ethdroid.sha3.Keccak;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.crypto.ChildNumber;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.crypto.DeterministicKey;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.crypto.HDUtils;
@@ -7,10 +8,13 @@ import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicKe
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.UnreadableWalletException;
 
+import org.bouncycastle.crypto.digests.KeccakDigest;
+import org.bouncycastle.crypto.digests.SHA3Digest;
 import org.bouncycastle.jcajce.provider.digest.SHA3;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -19,12 +23,15 @@ import org.web3j.crypto.WalletUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 
 import io.github.novacrypto.bip32.Network;
 import module.nrlwallet.com.nrlwalletsdk.Network.Ethereum;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
+import module.nrlwallet.com.nrlwalletsdk.Utils.Keccak256Helper;
+import module.nrlwallet.com.nrlwalletsdk.Utils.Util;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -50,7 +57,6 @@ public class NRLEthereum extends NRLCoin {
         super(seed, Ethereum.MAIN_NET, 60, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         Mnemonic = strMnemonic;
-//        this.init();
         this.createAddress();
     }
 
@@ -263,10 +269,11 @@ public class NRLEthereum extends NRLCoin {
             String strvalue = decToHex(Integer.parseInt(value));
             strvalue = stringTo64Symbols(strvalue);
 
-            String tmp = "0xa9059cbb";
-            tmp = tmp + address_to;
-            tmp = tmp + strvalue;
-            rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(65000), tokenID, BigInteger.ZERO, tmp);
+            String MethodID = "0xa9059cbb";
+            String ToAddress= address_to;
+            String ToAmount = strvalue;
+            String sendData = MethodID + ToAddress + ToAmount;
+            rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(65000), tokenID, BigInteger.ZERO, sendData);
         }
 
 
