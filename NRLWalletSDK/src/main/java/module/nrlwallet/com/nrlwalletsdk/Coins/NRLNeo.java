@@ -289,7 +289,15 @@ public class NRLNeo extends NRLCoin {
                     String body =   (response.body().string());
                     try {
                         JSONObject object = new JSONObject(body);
-                        callback.onResponse("success");
+                        if(object.getInt("msg") == 200){
+                            if(object.getBoolean("data")){
+                                callback.onResponse("success");
+                            }else{
+                                callback.onResponse("Failed");
+                            }
+                        }else{
+                            callback.onResponse("Failed");
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                         callback.onFailure(e);
