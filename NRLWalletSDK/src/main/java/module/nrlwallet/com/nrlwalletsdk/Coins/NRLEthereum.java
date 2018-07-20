@@ -6,17 +6,15 @@ import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.crypto.HDUtils;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicKeyChain;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.UnreadableWalletException;
+
+import org.bouncycastle.jcajce.provider.digest.SHA3;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.web3j.contracts.token.ERC20Interface;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
-import org.web3j.protocol.Web3j;
-import org.web3j.tx.ChainId;
-import org.web3j.tx.Transfer;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -25,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 
 import io.github.novacrypto.bip32.Network;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
 import module.nrlwallet.com.nrlwalletsdk.Network.Ethereum;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
@@ -78,32 +75,6 @@ public class NRLEthereum extends NRLCoin {
             e.printStackTrace();
         }
     }
-
-//    private void init() {
-//        addressIndex = BIP44.m()
-//                .purpose44()
-//                .coinType(coinType)
-//                .account(0)
-//                .external()
-//                .address(0);
-//
-//        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
-//        String DerivedAddress = root
-//                .derive("m/44'/60'/0'/0/0")
-//                .neuter().p2pkhAddress();
-//        System.out.println(DerivedAddress);
-//        root.derive("m/44'/60'/0'/0/0");
-//
-//        this.rootKey = new ExtendedPrivateKeyBIP32().getRootKey(bSeed, CoinType.ETHEREUM);
-//        ExtendedPrivateKey extendedPrivateKey = ExtendedPrivateKey.fromSeed(bSeed, Ethereum.MAIN_NET);
-//        ExtendedPrivateKey child = extendedPrivateKey.derive(addressIndex, AddressIndex.DERIVATION);
-//        ExtendedPublicKey childPub = child.neuter();
-//        extendedPrivateKey = child.extendedBase58();   //Extended Private Key
-//        extendedPublicKey = childPub.extendedBase58();    //Extended Public Key
-//        walletAddress = childPub.p2pkhAddress();
-//        String str4 = childPub.p2shAddress();
-//        this.getTransactionCount();
-//    }
 
     @Override
     public String getAddress() {
@@ -273,29 +244,31 @@ public class NRLEthereum extends NRLCoin {
     //tokenID : ERC20 token id
     //tokenAddress : ERC20 token address
     //value : d
-    public void createTransaction(String amount, String address, String memo, double fee, long tokenID, String tokenAddress, String value, NRLCallback callback) {
-        BigInteger nonce = BigInteger.valueOf(5);//this.count);
-        BigInteger gas_price = BigInteger.valueOf((long) 5500000000L);
+    public void createTransaction(String amount, String address, String memo, double fee, String tokenID, NRLCallback callback) {
+        BigInteger nonce = BigInteger.valueOf(this.count);
+        BigInteger gas_price = BigInteger.valueOf((long) fee);
         String amount_data = "0x" + amount;
+        String strAddress = stringTo64Symbols(address);
         BigInteger send_amount = BigInteger.valueOf(Long.valueOf(amount));
         // gas price 1,000,000,000 ===10e9
         // amount 1ETH = 1,000,000,000,000,000,000 WEI ==== 10e18
         //nonce, <gas price>, <gas limit>, <toAddress>, <value>
-        RawTransaction rawTransaction;
+//        Transaction transaction = null;
+        RawTransaction rawTransaction = null;
         if(memo.equals("ETH")){
-            rawTransaction = RawTransaction.createEtherTransaction(nonce, gas_price, BigInteger.valueOf(21000), amount_data, send_amount);
+            rawTransaction = RawTransaction.createEtherTransaction(nonce, gas_price, BigInteger.valueOf(21000), address, send_amount);
         } else {    //ERC20 Token
-            String data = null;
-            try {
-                data = inputData(tokenID, address, value);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(21000), tokenAddress, BigInteger.ZERO, data);
+            String address_to = stringTo64Symbols(address);
+            String value = stringTo64Symbols(amount);
+            String strvalue = decToHex(Integer.parseInt(value));
+            strvalue = stringTo64Symbols(strvalue);
+
+            String tmp = "0xa9059cbb";
+            tmp = tmp + address_to;
+            tmp = tmp + strvalue;
+            rawTransaction = RawTransaction.createTransaction(nonce, gas_price, BigInteger.valueOf(65000), tokenID, BigInteger.ZERO, tmp);
         }
 
-//        credentials = Credentials.create(this.getPrivateKey());
-//        credentials = Credentials.create(this.privateKey_origin);
 
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
         String str_Raw = "";
@@ -346,15 +319,19 @@ public class NRLEthereum extends NRLCoin {
         }
         return new String(hexChars);
     }
-    public String inputData(long contractId, String address, String value) throws Exception {
+    public String toHex(String arg) {
+        return String.format("%08x", new BigInteger(1, arg.getBytes(/*YOUR_CHARSET?*/)));
+    }
+    public String inputData(String contractId, String address, String value) throws Exception {
         if (!WalletUtils.isValidAddress(address)) {
             throw new Exception("address error");
         }
-        String strContract = "0x" + Long.toHexString(contractId);
+        String strContract = "0x" + contractId;
         String strAddress = stringTo64Symbols(address);
-        String strValue = stringValueFormat(value, 16);
-        strValue = stringTo64Symbols(strValue);
-        return strContract + strAddress + strValue;
+        String strvalue = decToHex(Integer.parseInt(value));
+//        String strValue = stringValueFormat(value, 16);
+        strvalue = stringTo64Symbols(strvalue);
+        return strContract + strAddress + strvalue;
     }
     public String stringValueFormat(String value, int radix) {
         BigDecimal bigDecimal = new BigDecimal(value);
@@ -379,5 +356,23 @@ public class NRLEthereum extends NRLCoin {
         }
         return buffer.toString();
 
+    }
+    private static final int sizeOfIntInHalfBytes = 8;
+    private static final int numberOfBitsInAHalfByte = 4;
+    private static final int halfByte = 0x0F;
+    private static final char[] hexDigits = {
+            '0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+    };
+    public String decToHex(int dec) {
+        StringBuilder hexBuilder = new StringBuilder(sizeOfIntInHalfBytes);
+        hexBuilder.setLength(sizeOfIntInHalfBytes);
+        for (int i = sizeOfIntInHalfBytes - 1; i >= 0; --i)
+        {
+            int j = dec & halfByte;
+            hexBuilder.setCharAt(i, hexDigits[j]);
+            dec >>= numberOfBitsInAHalfByte;
+        }
+        return hexBuilder.toString();
     }
 }
