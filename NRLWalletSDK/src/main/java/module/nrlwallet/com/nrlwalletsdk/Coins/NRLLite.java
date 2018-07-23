@@ -29,6 +29,7 @@ import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Transaction;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcast;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcaster;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.listeners.DownloadProgressTracker;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.kits.WalletAppKit;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.net.discovery.DnsDiscovery;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStoreException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.SPVBlockStore;
@@ -36,15 +37,16 @@ import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSe
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.SendRequest;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.UnreadableWalletException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.Wallet;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.litecoinj.integrations.LitecoinNetParameters;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Base58Encode;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
-import module.nrlwallet.com.nrlwalletsdk.libdohj.params.LitecoinMainNetParams;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
 
 public class NRLLite extends NRLCoin {
     String url_server = "https://ltc.mousebelt.com/api/v1";
@@ -67,8 +69,9 @@ public class NRLLite extends NRLCoin {
     Wallet wallet;
     String str_seed;
     File chainFile;
+    WalletAppKit kit;
 
-    NetworkParameters params = LitecoinMainNetParams.get();
+    NetworkParameters params = LitecoinNetParameters.get();
 
     public NRLLite(byte[] seed, String s_seed) {
 
@@ -76,6 +79,23 @@ public class NRLLite extends NRLCoin {
         bSeed = seed;
         str_seed = s_seed;
         this.createWallet();
+    }
+    void getWallet() {
+        long createTime = 1529131310L;//System.currentTimeMillis() - 3600*24*30*1000;//1529126900000
+        try {
+            DeterministicSeed deterministicSeed = new DeterministicSeed(str_seed, null, "", createTime);
+            File chainFile = new File(android.os.Environment.getExternalStorageDirectory(), "ltc.spvchain");
+            if (chainFile.exists()) {
+                chainFile.delete();
+            }
+
+            kit = new WalletAppKit(params, chainFile, "spvchain");
+            kit.restoreWalletFromSeed(deterministicSeed);
+            kit.startAsync();
+            kit.awaitRunning();
+        }catch (UnreadableWalletException e){
+            e.printStackTrace();
+        }
     }
 
     private void createWallet() {
