@@ -15,7 +15,7 @@ android {
         ndk {
             // Specifies the ABI configurations of your native
             // libraries Gradle should build and package with your APK.
-            abiFilters 'x86', 'x86_64', 'armeabi-v7a'
+            abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
         }
         externalNativeBuild {
             cmake {
@@ -37,6 +37,24 @@ android {
     }
     // Specifies two flavor dimensions.
     flavorDimensions "mode"
+    productFlavors {
+        sdktest {
+            dimension "mode"
+            resValue "string", "app_name", "NRLWalletSDK"
+            buildConfigField "boolean", "BITCOIN_TESTNET", "false"
+
+            externalNativeBuild {
+                cmake {
+                    // When you specify a version of CMake, as shown below,
+                    // the Android plugin searches for its binary within your
+                    // PATH environmental variable.
+                    cFlags "-DBITCOIN_TESTNET=0"
+                    targets "core"
+                }
+            }
+        }
+
+    }
     lintOptions {
         // set to true to turn off analysis progress reporting by lint
         quiet false
@@ -76,15 +94,9 @@ android {
         }
 
     }
-    sourceSets {
-        main {
-            java.srcDirs = ['src/main/java', 'src/main/jni/nrlwallet-core/Java/root', 'src/main/jni/nrlwallet-core/ethereum/Java/root']
-        }
-    }
-    dexOptions {
-        incremental true
-    }
 }
+
+
 allprojects {
     repositories {
         maven {
@@ -131,18 +143,17 @@ dependencies {
     implementation 'io.sigpipe:jbsdiff:1.0'
     implementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation 'tools.fastlane:screengrab:1.1.0'
-
-    implementation group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
-
+    implementation 'net.jcip:jcip-annotations:1.0'
     implementation 'com.google.protobuf:protobuf-java:3.0.0'
-    implementation group: 'com.lambdaworks', name: 'scrypt', version: '1.3.1'
-    implementation group: 'org.fusesource.leveldbjni', name: 'leveldbjni', version: '1.8'
-    androidTestCompile('org.mockito:mockito-core:1.9.5'){
+    implementation 'com.lambdaworks:scrypt:1.3.1'
+    implementation 'org.fusesource.leveldbjni:leveldbjni:1.8'
+    androidTestCompile('org.mockito:mockito-core:1.9.5') {
         exclude group: 'org.hamcrest'
     }
 }
 
 repositories {
-    mavenCentral()
     google()
+    mavenCentral()
+    maven { url 'https://maven.google.com' }
 }

@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.4.1)
 # automatically packages shared libraries with your APK.
 
 # now build app's shared lib
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -DANDROID_STL=gnustl_static -DANDROID_TOOLCHAIN=clang")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DANDROID_STL=gnustl_static -DANDROID_TOOLCHAIN=clang")
 
 # -Wimplicit-function-declaration
 # -Wno-missing-prototypes -Werror=return-type -Wdocumentation -Wunreachable-code-aggressive -Wno-missing-braces
@@ -20,153 +20,62 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -DANDROID_STL=gnustl_static -DANDRO
 # -Wint-conversion -Wbool-conversion -Wenum-conversion -Wassign-enum -Wno-shorten-64-to-32 -Wpointer-sign -Wnewline-eof
 # -Wdeprecated-declarations -Wno-sign-conversion
 
-add_library( # The name of the library.
+add_library( # Specifies the name of the library.
              core
 
-             # Shared library.
+             # Sets the library as a shared library.
              SHARED
 
-             # Core files
-             src/main/jni/nrlwallet-core/BRAddress.c
-             src/main/jni/nrlwallet-core/BRAddress.h
-             src/main/jni/nrlwallet-core/BRArray.h
-             src/main/jni/nrlwallet-core/BRBase58.c
-             src/main/jni/nrlwallet-core/BRBase58.h
-             src/main/jni/nrlwallet-core/BRBech32.c
-             src/main/jni/nrlwallet-core/BRBech32.h
-             src/main/jni/nrlwallet-core/BRBIP32Sequence.c
-             src/main/jni/nrlwallet-core/BRBIP32Sequence.h
-             src/main/jni/nrlwallet-core/BRBIP38Key.c
-             src/main/jni/nrlwallet-core/BRBIP38Key.h
-             src/main/jni/nrlwallet-core/BRBIP39Mnemonic.c
-             src/main/jni/nrlwallet-core/BRBIP39Mnemonic.h
-             src/main/jni/nrlwallet-core/BRBIP39WordsEn.h
-             src/main/jni/nrlwallet-core/BRBloomFilter.c
-             src/main/jni/nrlwallet-core/BRBloomFilter.h
-             src/main/jni/nrlwallet-core/BRCrypto.c
-             src/main/jni/nrlwallet-core/BRCrypto.h
-             src/main/jni/nrlwallet-core/BRInt.h
-             src/main/jni/nrlwallet-core/BRKey.c
-             src/main/jni/nrlwallet-core/BRKey.h
-             src/main/jni/nrlwallet-core/BRMerkleBlock.c
-             src/main/jni/nrlwallet-core/BRMerkleBlock.h
-             src/main/jni/nrlwallet-core/BRPaymentProtocol.c
-             src/main/jni/nrlwallet-core/BRPaymentProtocol.h
-             src/main/jni/nrlwallet-core/BRPeer.c
-             src/main/jni/nrlwallet-core/BRPeer.h
-             src/main/jni/nrlwallet-core/BRPeerManager.c
-             src/main/jni/nrlwallet-core/BRPeerManager.h
-             src/main/jni/nrlwallet-core/BRSet.c
-             src/main/jni/nrlwallet-core/BRSet.h
-             src/main/jni/nrlwallet-core/BRTransaction.c
-             src/main/jni/nrlwallet-core/BRTransaction.h
-             src/main/jni/nrlwallet-core/BRWallet.c
-             src/main/jni/nrlwallet-core/BRWallet.h
+             # Provides a relative path to your source file(s).
+             src/main/jni/loafwallet-core/BRAddress.c
+             src/main/jni/loafwallet-core/BRAddress.h
+             src/main/jni/loafwallet-core/BRArray.h
+             src/main/jni/loafwallet-core/BRBase58.c
+             src/main/jni/loafwallet-core/BRBase58.h
+             src/main/jni/loafwallet-core/BRBIP32Sequence.c
+             src/main/jni/loafwallet-core/BRBIP32Sequence.h
+             src/main/jni/loafwallet-core/BRBIP38Key.c
+             src/main/jni/loafwallet-core/BRBIP38Key.h
+             src/main/jni/loafwallet-core/BRBIP39Mnemonic.c
+             src/main/jni/loafwallet-core/BRBIP39Mnemonic.h
+             src/main/jni/loafwallet-core/BRBIP39WordsEn.h
+             src/main/jni/loafwallet-core/BRBloomFilter.c
+             src/main/jni/loafwallet-core/BRBloomFilter.h
+             src/main/jni/loafwallet-core/BRCrypto.c
+             src/main/jni/loafwallet-core/BRCrypto.h
+             src/main/jni/loafwallet-core/BRInt.h
+             src/main/jni/loafwallet-core/BRKey.c
+             src/main/jni/loafwallet-core/BRKey.h
+             src/main/jni/loafwallet-core/BRMerkleBlock.c
+             src/main/jni/loafwallet-core/BRMerkleBlock.h
+             src/main/jni/loafwallet-core/BRPaymentProtocol.c
+             src/main/jni/loafwallet-core/BRPaymentProtocol.h
+             src/main/jni/loafwallet-core/BRPeer.c
+             src/main/jni/loafwallet-core/BRPeer.h
+             src/main/jni/loafwallet-core/BRPeerManager.c
+             src/main/jni/loafwallet-core/BRPeerManager.h
+             src/main/jni/loafwallet-core/BRSet.c
+             src/main/jni/loafwallet-core/BRSet.h
+             src/main/jni/loafwallet-core/BRTransaction.c
+             src/main/jni/loafwallet-core/BRTransaction.h
+             src/main/jni/loafwallet-core/BRWallet.c
+             src/main/jni/loafwallet-core/BRWallet.h
 
-             # BCash files
-             src/main/jni/nrlwallet-core/bcash/BRBCashAddr.c
-             src/main/jni/nrlwallet-core/bcash/BRBCashAddr.h
-             src/main/jni/nrlwallet-core/bcash/BRBCashParams.h
+             src/main/jni/transition/core.c
+             src/main/jni/transition/core.h
+             src/main/jni/transition/JNIBase58.c
+             src/main/jni/transition/JNIBase58.h
+             src/main/jni/transition/JNIBIP32Sequence.c
+             src/main/jni/transition/JNIBIP32Sequence.h
+             src/main/jni/transition/JNIKey.c
+             src/main/jni/transition/JNIKey.h
+             src/main/jni/transition/PeerManager.c
+             src/main/jni/transition/PeerManager.h
+             src/main/jni/transition/wallet.c
+             src/main/jni/transition/wallet.h)
 
-             # Core JNI files
-             src/main/jni/nrlwallet-core/Java/BRCoreJni.h
-             src/main/jni/nrlwallet-core/Java/BRCoreJni.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreJniReference.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreJniReference.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreAddress.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreAddress.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreChainParams.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreChainParams.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCorePeer.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCorePeer.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreMasterPubKey.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreMasterPubKey.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreKey.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreKey.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreMerkleBlock.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreMerkleBlock.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCorePeerManager.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCorePeerManager.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreTransaction.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreTransaction.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreTransactionInput.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreTransactionInput.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreTransactionOutput.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreTransactionOutput.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCorePaymentProtocol.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCorePaymentProtocol.h
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreWallet.c
-             src/main/jni/nrlwallet-core/Java/com_breadwallet_core_BRCoreWallet.h
 
-             # Bech32 files
-             src/main/jni/nrlwallet-core/BRBech32.c
-             src/main/jni/nrlwallet-core/BRBech32.h
-
-             # Ethereum files
-             src/main/jni/nrlwallet-core/ethereum/BREthereum.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumAccount.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumAccount.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumAmount.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumAmount.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumBase.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumBlock.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumBlock.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumContract.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumContract.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumEther.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumEther.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumGas.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumGas.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumLightNode.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumLightNode.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumNetwork.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumNetwork.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumPrivate.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumToken.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumToken.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumTransaction.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumTransaction.h
-             src/main/jni/nrlwallet-core/ethereum/BREthereumWallet.c
-             src/main/jni/nrlwallet-core/ethereum/BREthereumWallet.h
-
-             #Ethereum RLP
-             src/main/jni/nrlwallet-core/ethereum/rlp/BRRlp.h
-             src/main/jni/nrlwallet-core/ethereum/rlp/BRRlpCoder.c
-             src/main/jni/nrlwallet-core/ethereum/rlp/BRRlpCoder.h
-
-             #Ethereum Util
-             src/main/jni/nrlwallet-core/ethereum/util/BRUtil.h
-             src/main/jni/nrlwallet-core/ethereum/util/BRUtilHex.c
-             src/main/jni/nrlwallet-core/ethereum/util/BRUtilHex.h
-             src/main/jni/nrlwallet-core/ethereum/util/BRUtilMath.c
-             src/main/jni/nrlwallet-core/ethereum/util/BRUtilMath.h
-             src/main/jni/nrlwallet-core/ethereum/util/BRUtilMathParse.c
-
-             #Ethereum JNI files
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumAccount.h
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumAmount.h
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumLightNode.c
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumLightNode.h
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumNetwork.c
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumNetwork.h
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumToken.c
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumToken.h
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumTransaction.h
-             src/main/jni/nrlwallet-core/ethereum/Java/com_breadwallet_core_ethereum_BREthereumWallet.h
-
-             )
-
-include_directories(src/main/jni/nrlwallet-core/ethereum/rlp/)
-include_directories(src/main/jni/nrlwallet-core/ethereum/util/)
-include_directories(src/main/jni/nrlwallet-core/ethereum/Java/)
-include_directories(src/main/jni/nrlwallet-core/ethereum/)
-include_directories(src/main/jni/nrlwallet-core/bcash/)
-include_directories(src/main/jni/nrlwallet-core/Java/)
-include_directories(src/main/jni/nrlwallet-core/)
-include_directories(src/main/jni/nrlwallet-core/secp256k1/include/)
-include_directories(src/main/jni/nrlwallet-core/secp256k1/src/)
-include_directories(src/main/jni/nrlwallet-core/secp256k1/)
-
+include_directories(src/main/jni/loafwallet-core/)
 include_directories(src/main/secp/secp256k1/include/)
 include_directories(src/main/secp/secp256k1/src/)
 include_directories(src/main/secp/secp256k1/)
