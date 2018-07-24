@@ -1,7 +1,10 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,38 +12,49 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 
-import io.github.novacrypto.bip32.ExtendedPrivateKey;
-import io.github.novacrypto.bip32.ExtendedPublicKey;
 import io.github.novacrypto.bip32.Network;
 import io.github.novacrypto.bip32.networks.Litecoin;
-import io.github.novacrypto.bip44.Account;
 import io.github.novacrypto.bip44.AddressIndex;
-import io.github.novacrypto.bip44.BIP44;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Address;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.BlockChain;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Coin;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.InsufficientMoneyException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.NetworkParameters;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.PeerGroup;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Transaction;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcast;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcaster;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.listeners.DownloadProgressTracker;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.kits.WalletAppKit;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.net.discovery.DnsDiscovery;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStoreException;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.SPVBlockStore;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.SendRequest;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.UnreadableWalletException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.Wallet;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.litecoinj.integrations.LitecoinNetParameters;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Base58Encode;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.BRMerkleBlockEntity;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.BRPeerEntity;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.BRTransactionEntity;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.PaymentItem;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.TxItem;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.listeners.SyncReceiver;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.manager.BREventManager;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.manager.BRSharedPrefs;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.security.BRKeyStore;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.security.BRSender;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.security.PostAuth;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.sqlite.MerkleBlockDataSource;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.sqlite.PeerDataSource;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.sqlite.TransactionDataSource;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.threads.BRExecutor;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.BRConstants;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.BRExchange;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.TypesConverter;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.Utils;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.wallet.BRPeerManager;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.wallet.BRWalletManager;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
+import module.nrlwallet.com.nrlwalletsdk.Utils.Util;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -50,6 +64,8 @@ import okhttp3.Response;
 
 public class NRLLite extends NRLCoin {
     String url_server = "https://ltc.mousebelt.com/api/v1";
+    Context ctx;
+    private static Context currentContext;
     Network network = Litecoin.MAIN_NET;
     int coinType = 2;
     String seedKey = "Bitcoin seed";
@@ -71,104 +87,187 @@ public class NRLLite extends NRLCoin {
     File chainFile;
     WalletAppKit kit;
 
+    byte[] pubKey;
+    byte[] authKey;
+
     NetworkParameters params = LitecoinNetParameters.get();
 
-    public NRLLite(byte[] seed, String s_seed) {
+    static {
+        System.loadLibrary("core");
+    }
+
+    public NRLLite(byte[] seed, String s_seed, Context context) {
 
         super(seed, Litecoin.MAIN_NET, 2, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
         str_seed = s_seed;
+        ctx = context;
+        currentContext = context;
         this.createWallet();
     }
-    void getWallet() {
-        long createTime = 1529131310L;//System.currentTimeMillis() - 3600*24*30*1000;//1529126900000
-        try {
-            DeterministicSeed deterministicSeed = new DeterministicSeed(str_seed, null, "", createTime);
-            File chainFile = new File(android.os.Environment.getExternalStorageDirectory(), "ltc.spvchain");
-            if (chainFile.exists()) {
-                chainFile.delete();
-            }
-
-            kit = new WalletAppKit(params, chainFile, "spvchain");
-            kit.restoreWalletFromSeed(deterministicSeed);
-            kit.startAsync();
-            kit.awaitRunning();
-        }catch (UnreadableWalletException e){
-            e.printStackTrace();
-        }
+    public static Context getBreadContext() {
+        return currentContext;
     }
 
-    private void createWallet() {
-        Long creationtime = new Date().getTime();
-        long createTime = 1531233924L;
-        try {
-            DeterministicSeed seed = new DeterministicSeed(str_seed, null, "", createTime);
-            wallet = Wallet.fromSeed(params, seed);
-            walletAddress = wallet.currentReceiveAddress().toBase58();
-//            privateKey = wallet.getActiveKeyChain().getWatchingKey().getPrivKey().toString();
-            wallet.clearTransactions(0);
-            chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"ltc.spvchain");
-            if (chainFile.exists()) {
-                chainFile.delete();
-            }
 
-            // Setting up the BlochChain, the BlocksStore and connecting to the network.
-            SPVBlockStore chainStore = new SPVBlockStore(params, chainFile);
-            BlockChain chain = new BlockChain(params, chainStore);
-            PeerGroup peers = new PeerGroup(params, chain);
-            peers.addPeerDiscovery(new DnsDiscovery(params));
+    void createWallet() {
+        byte[] bytePhrase = TypesConverter.getNullTerminatedPhrase(str_seed.getBytes());
+        byte[] seed = BRWalletManager.getSeedFromPhrase(bytePhrase);
+//        byte[] bytePhrase = str_seed.getBytes();
+//        byte[] seed = BRWalletManager.getSeedFromPhrase(bytePhrase);
+        authKey = BRWalletManager.getAuthPrivKeyForAPI(bytePhrase);
+        pubKey = BRWalletManager.getInstance().getMasterPubKey(seed);
+        initWallet();
+    }
+    void initWallet() {
+        BRWalletManager m = BRWalletManager.getInstance();
+        final BRPeerManager pm = BRPeerManager.getInstance();
 
-            // Now we need to hook the wallet up to the blockchain and the peers. This registers event listeners that notify our wallet about new transactions.
-            chain.addWallet(wallet);
-            peers.addWallet(wallet);
-
-            DownloadProgressTracker bListener = new DownloadProgressTracker() {
-                @Override
-                public void doneDownload() {
-                    System.out.println("blockchain downloaded");
+        if (!m.isCreated()) {
+            List<BRTransactionEntity> transactions = TransactionDataSource.getInstance(ctx).getAllTransactions();
+            int transactionsCount = transactions.size();
+            if (transactionsCount > 0) {
+                m.createTxArrayWithCount(transactionsCount);
+                for (BRTransactionEntity entity : transactions) {
+                    m.putTransaction(entity.getBuff(), entity.getBlockheight(), entity.getTimestamp());
                 }
-            };
+            }
 
-            // Now we re-download the blockchain. This replays the chain into the wallet. Once this is completed our wallet should know of all its transactions and print the correct balance.
-            peers.start();
-            peers.startBlockChainDownload(bListener);
-
-            bListener.await();
-
-            // Print a debug message with the details about the wallet. The correct balance should now be displayed.
-            System.out.println(wallet.toString());
-
-            // shutting down again
-            peers.stop();
-            wallet.saveToFile(chainFile);
-            Thread.sleep(1000);
-        } catch (UnreadableWalletException e) {
-            e.printStackTrace();
-        } catch (BlockStoreException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            byte[] pubkeyEncoded = pubKey;
+            if (Utils.isNullOrEmpty(pubkeyEncoded)) {
+                return;
+            }
+            //Save the first address for future check
+            m.createWallet(transactionsCount, pubkeyEncoded);
+            walletAddress = BRWalletManager.getFirstAddress(pubkeyEncoded);
+            long fee = BRSharedPrefs.getFeePerKb(ctx);
+            if (fee == 0) {
+                fee = BRConstants.DEFAULT_FEE_PER_KB;
+                BREventManager.getInstance().pushEvent("wallet.didUseDefaultFeePerKB");
+            }
+//            BRWalletManager.getInstance().setFeePerKb(fee, isEconomyFee);
         }
+
+        if (!pm.isCreated()) {
+            List<BRMerkleBlockEntity> blocks = MerkleBlockDataSource.getInstance(ctx).getAllMerkleBlocks();
+            List<BRPeerEntity> peers = PeerDataSource.getInstance(ctx).getAllPeers();
+            final int blocksCount = blocks.size();
+            final int peersCount = peers.size();
+            if (blocksCount > 0) {
+                pm.createBlockArrayWithCount(blocksCount);
+                for (BRMerkleBlockEntity entity : blocks) {
+                    pm.putBlock(entity.getBuff(), entity.getBlockHeight());
+                }
+            }
+            if (peersCount > 0) {
+                pm.createPeerArrayWithCount(peersCount);
+                for (BRPeerEntity entity : peers) {
+                    pm.putPeer(entity.getAddress(), entity.getPort(), entity.getTimeStamp());
+                }
+            }
+            BRKeyStore.putWalletCreationTime(1531000000, getBreadContext());
+
+            int walletTime = 1531000000;//BRKeyStore.getWalletCreationTime(ctx);
+
+            pm.create(walletTime, blocksCount, peersCount);
+
+        }
+        BRPeerManager.getInstance().updateFixedPeer(ctx);
+        pm.connect();
+        if (BRSharedPrefs.getStartHeight(ctx) == 0)
+            BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
+                @Override
+                public void run() {
+                    BRSharedPrefs.putStartHeight(ctx, BRPeerManager.getCurrentBlockHeight());
+                }
+            });
+        syncstart();
     }
 
-    private void init() {
-        ExtendedPrivateKey root = ExtendedPrivateKey.fromSeed(bSeed, Litecoin.MAIN_NET);
-        walletAddress = root
-                .derive("m/44'/2'/0'/0/0")
-                .neuter().p2pkhAddress();
-        Account account = BIP44.m().purpose44()
-                .coinType(2)
-                .account(0);
-        final ExtendedPublicKey accountKey = root.derive(account, Account.DERIVATION).neuter();
+    void syncstart() {
 
-        final ExtendedPrivateKey privateKey = root.derive("m/44'/2'/0'");
-        extendedPrivateKey = privateKey.extendedBase58();
-        extendedPublicKey = accountKey.extendedBase58();
+        BRWalletManager.getInstance().addBalanceChangedListener(new BRWalletManager.OnBalanceChanged() {
+            @Override
+            public void onBalanceChanged(long balance) {
 
+            }
+        });
+        BRPeerManager.getInstance().addStatusUpdateListener(new BRPeerManager.OnTxStatusUpdate() {
+            @Override
+            public void onStatusUpdate() {
+
+            }
+        });
+        BRPeerManager.setOnSyncFinished(new BRPeerManager.OnSyncSucceeded() {
+            @Override
+            public void onFinished() {
+                //put some here
+//                getBalanceFromBR();
+//                getTransactionFromBR();
+                sendBalanceFromBR("LiXoYvEwWhgAF8tJvPv6C6NNa8GBnQi5np", "200000");
+            }
+        });
+        BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
+            @Override
+            public void run() {
+//                final double progress = LitecoinPeerManager.syncProgress(BRSharedPrefs.getStartHeight(BreadActivity.this));
+////                    Log.e(TAG, "run: " + progress);
+//                if (progress < 1 && progress > 0) {
+//                    SyncManager.getInstance().startSyncingProgressThread();
+//                }
+            }
+        });
     }
 
+    public void getBalanceFromBR(NRLCallback callback) {
+        BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
+        balance = amount + "";
+        callback.onResponse(balance);
+    }
+
+    public void getTransactionFromBR(NRLCallback callback) {
+        final TxItem[] arr = BRWalletManager.getInstance().getTransactions();
+        JSONArray transactionArray = new JSONArray();
+        for(int i = 0; i < arr.length; i++) {
+            TxItem item = arr[i];
+            JSONObject transactionData = new JSONObject();
+            try {
+                transactionData.put("value", item.getReceived());
+                transactionData.put("txid", item.getTxHashHexReversed());
+                transactionArray.put(transactionData);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        callback.onResponseArray(transactionArray);
+    }
+
+    public void sendBalanceFromBR(String toAddress, String amount) {
+        BigDecimal satoshiAmount = new BigDecimal(amount);
+        BigDecimal balance = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
+        if(satoshiAmount.longValue() > balance.longValue()) {
+            return;
+        }
+//        BRSender.getInstance().sendTransaction(currentContext, new PaymentItem(new String[]{toAddress}, null, satoshiAmount.longValue(), null, false, ""));
+
+
+        BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
+            @Override
+            public void run() {
+                byte[] tmpTx = BRWalletManager.getInstance().tryTransaction(toAddress, satoshiAmount.longValue());
+                if (tmpTx == null) {
+                    return;
+                }else{
+                    String transactionID =  Util.bytesToHex(tmpTx);
+                    String aaa = transactionID;
+                }
+            }
+        });
+    }
+
+    public static void setCurrentProgress(double progress) {
+
+    }
     public String getPrivateKey() {
         return this.privateKey;
     }
