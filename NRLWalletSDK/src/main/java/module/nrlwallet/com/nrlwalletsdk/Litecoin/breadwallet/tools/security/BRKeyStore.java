@@ -397,7 +397,7 @@ public class BRKeyStore {
     @TargetApi(Build.VERSION_CODES.M)
     public synchronized static boolean putPhrase(byte[] strToStore, Context context, int requestCode) throws UserNotAuthenticatedException {
         AliasObject obj = aliasObjectMap.get(PHRASE_ALIAS);
-        return !(strToStore == null || strToStore.length == 0) && _setData(context, strToStore, obj.alias, obj.datafileName, obj.ivFileName, requestCode, true);
+        return !(strToStore == null || strToStore.length == 0) ;//&& _setData(context, strToStore, obj.alias, obj.datafileName, obj.ivFileName, requestCode, true);
     }
 
     @TargetApi(Build.VERSION_CODES.M)

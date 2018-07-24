@@ -184,7 +184,7 @@ public class BRWalletManager {
     /**
      * true if keystore is available and we know that no wallet exists on it
      */
-    @RequiresApi(api = Build.VERSION_CODES.M)
+//    @RequiresApi(api = Build.VERSION_CODES.M)
     public boolean noWallet(Context ctx) {
         byte[] pubkey = BRKeyStore.getMasterPublicKey(ctx);
 
