@@ -44,6 +44,7 @@ import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.wallet.BRPeerManag
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.wallet.BRWalletManager;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.Utils.Util;
+import module.nrlwallet.com.nrlwalletsdk.abstracts.LTCCallback;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -78,6 +79,7 @@ public class NRLLite extends NRLCoin {
     byte[] pubKey;
     byte[] authKey;
     boolean isSyncing = false;
+    LTCCallback ltcCallback;
 
     NetworkParameters params = LitecoinNetParameters.get();
 
@@ -85,13 +87,14 @@ public class NRLLite extends NRLCoin {
         System.loadLibrary("core");
     }
 
-    public NRLLite(byte[] seed, String s_seed, Context context) {
+    public NRLLite(byte[] seed, String mnemonic, Context context, LTCCallback callback) {
 
         super(seed, Litecoin.MAIN_NET, 2, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
-        str_seed = s_seed;
+        str_seed = mnemonic;
         ctx = context;
         currentContext = context;
+        this.ltcCallback = callback;
         this.createWallet();
     }
     public static Context getBreadContext() {
@@ -159,8 +162,7 @@ public class NRLLite extends NRLCoin {
             public void onFinished() {
                 //put some here
                 isSyncing = false;
-//                getBalanceFromBR1();
-//                getTransactionFromBR1();
+                getWalletData();
             }
         });
 
@@ -206,11 +208,9 @@ public class NRLLite extends NRLCoin {
         return isSyncing;
     }
 
-    public void getBalanceFromBR1() {
+    public void getWalletData() {
         BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
         balance = amount + "";
-    }
-    public void getTransactionFromBR1() {
         final TxItem[] arr = BRWalletManager.getInstance().getTransactions();
         JSONArray transactionArray = new JSONArray();
         for(int i = 0; i < arr.length; i++) {
@@ -222,8 +222,18 @@ public class NRLLite extends NRLCoin {
                 transactionArray.put(transactionData);
             } catch (JSONException e) {
                 e.printStackTrace();
+                ltcCallback.onFailed("failed");
             }
         }
+        JSONObject object = new JSONObject();
+        try {
+            object.put("balance", balance);
+            object.put("history", transactionArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            ltcCallback.onFailed("failed");
+        }
+        ltcCallback.onResponse(object);
     }
     public void getBalanceFromBR(NRLCallback callback) {
         BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
