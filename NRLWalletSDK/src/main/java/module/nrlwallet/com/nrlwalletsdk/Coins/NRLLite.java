@@ -1,5 +1,6 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
@@ -200,6 +201,11 @@ public class NRLLite extends NRLCoin {
         }
 
     }
+
+    public boolean SyncingNow() {
+        return isSyncing;
+    }
+
     public void getBalanceFromBR1() {
         BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
         balance = amount + "";
@@ -261,7 +267,7 @@ public class NRLLite extends NRLCoin {
                     byte[] rawSeed;
                     try {
                         rawSeed = BRKeyStore.getPhrase(currentContext, BRConstants.PAYMENT_PROTOCOL_REQUEST_CODE);
-                    } catch (UserNotAuthenticatedException e) {
+                    } catch (@SuppressLint("NewApi") UserNotAuthenticatedException e) {
                         callback.onResponse("Signing failed");
                         return;
                     }
