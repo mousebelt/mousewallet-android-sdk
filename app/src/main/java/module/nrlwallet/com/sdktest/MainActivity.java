@@ -24,8 +24,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         StringBuilder sb = new StringBuilder();
-//        strMnemonic = "target crater noble virus album surge kidney tennis snow click faculty robust";//sb.toString();
-        strMnemonic = "garbage alone hidden dizzy account novel essay cotton nephew first vital drink";
         //
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
 
