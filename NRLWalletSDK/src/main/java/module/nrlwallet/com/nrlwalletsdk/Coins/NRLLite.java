@@ -1,6 +1,6 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
-import android.app.Activity;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -12,11 +12,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.List;
 
 import io.github.novacrypto.bip32.Network;
 import io.github.novacrypto.bip32.networks.Litecoin;
@@ -28,37 +26,21 @@ import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.NetworkParameters
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Transaction;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcast;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.TransactionBroadcaster;
-import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.kits.WalletAppKit;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.SendRequest;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.Wallet;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.litecoinj.integrations.LitecoinNetParameters;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Base58Encode;
 import module.nrlwallet.com.nrlwalletsdk.Cryptography.Secp256k1;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.BRMerkleBlockEntity;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.BRPeerEntity;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.BRTransactionEntity;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.PaymentItem;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities.TxItem;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.listeners.SyncReceiver;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.manager.BREventManager;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.manager.BRSharedPrefs;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.manager.SyncManager;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.manager.TxManager;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.security.BRKeyStore;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.security.BRSender;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.security.PostAuth;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.sqlite.MerkleBlockDataSource;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.sqlite.PeerDataSource;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.sqlite.TransactionDataSource;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.threads.BRExecutor;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.BRConstants;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.BRExchange;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.TypesConverter;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.Utils;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.wallet.BRPeerManager;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.wallet.BRWalletManager;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.platform.entities.TxMetaData;
-import module.nrlwallet.com.nrlwalletsdk.Litecoin.platform.tools.KVStoreManager;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.Utils.Util;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
@@ -90,12 +72,11 @@ public class NRLLite extends NRLCoin {
 
     Wallet wallet;
     String str_seed;
-    File chainFile;
-    WalletAppKit kit;
 
     byte[] mnemonicbyte;
     byte[] pubKey;
     byte[] authKey;
+    boolean isSyncing = false;
 
     NetworkParameters params = LitecoinNetParameters.get();
 
@@ -110,15 +91,7 @@ public class NRLLite extends NRLCoin {
         str_seed = s_seed;
         ctx = context;
         currentContext = context;
-//        boolean success = false;
-//        try {
-//            success = BRKeyStore.putPhrase(str_seed.getBytes(), currentContext, BRConstants.PUT_PHRASE_NEW_WALLET_REQUEST_CODE);
-//        } catch (UserNotAuthenticatedException e) {
-//            return ;
-//        }
-//        if (!success) return ;
         this.createWallet();
-//        syncstart();
     }
     public static Context getBreadContext() {
         return currentContext;
@@ -135,20 +108,9 @@ public class NRLLite extends NRLCoin {
         }
     }
 
-    void newwallet() {
-        BRSharedPrefs.putPhraseWroteDown(currentContext, true);
-        byte[] bytePhrase = TypesConverter.getNullTerminatedPhrase(str_seed.getBytes());
-        byte[] seed = BRWalletManager.getSeedFromPhrase(bytePhrase);
-        byte[] authKey = BRWalletManager.getAuthPrivKeyForAPI(seed);
-        BRKeyStore.putAuthKey(authKey, currentContext);
-        byte[] pubKey = BRWalletManager.getInstance().getMasterPubKey(bytePhrase);
-        BRKeyStore.putMasterPublicKey(pubKey, currentContext);
-    }
-
+    @TargetApi(Build.VERSION_CODES.M)
     void createWallet() {
-//        byte[] bytePhrase = TypesConverter.getNullTerminatedPhrase(str_seed.getBytes());
-//        byte[] seed = BRWalletManager.getSeedFromPhrase(bytePhrase);
-
+        isSyncing = true;
         BRWalletManager m = BRWalletManager.getInstance();
         if(m.noWallet(ctx)){
             mnemonicbyte = TypesConverter.getNullTerminatedPhrase(str_seed.getBytes());
@@ -176,75 +138,6 @@ public class NRLLite extends NRLCoin {
             syncstart();
         }
     }
-    void initWallet() {
-        BRWalletManager m = BRWalletManager.getInstance();
-        final BRPeerManager pm = BRPeerManager.getInstance();
-
-        if (!m.isCreated()) {
-            List<BRTransactionEntity> transactions = TransactionDataSource.getInstance(ctx).getAllTransactions();
-            int transactionsCount = transactions.size();
-            if (transactionsCount > 0) {
-                m.createTxArrayWithCount(transactionsCount);
-                for (BRTransactionEntity entity : transactions) {
-                    m.putTransaction(entity.getBuff(), entity.getBlockheight(), entity.getTimestamp());
-                }
-            }
-
-            byte[] pubkeyEncoded = pubKey;
-            if (Utils.isNullOrEmpty(pubkeyEncoded)) {
-                return;
-            }
-            //Save the first address for future check
-            m.createWallet(transactionsCount, pubkeyEncoded);
-            String firstAddress = BRWalletManager.getFirstAddress(pubkeyEncoded);
-            BRSharedPrefs.putFirstAddress(ctx, firstAddress);
-            walletAddress = firstAddress;//(pubKey);
-            Log.e("====Wallet Address==", walletAddress);
-//            long fee = BRSharedPrefs.getFeePerKb(ctx);
-//            if (fee == 0) {
-//                fee = BRConstants.DEFAULT_FEE_PER_KB;
-//                BREventManager.getInstance().pushEvent("wallet.didUseDefaultFeePerKB");
-//            }
-//            BRWalletManager.getInstance().setFeePerKb(fee, isEconomyFee);
-        }
-
-        if (!pm.isCreated()) {
-            List<BRMerkleBlockEntity> blocks = MerkleBlockDataSource.getInstance(ctx).getAllMerkleBlocks();
-            List<BRPeerEntity> peers = PeerDataSource.getInstance(ctx).getAllPeers();
-            final int blocksCount = blocks.size();
-            final int peersCount = peers.size();
-            if (blocksCount > 0) {
-                pm.createBlockArrayWithCount(blocksCount);
-                for (BRMerkleBlockEntity entity : blocks) {
-                    pm.putBlock(entity.getBuff(), entity.getBlockHeight());
-                }
-            }
-            if (peersCount > 0) {
-                pm.createPeerArrayWithCount(peersCount);
-                for (BRPeerEntity entity : peers) {
-                    pm.putPeer(entity.getAddress(), entity.getPort(), entity.getTimeStamp());
-                }
-            }
-
-            BRKeyStore.putWalletCreationTime(1531000000, currentContext);
-
-            int walletTime = 1531000000;//BRKeyStore.getWalletCreationTime(ctx);
-
-            pm.create(walletTime, blocksCount, peersCount);
-
-        }
-//        BRPeerManager.getInstance().updateFixedPeer(ctx);
-//        pm.connect();
-//        if (BRSharedPrefs.getStartHeight(ctx) == 0)
-//            BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
-//                @Override
-//                public void run() {
-//                    BRSharedPrefs.putStartHeight(ctx, BRPeerManager.getCurrentBlockHeight());
-//                }
-//            });
-        syncstart();
-    }
-
     void syncstart() {
         BRWalletManager.getInstance().addBalanceChangedListener(new BRWalletManager.OnBalanceChanged() {
             @Override
@@ -255,16 +148,18 @@ public class NRLLite extends NRLCoin {
         BRPeerManager.getInstance().addStatusUpdateListener(new BRPeerManager.OnTxStatusUpdate() {
             @Override
             public void onStatusUpdate() {
-
+                int startHeight = BRSharedPrefs.getStartHeight(currentContext);
+                int lastcount =  BRSharedPrefs.getLastBlockHeight(currentContext);
+                long progress = (startHeight - lastcount);
             }
         });
         BRPeerManager.setOnSyncFinished(new BRPeerManager.OnSyncSucceeded() {
             @Override
             public void onFinished() {
                 //put some here
-                getBalanceFromBR1();
-                getTransactionFromBR1();
-//                sendBalanceFromBR("LiXoYvEwWhgAF8tJvPv6C6NNa8GBnQi5np", "200000");
+                isSyncing = false;
+//                getBalanceFromBR1();
+//                getTransactionFromBR1();
             }
         });
 
@@ -283,14 +178,8 @@ public class NRLLite extends NRLCoin {
         BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
             @Override
             public void run() {
-//                final double progress = LitecoinPeerManager.syncProgress(BRSharedPrefs.getStartHeight(BreadActivity.this));
-////                    Log.e(TAG, "run: " + progress);
-//                if (progress < 1 && progress > 0) {
-//                    SyncManager.getInstance().startSyncingProgressThread();
-//                }
             }
         });
-//        sendBalanceFromBR("LiXoYvEwWhgAF8tJvPv6C6NNa8GBnQi5np", "200000");
     }
 
     public void onConnectionChanged(boolean isConnected) {
@@ -314,7 +203,6 @@ public class NRLLite extends NRLCoin {
     public void getBalanceFromBR1() {
         BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
         balance = amount + "";
-        sendBalanceFromBR("LiXoYvEwWhgAF8tJvPv6C6NNa8GBnQi5np", "50000");
     }
     public void getTransactionFromBR1() {
         final TxItem[] arr = BRWalletManager.getInstance().getTransactions();
@@ -354,33 +242,35 @@ public class NRLLite extends NRLCoin {
         callback.onResponseArray(transactionArray);
     }
 
-    public void sendBalanceFromBR(String toAddress, String amount) {
+    public void sendBalanceFromBR(String toAddress, String amount, NRLCallback callback) {
         BigDecimal satoshiAmount = new BigDecimal(amount);
         BigDecimal balance = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
         if(satoshiAmount.longValue() > balance.longValue()) {
+            callback.onResponse("Balance is not enough");
             return;
         }
-//        BRSender.getInstance().sendTransaction(currentContext, new PaymentItem(new String[]{toAddress}, null, satoshiAmount.longValue(), null, false, ""));
-
 
         BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
             @Override
             public void run() {
                 byte[] tmpTx = BRWalletManager.getInstance().tryTransaction(toAddress, satoshiAmount.longValue());
                 if (tmpTx == null) {
+                    callback.onResponse("Send transaction failed");
                     return;
                 }else{
                     byte[] rawSeed;
                     try {
                         rawSeed = BRKeyStore.getPhrase(currentContext, BRConstants.PAYMENT_PROTOCOL_REQUEST_CODE);
                     } catch (UserNotAuthenticatedException e) {
+                        callback.onResponse("Signing failed");
                         return;
                     }
                     if (rawSeed == null || rawSeed.length < 10 || tmpTx == null) {
                         Log.d("", "onPaymentProtocolRequest() returned: rawSeed is malformed: " + Arrays.toString(rawSeed));
+                        callback.onResponse("Signing failed");
                         return;
                     }
-                    if (rawSeed.length < 10) return;
+//                    if (rawSeed.length < 10) return;
 
                     final byte[] seed = TypesConverter.getNullTerminatedPhrase(rawSeed);
                     byte[] txHash = BRWalletManager.getInstance().publishSerializedTransaction(tmpTx, seed);
@@ -391,6 +281,7 @@ public class NRLLite extends NRLCoin {
 //                        TxMetaData txMetaData = new TxMetaData();
 //                        KVStoreManager.getInstance().putTxMetaData(currentContext, txMetaData, txHash);
                         Log.e("TXHash----------", Util.bytesToHex(txHash));
+                        callback.onResponse(Util.bytesToHex(txHash));
                     }
                 }
             }

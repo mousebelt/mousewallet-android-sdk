@@ -13,9 +13,8 @@ import module.nrlwallet.com.nrlwalletsdk.Coins.NRLStellar;
 import module.nrlwallet.com.nrlwalletsdk.Utils.GenerateMnemonic;
 import module.nrlwallet.com.nrlwalletsdk.Language.English;
 import module.nrlwallet.com.nrlwalletsdk.Utils.MnemonicToSeed;
+import module.nrlwallet.com.nrlwalletsdk.Utils.Util;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
-import module.nrlwallet.core.BRCoreKey;
-import module.nrlwallet.core.BRCoreMasterPubKey;
 
 public class MainActivity extends Activity {
 
@@ -25,16 +24,17 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         StringBuilder sb = new StringBuilder();
+//        strMnemonic = "target crater noble virus album surge kidney tennis snow click faculty robust";//sb.toString();
+        strMnemonic = "garbage alone hidden dizzy account novel essay cotton nephew first vital drink";
+        //
         new GenerateMnemonic(English.INSTANCE).createMnemonic(sb::append);
-//        strMnemonic = "tone absurd popular virus fatal possible skirt local head open siren damp";//sb.toString();
-        strMnemonic = "cost alpha light gravity result unique multiply stadium fitness catalog diesel beauty";//sb.toString();
-//        strMnemonic = "tape have dawn eagle ginger wagon couple sunset okay gentle curve put";//sb.toString();
 
-//        this.getEthereumWallet(strMnemonic);//done
-        this.getLitecoinWallet(strMnemonic);//okkkk------
-//        this.getBitcoinWallet(strMnemonic);//okkkk
-//        this.getNeoWallet(strMnemonic);//okkkkk----
-//        this.getStellarWallet(strMnemonic);//okkkk
+        this.getLitecoinWallet(strMnemonic);
+
+//        this.getEthereumWallet(strMnemonic);//DONE
+//        this.getBitcoinWallet(strMnemonic);//DONE
+//        this.getStellarWallet(strMnemonic);//DONE
+//        this.getNeoWallet(strMnemonic);//DONE
     }
 
     private void getEthereumWallet(String strMnemonic) {
@@ -42,9 +42,7 @@ public class MainActivity extends Activity {
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
         NRLEthereum nrlEthereum = new NRLEthereum(bseed, strMnemonic);
-        String ethRootKey = nrlEthereum.getRootKey();
-        String ethPrivateKey = nrlEthereum.getPrivateKey();
-        String ethAddress = nrlEthereum.getAddress();
+/*
         nrlEthereum.getBalance(new NRLCallback() {
             @Override
             public void onFailure(Throwable t) {
@@ -60,6 +58,7 @@ public class MainActivity extends Activity {
 
             }
         });
+
 
         nrlEthereum.getTransactions(new NRLCallback() {
             @Override
@@ -77,34 +76,34 @@ public class MainActivity extends Activity {
 
             }
         });
-
+*/
         //amount, toAddress, memo, fee, callback
-        nrlEthereum.createTransaction("0.001", "0xAf85f3AE0CE48c4C6c9Ad462761F6ca60f5087f1", "", 0.00001, new NRLCallback(){
-            @Override
-            public void onFailure(Throwable t) {
-
-            }
-            @Override
-            public void onResponse(String response) {
-                System.out.println("************----------- ETH Balance     : " + response);
-
-            }
-            @Override
-            public void onResponseArray(JSONArray jsonArray) {
-
-            }
-        });
+//        nrlEthereum.createTransaction("500000000000000", "0x9aFEE7Af06290771F589381730312939c2657239", "", 0.00001, new NRLCallback(){
+//            @Override
+//            public void onFailure(Throwable t) {
+//
+//            }
+//            @Override
+//            public void onResponse(String response) {
+//                System.out.println("************----------- ETH Balance     : " + response);
+//
+//            }
+//            @Override
+//            public void onResponseArray(JSONArray jsonArray) {
+//
+//            }
+//        });
     }
 
     private void getNeoWallet(String strMnemonic) {
 
-        byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
+//        byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
+        byte[] bseed = Util.stringToBytes(seed);
 
-        NRLNeo nrlNeo = new NRLNeo(bseed);
-        String neoPrivateKey = nrlNeo.getPrivateKey();
-        String neoAddress = nrlNeo.getAddress();
+        NRLNeo nrlNeo = new NRLNeo(bseed, strMnemonic);
         //need sync
+/*
         nrlNeo.getBalance(new NRLCallback() {
             @Override
             public void onFailure(Throwable t) {
@@ -136,12 +135,9 @@ public class MainActivity extends Activity {
 
             }
         });
-        System.out.println("************----------- Mnemonic : " + strMnemonic);
-        System.out.println("************----------- Seed : " + seed);
-        System.out.println("************----------- NEO Private Key : " + neoPrivateKey);
-        System.out.println("************----------- NEO address     : " + neoAddress);
 
-        nrlNeo.createTransaction(0.001, "ATdP62ufbPWhcs3avSCSTX79cbAJ4STHVY", "", 0.00001, new NRLCallback(){
+*/
+        nrlNeo.createTransaction(1, "AQhwKFBVN1DicQkdqRaDGaDbxhXQEKzzxX", "", 0.001, new NRLCallback(){
             @Override
             public void onFailure(Throwable t) {
 
@@ -165,10 +161,10 @@ public class MainActivity extends Activity {
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
         NRLBitcoin nrlBitcoin = new NRLBitcoin(bseed, strMnemonic);
-        String btcPrivateKey = nrlBitcoin.getPrivateKey();
+        String btcPrivateKey = nrlBitcoin.getBalance();
         String btcAddress = nrlBitcoin.getAddress();
-        String btcBalance = nrlBitcoin.getBalance();
-        nrlBitcoin.getTransctions(new NRLCallback() {
+        /*
+        nrlBitcoin.getBalance(new NRLCallback() {
             @Override
             public void onFailure(Throwable t) {
 
@@ -184,25 +180,53 @@ public class MainActivity extends Activity {
 
             }
         });
-        System.out.println("************----------- Mnemonic : " + strMnemonic);
-        System.out.println("************----------- Seed : " + seed);
-        System.out.println("************----------- BTC Private Key : " + btcPrivateKey);
-        System.out.println("************----------- BTC address     : " + btcAddress);
-        System.out.println("************----------- BTC balance     : " + btcBalance);
+        nrlBitcoin.getTransactions(new NRLCallback() {
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });*/
+        nrlBitcoin.setTransaction(30000, "1Ncbaw4SbQt2UJYhA3fJVzBg43Zwdk9w5L", new NRLCallback(){
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+
+            @Override
+            public void onResponse(String response) {
+
+            }
+
+            @Override
+            public void onResponseArray(JSONArray jsonArray) {
+
+            }
+        });
     }
     private void getLitecoinWallet(String strMnemonic) {
 
         byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
 
-        NRLLite nrlLite = new NRLLite(bseed, strMnemonic);
-        String stlPrivateKey = nrlLite.getPrivateKey();
-        String stlAddress = nrlLite.getAddress();
-        System.out.println("************----------- Mnemonic : " + strMnemonic);
-        System.out.println("************----------- Seed : " + seed);
-        System.out.println("************----------- Lite Private Key : " + stlPrivateKey);
-        System.out.println("************----------- Lite address     : " + stlAddress);
-        nrlLite.getBalance(new NRLCallback() {
+        NRLLite nrlLite = new NRLLite(bseed, strMnemonic, getApplicationContext());
+//        String stlPrivateKey = nrlLite.getPrivateKey();
+//        String stlAddress = nrlLite.getAddress();
+//        System.out.println("************----------- Mnemonic : " + strMnemonic);
+//        System.out.println("************----------- Seed : " + seed);
+//        System.out.println("************----------- Lite Private Key : " + stlPrivateKey);
+//        System.out.println("************----------- Lite address     : " + stlAddress);
+        /*
+       nrlLite.getBalance(new NRLCallback() {
             @Override
             public void onFailure(Throwable t) {
 
@@ -235,8 +259,8 @@ public class MainActivity extends Activity {
 
             }
         });
-
-        nrlLite.createTransaction((long)0.0001, "LZSTRc6imhZLuz9aDQs8GTrLw3cjBHSMzJ", "", (long) 0.01, new NRLCallback() {
+        /*
+        nrlLite.createTransaction("0.0001", "LeR3qsGMvP3bzQux7hj3LLoKfdDSHdtFo8", "", (long) 0.01, new NRLCallback() {
             @Override
             public void onFailure(Throwable t) {
 
@@ -252,13 +276,16 @@ public class MainActivity extends Activity {
 
             }
         });
+*/
     }
 
     private void getStellarWallet(String strMnemonic) {
-        byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
+//        byte[] bseed = new MnemonicToSeed().calculateSeedByte(strMnemonic, "");
         String seed = new MnemonicToSeed().calculateSeed(strMnemonic, "");
+        byte[] bseed = Util.stringToBytes(seed);
 
-        NRLStellar nrlStellar = new NRLStellar(bseed);
+
+        NRLStellar nrlStellar = new NRLStellar(bseed, seed);
         String stlPrivateKey = nrlStellar.getPrivateKey();
         String stlAddress = nrlStellar.getAddress();
         System.out.println("************----------- Mnemonic : " + strMnemonic);
@@ -297,7 +324,8 @@ public class MainActivity extends Activity {
 
             }
         });
-        nrlStellar.createTransaction((long)0.001, "GBQK3OOKZBMIHDD7ODLYHDRPJ4TM43345UCYIV77OSWRQDEC5DGX2JNG", new NRLCallback() {
+        //amount : long,    destinationAddress : string, Callback
+        nrlStellar.SendTransaction((long)1, "GCKYEVXDV5BRXGPUJ22FORT2WUNSXCQ6JH2PT36ZBMWLV44YTLVGONTP", new NRLCallback() {
 
             @Override
             public void onFailure(Throwable t) {
@@ -314,5 +342,7 @@ public class MainActivity extends Activity {
 
             }
         });
+
+
     }
 }
