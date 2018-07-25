@@ -211,6 +211,7 @@ public class NRLLite extends NRLCoin {
     public void getWalletData() {
         BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
         balance = amount + "";
+        walletAddress = BRSharedPrefs.getFirstAddress(currentContext);
         final TxItem[] arr = BRWalletManager.getInstance().getTransactions();
         JSONArray transactionArray = new JSONArray();
         for(int i = 0; i < arr.length; i++) {
@@ -227,6 +228,7 @@ public class NRLLite extends NRLCoin {
         }
         JSONObject object = new JSONObject();
         try {
+            object.put("address", walletAddress);
             object.put("balance", balance);
             object.put("history", transactionArray);
         } catch (JSONException e) {
