@@ -36,6 +36,7 @@ import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.presenter.entities
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.manager.BRSharedPrefs;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.manager.SyncManager;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.security.BRKeyStore;
+import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.sqlite.BRSQLiteHelper;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.threads.BRExecutor;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.BRConstants;
 import module.nrlwallet.com.nrlwalletsdk.Litecoin.breadwallet.tools.util.TypesConverter;
@@ -98,7 +99,9 @@ public class NRLLite extends NRLCoin {
         this.ltcCallback = callback;
         this.isExist = isExist;
         if(!isExist) {
-
+            BRSharedPrefs.clearAllPrefs(context);
+            BRSQLiteHelper dbHelper = BRSQLiteHelper.getInstance(context);
+            dbHelper.formatSQLite(dbHelper.getWritableDatabase());
         }
         this.createWallet();
     }
@@ -121,7 +124,7 @@ public class NRLLite extends NRLCoin {
     void createWallet() {
         isSyncing = true;
         BRWalletManager m = BRWalletManager.getInstance();
-        if(m.noWallet(ctx)){
+        if(m.noWallet(ctx) || !isExist){
             mnemonicbyte = TypesConverter.getNullTerminatedPhrase(str_seed.getBytes());
             byte[] seed = BRWalletManager.getSeedFromPhrase(mnemonicbyte);
 
@@ -140,6 +143,7 @@ public class NRLLite extends NRLCoin {
             pubKey = BRWalletManager.getInstance().getMasterPubKey(mnemonicbyte);
             BRKeyStore.putMasterPublicKey(pubKey, ctx);
             initWallets();
+            syncstart();
         }else{
             walletAddress = BRSharedPrefs.getFirstAddress(ctx);
             Log.e("====Wallet Address==", walletAddress);

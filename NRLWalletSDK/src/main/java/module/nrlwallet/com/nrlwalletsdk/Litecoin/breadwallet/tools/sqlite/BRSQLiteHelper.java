@@ -132,4 +132,18 @@ public class BRSQLiteHelper extends SQLiteOpenHelper {
         onCreate(db);
 
     }
+
+    public void formatSQLite(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS " + MB_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TX_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + PEER_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + CURRENCY_TABLE_NAME);
+        db.execSQL(MB_DATABASE_CREATE);
+        db.execSQL(TX_DATABASE_CREATE);
+        db.execSQL(PEER_DATABASE_CREATE);
+        db.execSQL(CURRENCY_DATABASE_CREATE);
+//        db.execSQL("PRAGMA journal_mode=WAL;");
+//        onCreate(db);
+
+    }
 }
