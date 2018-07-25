@@ -80,6 +80,7 @@ public class NRLLite extends NRLCoin {
     byte[] authKey;
     boolean isSyncing = false;
     LTCCallback ltcCallback;
+    boolean isExist = true;
 
     NetworkParameters params = LitecoinNetParameters.get();
 
@@ -87,7 +88,7 @@ public class NRLLite extends NRLCoin {
         System.loadLibrary("core");
     }
 
-    public NRLLite(byte[] seed, String mnemonic, Context context, LTCCallback callback) {
+    public NRLLite(byte[] seed, String mnemonic, Context context, LTCCallback callback, boolean isExist) {
 
         super(seed, Litecoin.MAIN_NET, 2, "Bitcoin seed", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
         bSeed = seed;
@@ -95,6 +96,10 @@ public class NRLLite extends NRLCoin {
         ctx = context;
         currentContext = context;
         this.ltcCallback = callback;
+        this.isExist = isExist;
+        if(!isExist) {
+
+        }
         this.createWallet();
     }
     public static Context getBreadContext() {
@@ -219,7 +224,8 @@ public class NRLLite extends NRLCoin {
             JSONObject transactionData = new JSONObject();
             try {
                 transactionData.put("value", item.getReceived());
-                transactionData.put("txid", item.getTxHashHexReversed());
+                byte[]tmp = item.getTxHash();
+                transactionData.put("txid", Util.bytesToHex(tmp));
                 transactionArray.put(transactionData);
             } catch (JSONException e) {
                 e.printStackTrace();
