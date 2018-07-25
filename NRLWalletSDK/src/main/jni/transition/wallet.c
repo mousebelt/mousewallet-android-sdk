@@ -671,7 +671,7 @@ Java_module_nrlwallet_com_nrlwalletsdk_Litecoin_breadwallet_wallet_BRWalletManag
     size_t seedSize = sizeof(key);
 
     BRWalletSignTransaction(_wallet, tmpTx, 0, key.u8, seedSize);
-    assert(BRTransactionIsSigned(tmpTx));
+//    assert(BRTransactionIsSigned(tmpTx));
     if (!tmpTx) return NULL;
     BRPeerManagerPublishTx(_peerManager, tmpTx, tmpTx, callback);
     (*env)->ReleaseByteArrayElements(env, phrase, bytePhrase, JNI_ABORT);

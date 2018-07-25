@@ -181,7 +181,7 @@ public class BRKeyStore {
                 } catch (InvalidKeyException ignored) {
                     Log.e(TAG, "_setData: OLD KEY PRESENT");
                     if (ignored instanceof UserNotAuthenticatedException) {
-                        throw ignored;
+//                        throw ignored;
                     }
                     //create new key and reinitialize the cipher
                     secretKey = createKeys(alias, auth_required);
@@ -315,7 +315,8 @@ public class BRKeyStore {
             byte[] result = BytesUtil.readBytesFromStream(cipherInputStream);
 
             //create the new format key
-            SecretKey newKey = createKeys(alias, (alias.equals(PHRASE_ALIAS) || alias.equals(CANARY_ALIAS)));
+//            SecretKey newKey = createKeys(alias, (alias.equals(PHRASE_ALIAS) || alias.equals(CANARY_ALIAS)));
+            SecretKey newKey = createKeys(alias, false);
             Cipher inCipher = Cipher.getInstance(NEW_CIPHER_ALGORITHM);
             inCipher.init(Cipher.ENCRYPT_MODE, newKey);
             iv = inCipher.getIV();
@@ -397,7 +398,7 @@ public class BRKeyStore {
     @TargetApi(Build.VERSION_CODES.M)
     public synchronized static boolean putPhrase(byte[] strToStore, Context context, int requestCode) throws UserNotAuthenticatedException {
         AliasObject obj = aliasObjectMap.get(PHRASE_ALIAS);
-        return !(strToStore == null || strToStore.length == 0) ;//&& _setData(context, strToStore, obj.alias, obj.datafileName, obj.ivFileName, requestCode, true);
+        return !(strToStore == null || strToStore.length == 0) && _setData(context, strToStore, obj.alias, obj.datafileName, obj.ivFileName, requestCode, false);
     }
 
     @TargetApi(Build.VERSION_CODES.M)

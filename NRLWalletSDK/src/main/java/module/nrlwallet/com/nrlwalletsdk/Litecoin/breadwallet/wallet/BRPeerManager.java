@@ -239,6 +239,7 @@ public class BRPeerManager {
 
     public static void setOnSyncFinished(OnSyncSucceeded listener) {
         onSyncFinished = listener;
+
     }
 
     public interface OnTxStatusUpdate {

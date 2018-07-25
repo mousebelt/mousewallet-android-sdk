@@ -1583,7 +1583,7 @@ static BRTransaction *_peerRequestedTx(void *info, UInt256 txHash)
 //    pingInfo->hash = txHash;
 //    BRPeerSendPing(peer, pingInfo, _peerRequestedTxPingDone);
     pthread_mutex_unlock(&manager->lock);
-    if (txCallback) txCallback(txInfo, error);
+//    if (txCallback) txCallback(txInfo, error);//by cheera
     return tx;
 }
 
@@ -1968,7 +1968,7 @@ void BRPeerManagerPublishTx(BRPeerManager *manager, BRTransaction *tx, void *inf
                             void (*callback)(void *info, int error))
 {
     assert(manager != NULL);
-    assert(tx != NULL && BRTransactionIsSigned(tx));
+//    assert(tx != NULL && BRTransactionIsSigned(tx));
     if (tx) pthread_mutex_lock(&manager->lock);
 
     if (tx && ! BRTransactionIsSigned(tx)) {

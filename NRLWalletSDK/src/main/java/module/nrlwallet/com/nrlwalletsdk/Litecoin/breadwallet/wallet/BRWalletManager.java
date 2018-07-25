@@ -319,7 +319,6 @@ public class BRWalletManager {
         final BRWalletManager m = BRWalletManager.getInstance();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @WorkerThread
     public void initWallet(final Context ctx) {
 //        if (ActivityUTILS.isMainThread()) throw new NetworkOnMainThreadException();
@@ -378,7 +377,7 @@ public class BRWalletManager {
             Log.d(TAG, "blocksCount before connecting: " + blocksCount);
             Log.d(TAG, "peersCount before connecting: " + peersCount);
 
-            int walletTime = BRKeyStore.getWalletCreationTime(ctx);
+            int walletTime = 1531000000;//BRKeyStore.getWalletCreationTime(ctx);
 
             Log.e(TAG, "initWallet: walletTime: " + walletTime);
             pm.create(walletTime, blocksCount, peersCount);

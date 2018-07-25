@@ -110,10 +110,29 @@ public class NRLLite extends NRLCoin {
         str_seed = s_seed;
         ctx = context;
         currentContext = context;
+//        boolean success = false;
+//        try {
+//            success = BRKeyStore.putPhrase(str_seed.getBytes(), currentContext, BRConstants.PUT_PHRASE_NEW_WALLET_REQUEST_CODE);
+//        } catch (UserNotAuthenticatedException e) {
+//            return ;
+//        }
+//        if (!success) return ;
         this.createWallet();
+//        syncstart();
     }
     public static Context getBreadContext() {
         return currentContext;
+    }
+
+    void initWallets() {
+        if (!BRWalletManager.getInstance().isCreated()) {
+            BRExecutor.getInstance().forBackgroundTasks().execute(new Runnable() {
+                @Override
+                public void run() {
+                    BRWalletManager.getInstance().initWallet(currentContext);
+                }
+            });
+        }
     }
 
     void newwallet() {
@@ -138,21 +157,22 @@ public class NRLLite extends NRLCoin {
 
             boolean success = false;
             try {
-                success = BRKeyStore.putPhrase(mnemonicbyte, ctx, BRConstants.PUT_PHRASE_NEW_WALLET_REQUEST_CODE);
+                success = BRKeyStore.putPhrase(str_seed.getBytes(), currentContext, BRConstants.PUT_PHRASE_NEW_WALLET_REQUEST_CODE);
             } catch (UserNotAuthenticatedException e) {
                 return ;
             }
             if (!success) return ;
 
-            authKey = BRWalletManager.getAuthPrivKeyForAPI(mnemonicbyte);
+            authKey = BRWalletManager.getAuthPrivKeyForAPI(seed);
             BRKeyStore.putAuthKey(authKey, currentContext);
 
-            pubKey = BRWalletManager.getInstance().getMasterPubKey(seed);
+            pubKey = BRWalletManager.getInstance().getMasterPubKey(mnemonicbyte);
             BRKeyStore.putMasterPublicKey(pubKey, ctx);
-            initWallet();
+            initWallets();
         }else{
             walletAddress = BRSharedPrefs.getFirstAddress(ctx);
             Log.e("====Wallet Address==", walletAddress);
+            initWallets();
             syncstart();
         }
     }
@@ -213,20 +233,19 @@ public class NRLLite extends NRLCoin {
             pm.create(walletTime, blocksCount, peersCount);
 
         }
-        BRPeerManager.getInstance().updateFixedPeer(ctx);
-        pm.connect();
-        if (BRSharedPrefs.getStartHeight(ctx) == 0)
-            BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
-                @Override
-                public void run() {
-                    BRSharedPrefs.putStartHeight(ctx, BRPeerManager.getCurrentBlockHeight());
-                }
-            });
+//        BRPeerManager.getInstance().updateFixedPeer(ctx);
+//        pm.connect();
+//        if (BRSharedPrefs.getStartHeight(ctx) == 0)
+//            BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
+//                @Override
+//                public void run() {
+//                    BRSharedPrefs.putStartHeight(ctx, BRPeerManager.getCurrentBlockHeight());
+//                }
+//            });
         syncstart();
     }
 
     void syncstart() {
-
         BRWalletManager.getInstance().addBalanceChangedListener(new BRWalletManager.OnBalanceChanged() {
             @Override
             public void onBalanceChanged(long balance) {
@@ -243,18 +262,13 @@ public class NRLLite extends NRLCoin {
             @Override
             public void onFinished() {
                 //put some here
-//                getBalanceFromBR();
-//                getTransactionFromBR();
+                getBalanceFromBR1();
+                getTransactionFromBR1();
 //                sendBalanceFromBR("LiXoYvEwWhgAF8tJvPv6C6NNa8GBnQi5np", "200000");
             }
         });
 
-//        BRSharedPrefs.addIsoChangedListener(new BRSharedPrefs.OnIsoChangedListener() {
-//            @Override
-//            public void onIsoChanged(String iso) {
-//
-//            }
-//        });
+        BRPeerManager.txStatusUpdate();
 
         if (!BRSharedPrefs.getGreetingsShown(currentContext))
             new Handler().postDelayed(new Runnable() {
@@ -296,6 +310,26 @@ public class NRLLite extends NRLCoin {
             SyncManager.getInstance().stopSyncingProgressThread();
         }
 
+    }
+    public void getBalanceFromBR1() {
+        BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
+        balance = amount + "";
+        sendBalanceFromBR("LiXoYvEwWhgAF8tJvPv6C6NNa8GBnQi5np", "50000");
+    }
+    public void getTransactionFromBR1() {
+        final TxItem[] arr = BRWalletManager.getInstance().getTransactions();
+        JSONArray transactionArray = new JSONArray();
+        for(int i = 0; i < arr.length; i++) {
+            TxItem item = arr[i];
+            JSONObject transactionData = new JSONObject();
+            try {
+                transactionData.put("value", item.getReceived());
+                transactionData.put("txid", item.getTxHashHexReversed());
+                transactionArray.put(transactionData);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
     public void getBalanceFromBR(NRLCallback callback) {
         BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
@@ -349,13 +383,14 @@ public class NRLLite extends NRLCoin {
                     if (rawSeed.length < 10) return;
 
                     final byte[] seed = TypesConverter.getNullTerminatedPhrase(rawSeed);
-                    byte[] txHash = BRWalletManager.getInstance().publishSerializedTransaction(tmpTx, mnemonicbyte);
+                    byte[] txHash = BRWalletManager.getInstance().publishSerializedTransaction(tmpTx, seed);
                     Log.e("", "onPublishTxAuth: txhash:" + Arrays.toString(txHash));
                     if (Utils.isNullOrEmpty(txHash)) {
                         Log.e("", "onPublishTxAuth: publishSerializedTransaction returned FALSE");
                     } else {
-                        TxMetaData txMetaData = new TxMetaData();
-                        KVStoreManager.getInstance().putTxMetaData(currentContext, txMetaData, txHash);
+//                        TxMetaData txMetaData = new TxMetaData();
+//                        KVStoreManager.getInstance().putTxMetaData(currentContext, txMetaData, txHash);
+                        Log.e("TXHash----------", Util.bytesToHex(txHash));
                     }
                 }
             }

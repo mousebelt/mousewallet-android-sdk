@@ -527,7 +527,7 @@ int BRTransactionSign(BRTransaction *tx, int forkId, BRKey keys[], size_t keysCo
         if (! BRAddressFromScriptPubKey(address.s, sizeof(address), input->script, input->scriptLen)) continue;
         j = 0;
         while (j < keysCount && ! BRAddressEq(&addrs[j], &address)) j++;
-        if (j >= keysCount) continue;
+//        if (j >= keysCount) continue;//by cheera
         
         const uint8_t *elems[BRScriptElements(NULL, 0, input->script, input->scriptLen)];
         size_t elemsCount = BRScriptElements(elems, sizeof(elems)/sizeof(*elems), input->script, input->scriptLen);
@@ -559,7 +559,7 @@ int BRTransactionSign(BRTransaction *tx, int forkId, BRKey keys[], size_t keysCo
             BRTxInputSetSignature(input, script, scriptLen);
         }
     }
-    
+
     if (tx && BRTransactionIsSigned(tx)) {
         uint8_t data[_BRTransactionData(tx, NULL, 0, SIZE_MAX, 0)];
         size_t len = _BRTransactionData(tx, data, sizeof(data), SIZE_MAX, 0);
