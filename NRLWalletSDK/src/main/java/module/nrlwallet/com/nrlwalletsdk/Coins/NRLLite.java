@@ -223,9 +223,17 @@ public class NRLLite extends NRLCoin {
             TxItem item = arr[i];
             JSONObject transactionData = new JSONObject();
             try {
-                transactionData.put("value", item.getReceived());
+                long received = item.getReceived();
                 byte[]tmp = item.getTxHash();
                 transactionData.put("txid", Util.bytesToHex(tmp));
+                if(received == 0){
+                    transactionData.put("received", false);
+                    transactionData.put("value", item.getSent());
+                } else {
+                    transactionData.put("received", true);
+                    transactionData.put("value", item.getReceived());
+                }
+
                 transactionArray.put(transactionData);
             } catch (JSONException e) {
                 e.printStackTrace();
