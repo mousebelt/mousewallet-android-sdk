@@ -218,7 +218,7 @@ public class NRLLite extends NRLCoin {
     }
 
     public void getWalletData() {
-        BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
+        long amount = BRWalletManager.getInstance().getBalance(currentContext);
         balance = amount + "";
         walletAddress = BRSharedPrefs.getFirstAddress(currentContext);
         final TxItem[] arr = BRWalletManager.getInstance().getTransactions();
@@ -254,9 +254,11 @@ public class NRLLite extends NRLCoin {
             ltcCallback.onFailed("failed");
         }
         ltcCallback.onResponse(object);
+//        sendBalanceFromBR("LcZHGWTW4ZFA2SxpV1niNhYR8ovTKfQxM2", "500000", null);
     }
     public void getBalanceFromBR(NRLCallback callback) {
-        BigDecimal amount = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
+
+        long amount = BRWalletManager.getInstance().getBalance(currentContext);//new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
         balance = amount + "";
         callback.onResponse(balance);
     }
@@ -280,7 +282,7 @@ public class NRLLite extends NRLCoin {
 
     public void sendBalanceFromBR(String toAddress, String amount, NRLCallback callback) {
         BigDecimal satoshiAmount = new BigDecimal(amount);
-        BigDecimal balance = new BigDecimal(BRSharedPrefs.getCatchedBalance(currentContext));
+        BigDecimal balance = new BigDecimal(BRWalletManager.getInstance().getBalance(currentContext));
         if(satoshiAmount.longValue() > balance.longValue()) {
             callback.onResponse("Balance is not enough");
             return;

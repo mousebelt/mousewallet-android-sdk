@@ -377,7 +377,7 @@ public class BRWalletManager {
             Log.d(TAG, "blocksCount before connecting: " + blocksCount);
             Log.d(TAG, "peersCount before connecting: " + peersCount);
 
-            int walletTime = 1531000000;//BRKeyStore.getWalletCreationTime(ctx);
+            int walletTime = 1532000000;//BRKeyStore.getWalletCreationTime(ctx);
 
             Log.e(TAG, "initWallet: walletTime: " + walletTime);
             pm.create(walletTime, blocksCount, peersCount);
