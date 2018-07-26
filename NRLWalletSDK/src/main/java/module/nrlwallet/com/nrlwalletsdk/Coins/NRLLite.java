@@ -155,7 +155,7 @@ public class NRLLite extends NRLCoin {
         BRWalletManager.getInstance().addBalanceChangedListener(new BRWalletManager.OnBalanceChanged() {
             @Override
             public void onBalanceChanged(long balance) {
-
+                getWalletData();
             }
         });
         BRPeerManager.getInstance().addStatusUpdateListener(new BRPeerManager.OnTxStatusUpdate() {
@@ -218,7 +218,7 @@ public class NRLLite extends NRLCoin {
     }
 
     public void getWalletData() {
-        long amount = BRWalletManager.getInstance().getBalance(currentContext);
+        long amount = BRWalletManager.getInstance().nativeBalance();
         balance = amount + "";
         walletAddress = BRSharedPrefs.getFirstAddress(currentContext);
         final TxItem[] arr = BRWalletManager.getInstance().getTransactions();

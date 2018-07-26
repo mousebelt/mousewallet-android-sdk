@@ -1,8 +1,12 @@
 package module.nrlwallet.com.nrlwalletsdk.Coins;
 
+import android.webkit.DownloadListener;
+
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Address;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.BlockChain;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Coin;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.Context;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.ECKey;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.InsufficientMoneyException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.NetworkParameters;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.PeerGroup;
@@ -13,6 +17,7 @@ import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.core.listeners.Downloa
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.kits.WalletAppKit;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.net.discovery.DnsDiscovery;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.params.MainNetParams;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStore;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.BlockStoreException;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.store.SPVBlockStore;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.DeterministicSeed;
@@ -34,6 +39,7 @@ import io.github.novacrypto.bip32.Network;
 import io.github.novacrypto.bip32.networks.Bitcoin;
 import jersey.repackaged.com.google.common.util.concurrent.MoreExecutors;
 import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.WalletProtobufSerializer;
+import module.nrlwallet.com.nrlwalletsdk.Bitcoin.bitcoinj.wallet.listeners.WalletCoinsReceivedEventListener;
 import module.nrlwallet.com.nrlwalletsdk.Utils.HTTPRequest;
 import module.nrlwallet.com.nrlwalletsdk.abstracts.NRLCallback;
 import okhttp3.Call;
@@ -58,6 +64,12 @@ public class NRLBitcoin extends NRLCoin {
     NetworkParameters params = MainNetParams.get();
     int originalBlocksLeft = -1;
 
+    //for wallet kit
+    File walletFile;
+    PeerGroup peerGroup;
+    BlockChain blockChain;
+    BlockStore blockStore;
+
     static {
         try {
             System.loadLibrary("core");
@@ -72,45 +84,86 @@ public class NRLBitcoin extends NRLCoin {
 
         bSeed = seed;
         mNemonic = mnemonic;
-        this.getWallet();
+//        this.getWallet();
+        initWalletService();
     }
-    void getWallet1() {
-        File chainFile = new File(android.os.Environment.getExternalStorageDirectory(),"btc.spvchain");
-        if(chainFile.exists()){
-            FileInputStream stream = null;
-            try {
-                stream = new FileInputStream(chainFile);
-                Protos.Wallet proto = WalletProtobufSerializer.parseToProto(stream);
-                System.out.println(proto.toString());
-                return;
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+    void initWalletService() {
+        walletFile = new File(android.os.Environment.getExternalStorageDirectory(), "btc.wallet");
+        long createTime = 1529131310L;
+        try {
+            DeterministicSeed deterministicSeed = new DeterministicSeed(mNemonic, null, "", createTime);
+            kit = new WalletAppKit(params, walletFile, "blc"){
+                @Override
+                protected void onSetupCompleted() {
+                    super.onSetupCompleted();
+                    final long startTime = System.currentTimeMillis();
+                    try{
+                        wallet = kit.wallet();
+                        peerGroup = kit.peerGroup();
+                        blockChain = kit.chain();
+                        blockStore = kit.store();
+
+                        Coin coinBalance = wallet.getBalance();
+                    } catch (Exception e) {
+
+                    }
                 }
-            }
-        }else{
-            createWallet();
+            };
+            kit.restoreWalletFromSeed(deterministicSeed);
+            kit.setBlockingStartup(false);
+            kit.startAsync();
+            kit.awaitRunning();
+        }catch (UnreadableWalletException e){
+            e.printStackTrace();
         }
     }
+
+    void setChainCheckpoints() {
+
+    }
+
+    void loadWallet() {
+        long createTime = 1529131310L;
+        try {
+            DeterministicSeed deterministicSeed = new DeterministicSeed(mNemonic, null, "", createTime);
+            kit.restoreWalletFromSeed(deterministicSeed);
+            kit = new WalletAppKit(params, new File("."), "mousebelt") {
+                @Override
+                protected void onSetupCompleted() {
+                    // This is called in a background thread after startAndWait is called, as setting up various objects
+                    // can do disk and network IO that may cause UI jank/stuttering in wallet apps if it were to be done
+                    // on the main thread.
+                    if (wallet().getKeyChainGroupSize() < 1)
+                        wallet().importKey(new ECKey());
+                }
+            };
+
+            kit.startAsync();
+            kit.awaitRunning();
+        }catch (UnreadableWalletException e){
+            e.printStackTrace();
+        }
+    }
+
     void getWallet() {
         long createTime = 1529131310L;//System.currentTimeMillis() - 3600*24*30*1000;//1529126900000
         try {
             DeterministicSeed deterministicSeed = new DeterministicSeed(mNemonic, null, "", createTime);
-            File chainFile = new File(android.os.Environment.getExternalStorageDirectory(), "btc.spvchain");
+            File chainFile = new File(android.os.Environment.getExternalStorageDirectory(), "btc");
             if (chainFile.exists()) {
-                chainFile.delete();
+//                chainFile.delete();
             }
 
-            kit = new WalletAppKit(params, chainFile, "spvchain");
+            kit = new WalletAppKit(params, chainFile, "mousebelt");
             kit.restoreWalletFromSeed(deterministicSeed);
             kit.startAsync();
             kit.awaitRunning();
+            kit.wallet().addCoinsReceivedEventListener(new WalletCoinsReceivedEventListener() {
+                @Override
+                public void onCoinsReceived(Wallet w, Transaction tx, Coin prevBalance, Coin newBalance) {
+                    // Runs in the dedicated "user thread".
+                }
+            });
         }catch (UnreadableWalletException e){
             e.printStackTrace();
         }
